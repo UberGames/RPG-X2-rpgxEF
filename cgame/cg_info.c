@@ -560,9 +560,8 @@ static void ObjectivePrint_Line(int strIndex,int color,centity_t *cent)
 	char finalText[MAX_OBJ_LENGTH];
 	int len,len_s,maxPixLength,charHeight;
 
-#ifndef Q3_VM
 	assert(cgs.objectives[strIndex].text);
-#endif
+
 	str =  cgs.objectives[strIndex].text;
 
 	len = strlen(str);
@@ -662,9 +661,7 @@ static int Objective_LineCnt(int strIndex,centity_t *cent)
 	int len,len_s,maxPixLength;
 	int	lineCnt;
 
-#ifndef Q3_VM
 	assert(cgs.objectives[strIndex].text);
-#endif
 	str =  cgs.objectives[strIndex].text;
 
 	len = strlen(str);

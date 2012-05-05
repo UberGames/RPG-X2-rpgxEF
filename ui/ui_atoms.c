@@ -9,14 +9,14 @@
 #include "../qcommon/stv_version.h"
 
 uiStatic_t		uis;
-qboolean		m_entersound;		// after a frame, so caching won't disrupt the sound
+qboolean		m_entersound;		/* after a frame, so caching won't disrupt the sound */
 void UI_LanguageFilename(char *baseName,char *baseExtension,char *finalName);
 void BG_LoadItemNames(void);
 
 extern qboolean BG_ParseRankNames ( char* fileName, rankNames_t rankNames[] );
 void UI_SecurityCodeSetup ( void );
 
-// these are here so the functions in q_shared.c can link
+/* these are here so the functions in q_shared.c can link */
 #ifndef UI_HARD_LINKED
 
 void QDECL Com_Error( int level, const char *error, ... ) {
@@ -46,7 +46,7 @@ void QDECL Com_Printf( const char *msg, ... ) {
 
 typedef struct 
 {
-	int				initialized;	// Has this structure been initialized
+	int			initialized;	/* Has this structure been initialized */
 	qhandle_t		cornerUpper;
 	qhandle_t		cornerUpper2;
 	qhandle_t		cornerLower;
@@ -86,7 +86,7 @@ void UI_PushMenu( menuframework_s *menu )
 	int				i;
 	menucommon_s*	item;
 
-	// avoid stacking menus invoked by hotkeys
+	/* avoid stacking menus invoked by hotkeys */
 	for (i=0 ; i<uis.menusp ; i++)
 	{
 		if (uis.stack[i] == menu)
@@ -106,7 +106,7 @@ void UI_PushMenu( menuframework_s *menu )
 
 	uis.activemenu = menu;
 
-	// default cursor position
+	/* default cursor position */
 	menu->cursor      = 0;
 	menu->cursor_prev = 0;
 
@@ -114,7 +114,7 @@ void UI_PushMenu( menuframework_s *menu )
 
 	trap_Key_SetCatcher( KEYCATCH_UI );
 
-	// force first available item to have focus
+	/* force first available item to have focus */
 	for (i=0; i<menu->nitems; i++)
 	{
 		item = (menucommon_s *)menu->items[i];
@@ -171,7 +171,7 @@ static void UI_LerpColor(vec4_t a, vec4_t b, vec4_t c, float t)
 {
 	int i;
 
-	// lerp and clamp each component
+	/* lerp and clamp each component */
 	for (i=0; i<4; i++)
 	{
 		c[i] = a[i] + t*(b[i]-a[i]);
@@ -247,10 +247,10 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 	float	fwidth;
 	float	fheight;
 
-	// draw the colored text
+	/* draw the colored text */
 	trap_R_SetColor( color );
 	
-//	ax = x * uis.scale + uis.bias;
+	/*ax = x * uis.scale + uis.bias;*/
 	ax = x * uis.scalex;
 	ay = y * uis.scaley;
 
@@ -263,7 +263,7 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 		}
 		else if ( ch >= 'A' && ch <= 'Z' ) {
 			ch -= 'A';
-			fcol = (float)propMapB[(int)ch][0] / 256.0f; //256.0f
+			fcol = (float)propMapB[(int)ch][0] / 256.0f; /*256.0f*/
 			frow = (float)propMapB[(int)ch][1] / 256.0f;
 			fwidth = (float)propMapB[(int)ch][2] / 256.0f;
 			fheight = (float)PROPB_HEIGHT / 256.0f;
@@ -289,7 +289,7 @@ void UI_DrawBannerString( int x, int y, const char* str, int style, vec4_t color
 	int				width;
 	vec4_t			drawcolor;
 
-	// find the width of the drawn text
+	/* find the width of the drawn text */
 	s = str;
 	width = 0;
 	while ( *s ) {
@@ -392,94 +392,94 @@ int UI_ProportionalStringWidth( const char* str,int style ) {
 
 static int specialTinyPropChars[CHARMAX][2] = {
 {0, 0},
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 10
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 20
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 30
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 40
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 50
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 60
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 70
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 80
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 90
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 100
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 110
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 120
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 130
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 140
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 150
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{2,-3},{0, 0},	// 160
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 170
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 180
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 190
-{0,-1},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},{2, 0},{2,-3},	// 200
-{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0,-1},{2,-3},{2,-3},	// 210
-{2,-3},{3,-3},{2,-3},{2,-3},{0, 0},{0,-1},{2,-3},{2,-3},{2,-3},{2,-3},	// 220
-{2,-3},{0,-1},{0,-1},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},	// 230
-{2, 0},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},	// 240
-{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},{0,-1},{2,-3},{2,-3},	// 250
-{2,-3},{2,-3},{2,-3},{0,-1},{2,-3}										// 255
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 10 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 20 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 30 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 40 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 50 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 60 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 70 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 80 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 90 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 100 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 110 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 120 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 130 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 140 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 150 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{2,-3},{0, 0},	/* 160 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 170 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 180 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 190 */
+{0,-1},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},{2, 0},{2,-3},	/* 200 */
+{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0,-1},{2,-3},{2,-3},	/* 210 */
+{2,-3},{3,-3},{2,-3},{2,-3},{0, 0},{0,-1},{2,-3},{2,-3},{2,-3},{2,-3},	/* 220 */
+{2,-3},{0,-1},{0,-1},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},	/* 230 */
+{2, 0},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},	/* 240 */
+{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},{0,-1},{2,-3},{2,-3},	/* 250 */
+{2,-3},{2,-3},{2,-3},{0,-1},{2,-3}					/* 255 */
 }; 
 
 
 static int specialPropChars[CHARMAX][2] = {
 {0, 0},
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 10
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 20
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 30
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 40
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 50
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 60
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 70
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 80
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 90
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 100
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 110
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 120
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 130
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 140
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 150
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 160
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 170
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 180
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 190
-{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{0, 0},{1, 1},{2,-2},	// 200
-{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{0, 0},{2,-2},{2,-2},	// 210
-{2,-2},{2,-2},{2,-2},{2,-2},{0, 0},{0, 0},{2,-2},{2,-2},{2,-2},{2,-2},	// 220
-{2,-2},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 230
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 240
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 250
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0}										// 255
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 10 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 20 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 30 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 40 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 50 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 60 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 70 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 80 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 90 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 100 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 110 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 120 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 130 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 140 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 150 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 160 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 170 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 180 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 190 */
+{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{0, 0},{1, 1},{2,-2},	/* 200 */
+{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{2,-2},{0, 0},{2,-2},{2,-2},	/* 210 */
+{2,-2},{2,-2},{2,-2},{2,-2},{0, 0},{0, 0},{2,-2},{2,-2},{2,-2},{2,-2},	/* 220 */
+{2,-2},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 230 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 240 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 250 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0}					/* 255 */
 }; 
 
 
 static int specialBigPropChars[CHARMAX][2] = {
 {0, 0},
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 10
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 20
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 30
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 40
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 50
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 60
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 70
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 80
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 90
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 100
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 110
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 120
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 130
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 140
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 150
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 160
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 170
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 180
-{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 190
-{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{3, 1},{3,-3},	// 200
-{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{3,-3},{3,-3},	// 210
-{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},{3,-3},{3,-3},	// 220
-{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},	// 230
-{3, 1},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},	// 240
-{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},	// 250
-{3,-3},{3,-3},{3,-3},{0, 0},{3,-3}										// 255
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 10 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 20 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 30 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 40 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 50 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 60 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 70 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 80 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 90 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 100 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 110 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 120 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 130 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 140 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 150 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 160 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 170 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 180 */
+{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	/* 190 */
+{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{3, 1},{3,-3},	/* 200 */
+{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{3,-3},{3,-3},	/* 210 */
+{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},{3,-3},{3,-3},	/* 220 */
+{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},	/* 230 */
+{3, 1},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},	/* 240 */
+{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},	/* 250 */
+{3,-3},{3,-3},{3,-3},{0, 0},{3,-3}					/* 255 */
 }; 
 
 static int showColorChars;
@@ -505,20 +505,20 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 	int		colorI;
 	int		special;
 
-	// draw the colored text
+	/* draw the colored text */
 	trap_R_SetColor( color );
 	
-//	ax = x * uis.scale + uis.bias;
+	/*ax = x * uis.scale + uis.bias;*/
 	ax = x * uis.scalex;
 	ay = y * uis.scaley;
 	holdY = ay;
 
-	//TiM - adjust for widescreen monitors
+	/* TiM - adjust for widescreen monitors */
 	if ( UI_IsWidescreen() )
 	{
 		ax *= uis.widescreen.ratio;
 
-		//center the elements into the middle of the screen
+		/* center the elements into the middle of the screen */
 		if ( uis.widescreen.state == WIDESCREEN_CENTER )
 			ax += uis.widescreen.bias;
 	}	
@@ -532,7 +532,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 		s = str;
 		while ( *s )
 		{
-			// Is this a color????
+			/* Is this a color???? */
 			if ( Q_IsColorString( s ) && !( style & UI_SHOWCOLOR ) ) 
 			{
 				colorI = ColorIndex( *(s+1) );
@@ -546,18 +546,18 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = (float)PROP_SPACE_TINY_WIDTH;
 			}
 			else if ( propMap[ch][2] != -1 ) {
-				// Because some foreign characters were a little different
+				/* Because some foreign characters were a little different */
 				special = specialTinyPropChars[ch][0];
 				ay = holdY + (specialTinyPropChars[ch][1] * uis.scaley);
 
-				fcol = (float ) propMapTiny[ch][0] / 256.0f; //256.0f
+				fcol = (float ) propMapTiny[ch][0] / 256.0f; /*256.0f*/
 				frow = (float)propMapTiny[ch][1] / 256.0f;
 				fwidth = (float)propMapTiny[ch][2] / 256.0f;
 				fheight = (float)(PROP_TINY_HEIGHT + special) / 256.0f;
 				aw = (float)propMapTiny[ch][2] * uis.scalex * sizeScale;
 				ah = (float)(PROP_TINY_HEIGHT+ special) * uis.scaley * sizeScale;
 
-				//TiM - adjust for widescreen
+				/* TiM - adjust for widescreen */
 				if ( UI_IsWidescreen() )
 				{
 					aw *= uis.widescreen.ratio;
@@ -574,7 +574,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			
 			ax += (aw + (float)PROP_GAP_TINY_WIDTH * uis.scalex * sizeScale);
 			
-			//again adjust for widescreen
+			/* again adjust for widescreen */
 			if ( UI_IsWidescreen() )
 				ax -= ((float)PROP_GAP_TINY_WIDTH * uis.scalex * sizeScale)*(1.0f-uis.widescreen.ratio);
 
@@ -586,7 +586,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 		s = str;
 		while ( *s )
 		{
-			// Is this a color????
+			/* Is this a color???? */
 			if ( Q_IsColorString( s ) && !( style & UI_SHOWCOLOR ) ) 
 			{
 				colorI = ColorIndex( *(s+1) );
@@ -600,18 +600,18 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = (float)PROP_SPACE_BIG_WIDTH * uis.scalex;
 			}
 			else if ( propMap[ch][2] != -1 ) {
-				// Because some foreign characters were a little different
+				/* Because some foreign characters were a little different */
 				special = specialBigPropChars[ch][0];
 				ay = holdY + (specialBigPropChars[ch][1] * uis.scaley);
 
-				fcol = (float ) propMapBig[ch][0] / 256.0f; //256.0f
+				fcol = (float ) propMapBig[ch][0] / 256.0f; /* 256.0f */
 				frow = (float)propMapBig[ch][1] / 256.0f;
 				fwidth = (float)propMapBig[ch][2] / 256.0f;
 				fheight = (float)(PROP_BIG_HEIGHT+ special) / 256.0f;
 				aw = (float)propMapBig[ch][2] * uis.scalex * sizeScale;
 				ah = (float)(PROP_BIG_HEIGHT+ special) * uis.scaley * sizeScale;
 
-				//TiM - adjust for widescreen
+				/* TiM - adjust for widescreen */
 				if ( UI_IsWidescreen() )
 				{
 					aw *= uis.widescreen.ratio;
@@ -627,7 +627,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			
 			ax += (aw + (float)PROP_GAP_BIG_WIDTH * uis.scalex * sizeScale);
 			
-			//again adjust for widescreen
+			/* again adjust for widescreen */
 			if ( UI_IsWidescreen() )
 				ax -= ((float)PROP_GAP_BIG_WIDTH * uis.scalex * sizeScale)*(1.0f-uis.widescreen.ratio);
 
@@ -639,7 +639,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 		s = str;
 		while ( *s )
 		{
-			// Is this a color????
+			/* Is this a color???? */
 			if ( Q_IsColorString( s ) && !( style & UI_SHOWCOLOR ) ) 
 			{
 				colorI = ColorIndex( *(s+1) );
@@ -653,7 +653,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = (float)PROP_SPACE_WIDTH * uis.scalex * sizeScale;
 			}
 			else if ( propMap[ch][2] != -1 ) {
-				// Because some foreign characters were a little different
+				/* Because some foreign characters were a little different */
 				special = specialPropChars[ch][0];
 				ay = holdY + (specialPropChars[ch][1] * uis.scaley);
 
@@ -664,7 +664,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = (float)propMap[ch][2] * uis.scalex * sizeScale;
 				ah = (float)(PROP_HEIGHT+ special) * uis.scaley * sizeScale;
 				
-				//TiM - adjust for widescreen
+				/* TiM - adjust for widescreen */
 				if ( ui_handleWidescreen.integer && uis.widescreen.ratio )
 				{
 					aw *= uis.widescreen.ratio;
@@ -680,7 +680,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			
 			ax += (aw + (float)PROP_GAP_WIDTH * uis.scalex * sizeScale);
 			
-			//again adjust for widescreen
+			/* again adjust for widescreen */
 			if ( UI_IsWidescreen() )
 				ax -= ((float)PROP_GAP_WIDTH * uis.scalex * sizeScale)*(1.0f-uis.widescreen.ratio);
 
@@ -719,7 +719,7 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 	if ((style & UI_BLINK) && ((uis.realtime/BLINK_DIVISOR) & 1))
 		return;
 
-	// Get char style
+	/* Get char style */
 	if (style & UI_TINYFONT)
 	{
 		charstyle = UI_TINYFONT;
@@ -736,7 +736,7 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 	{
 		charstyle = UI_GIANTFONT;
 	}
-	else	// Just in case
+	else	/* Just in case */
 	{
 		charstyle = UI_SMALLFONT;
 	}
@@ -816,7 +816,7 @@ static void UI_DrawString2( int x, int y, const char* str, vec4_t color, int cha
 {
 	const char* s;
 	char	ch;
-	int forceColor = qfalse; //APSFIXME;
+	int forceColor = qfalse; /* APSFIXME; */
 	vec4_t	tempcolor;
 	float	ax;
 	float	ay;
@@ -826,13 +826,13 @@ static void UI_DrawString2( int x, int y, const char* str, vec4_t color, int cha
 	float	fcol;
 
 	if (y < -charh)
-		// offscreen
+		/* offscreen */
 		return;
 
-	// draw the colored text
+	/* draw the colored text */
 	trap_R_SetColor( color );
 	
-//	ax = x * uis.scale + uis.bias;
+	/* ax = x * uis.scale + uis.bias; */
 	ax = x * uis.scalex;
 	ay = y * uis.scaley;
 	aw = charw * uis.scalex;
@@ -869,9 +869,9 @@ static void UI_DrawString2( int x, int y, const char* str, vec4_t color, int cha
 
 		if (ch != ' ')
 		{
-//			frow = (ch>>4)*0.0625;
-//			fcol = (ch&15)*0.0625;
-//			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + 0.0625, frow + 0.0625, uis.charset );
+			/*frow = (ch>>4)*0.0625;
+			fcol = (ch&15)*0.0625;
+			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + 0.0625, frow + 0.0625, uis.charset );*/
 
 			frow = (ch>>4)*0.0625;
 			fcol = (ch&15)*0.0625;
@@ -946,19 +946,19 @@ void UI_DrawString( int x, int y, const char* str, int style, vec4_t color, qboo
 	switch (style & UI_FORMATMASK)
 	{
 		case UI_CENTER:
-			// center justify at x
+			/* center justify at x */
 			len = strlen(str);
 			x   = x - len*charw/2;
 			break;
 
 		case UI_RIGHT:
-			// right justify at x
+			/* right justify at x */
 			len = strlen(str);
 			x   = x - len*charw;
 			break;
 
 		default:
-			// left justify at x
+			/* left justify at x */
 			break;
 	}
 
@@ -982,8 +982,8 @@ void UI_DrawString( int x, int y, const char* str, int style, vec4_t color, qboo
 			UI_DrawString2(x+2,y+2,str,dropcolor,charw,charh);
 	}
 
-	//TiM - Using a different char set now...
-	if (!highRes) //keep the low res version for specific instances
+	/* TiM - Using a different char set now... */
+	if (!highRes) /* keep the low res version for specific instances */
 		UI_DrawString2(x,y,str,drawcolor,charw,charh);
 	else
 		UI_DrawProportionalString( x, y, str, style, drawcolor );
@@ -1015,14 +1015,16 @@ qboolean UI_IsFullscreen( void ) {
 
 static void NeedCDAction( qboolean result ) {
 	if ( !result ) {
-		//trap_Cvar_Set ("rpg_playIntro", "1");
+		/*trap_Cvar_Set ("rpg_playIntro", "1");*/
 		trap_Cmd_ExecuteText( EXEC_APPEND, "quit\n" );
 	}
 }
 
 void UI_SetActiveMenu( uiMenuCommand_t menu ) {
-	// this should be the ONLY way the menu system is brought up, except for UI_ConsoleCommand below
-	// enusure minumum menu data is cached
+	/* 
+ 	 * this should be the ONLY way the menu system is brought up, except for UI_ConsoleCommand below
+	 * enusure minumum menu data is cached 
+	 */
 	Menu_Cache();
 
 	switch ( menu ) {
@@ -1076,9 +1078,9 @@ void UI_MouseEvent( int dx, int dy )
 	if (!uis.activemenu)
 		return;
 
-	// update mouse screen position
+	/* update mouse screen position */
 	uis.cursorx += dx;
-	//kinda pointless, but looks nice. allow negative offsets for widescreen setups (we must maintain the ratio or buttons will stop working)
+	/* kinda pointless, but looks nice. allow negative offsets for widescreen setups (we must maintain the ratio or buttons will stop working) */
 	if ( UI_IsWidescreen() && uis.widescreen.state == WIDESCREEN_CENTER )
 	{
 		if (uis.cursorx < ( 0 - uis.widescreen.bias))
@@ -1100,11 +1102,11 @@ void UI_MouseEvent( int dx, int dy )
 	else if (uis.cursory > SCREEN_HEIGHT)
 		uis.cursory = SCREEN_HEIGHT;
 
-	//RPG-X: TiM - Skip new selections if a spin control window is open
+	/* RPG-X: TiM - Skip new selections if a spin control window is open */
 	if ( uis.activemenu->noNewSelecting )
 		return;
 
-	// region test the active menu items
+	/* region test the active menu items */
 	for (i=0; i<uis.activemenu->nitems; i++)
 	{
 		m = (menucommon_s*)uis.activemenu->items[i];
@@ -1117,11 +1119,11 @@ void UI_MouseEvent( int dx, int dy )
 			(uis.cursory < m->top) ||
 			(uis.cursory > m->bottom))
 		{
-			// cursor out of item bounds
+			/* cursor out of item bounds */
 			continue;
 		}
 
-		// set focus to item at cursor
+		/* set focus to item at cursor */
 		if (uis.activemenu->cursor != i)
 		{
 			Menu_SetCursor( uis.activemenu, i );
@@ -1137,7 +1139,7 @@ void UI_MouseEvent( int dx, int dy )
 	}  
 
 	if (uis.activemenu->nitems > 0) {
-		// out of any region
+		/* out of any region */
 		((menucommon_s*)(uis.activemenu->items[uis.activemenu->cursor]))->flags &= ~QMF_HASMOUSEFOCUS;
 	}
 }
@@ -1171,25 +1173,25 @@ static void UI_Cache_f( void ) {
 	ConfirmMenu_Cache();
 	PlayerModel_Cache();
 	PlayerSettings_Cache();
-//	Preferences_Cache();
+	/*Preferences_Cache();*/
 	ServerInfo_Cache();
 	SpecifyServer_Cache();
 	ArenaServers_Cache();
 	StartServer_Cache();
 	ServerOptions_Cache();
 	DriverInfo_Cache();
-//	GraphicsOptions_Cache();
-//	UI_DisplayOptionsMenu_Cache();
-//	UI_SoundOptionsMenu_Cache();
+	/*GraphicsOptions_Cache();*/
+	/*UI_DisplayOptionsMenu_Cache();*/
+	/*UI_SoundOptionsMenu_Cache();*/
 	UI_NetworkOptionsMenu_Cache();
-	//UI_SPLevelMenu_Cache();
+	/*UI_SPLevelMenu_Cache();*/
 	UI_SPSkillMenu_Cache();
 	UI_SPPostgameMenu_Cache();
-	//TeamMain_Cache();
+	/*TeamMain_Cache();*/
 	UI_AddBots_Cache();
 	UI_RemoveBots_Cache();
-//	UI_LoadConfig_Cache();
-//	UI_SaveConfigMenu_Cache();
+	/*UI_LoadConfig_Cache();*/
+	/*UI_SaveConfigMenu_Cache();*/
 	UI_BotSelectMenu_Cache();
 	UI_CDKeyMenu_Cache();
 	UI_ModsMenu_Cache();
@@ -1199,15 +1201,15 @@ static void UI_Cache_f( void ) {
 	UI_VideoDataMenu_Cache();
 	UI_GameOptionsMenu_Cache();
 	UI_ControlsMouseJoyStickMenu_Cache();
-	//UI_ResetGameMenu_Cache();
+	/*UI_ResetGameMenu_Cache();*/
 	UI_VideoData2Menu_Cache();
 	UI_VideoDriverMenu_Cache();
 	UI_HolomatchInMenu_Cache();
 	UI_ChooseServerTypeMenu_Cache();
 	UI_AdminMenu_Cache();
 	UI_CreditsMenu_Cache();
-	//UI_AccessingMenu_Cache();
-	//UI_LibraryMenu_Cache();
+	/*UI_AccessingMenu_Cache();*/
+	/*UI_LibraryMenu_Cache();*/
 	UI_PlayerEmotes_Cache();
     UI_MotdMenu_Cache();
 }
@@ -1219,11 +1221,11 @@ UI_ConsoleCommand
 */
 qboolean UI_ConsoleCommand( void ) {
 	char	*cmd;
-	//int		i;
+	/*int	i;*/
 
 	cmd = UI_Argv( 0 );
 
-	// ensure minimum menu data is available
+	/* ensure minimum menu data is available*/
 	Menu_Cache();
 
 	/*if ( Q_stricmp (cmd, "levelselect") == 0 ) {
@@ -1256,10 +1258,10 @@ qboolean UI_ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-	//if ( Q_stricmp( cmd, "ui_library" ) == 0 ) {
-	//	UI_AccessingMenu();
-	//	return qtrue;
-	//}
+	/*if ( Q_stricmp( cmd, "ui_library" ) == 0 ) {
+		UI_AccessingMenu();
+		return qtrue;
+	}*/
 
 	if ( Q_stricmp( cmd, "ui_admin" ) == 0 ) {
 		UI_AdminMenu(qtrue);
@@ -1276,7 +1278,7 @@ qboolean UI_ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-    // RPG-X | Marcin | 15/12/2008
+    	/* RPG-X | Marcin | 15/12/2008 */
 	if ( Q_stricmp( cmd, "ui_motd" ) == 0 ) {
 		UI_MotdMenu();
 		return qtrue;
@@ -1287,8 +1289,10 @@ qboolean UI_ConsoleCommand( void ) {
 		return qtrue;
 	}
 
-    // RPG-X | Marcin | 18/12/2008
-    // I hope this is the right way to do it...
+    /*
+     *  RPG-X | Marcin | 18/12/2008
+     * I hope this is the right way to do it...
+     */
     if ( Q_stricmp( cmd, "ui_motd_line" ) == 0 ) {
 		MotdReceiveLine( UI_Argv( 1 ) );
 		return qtrue;
@@ -1300,7 +1304,7 @@ qboolean UI_ConsoleCommand( void ) {
 	}
 
 	if ( Q_stricmp( cmd, "holo_data" ) == 0 ) {
-		//HoloDataReceived(UI_Argv(1));
+		/*HoloDataReceived(UI_Argv(1));*/
 		return qtrue;
 	}
 
@@ -1310,16 +1314,15 @@ qboolean UI_ConsoleCommand( void ) {
 	}
 
 	if ( Q_stricmp( cmd, "ui_holodeck" ) == 0) {
-		//UI_HolodeckMenu( atoi(UI_Argv(1)) );
+		/*UI_HolodeckMenu( atoi(UI_Argv(1)) );*/
 		return qtrue;
 	}
 
-	#ifdef XTRA
+	/* TODO remove me? */
 	if ( Q_stricmp( cmd, "sqlkey" ) == 0) {
-		//UI_LoginSetSqlkey((int)UI_Argv(1));
+		/*UI_LoginSetSqlkey((int)UI_Argv(1));*/
 		return qtrue;
 	}
-	#endif
 
 
 	return qfalse;
@@ -1331,7 +1334,7 @@ UI_Shutdown
 =================
 */
 void UI_Shutdown( void ) {
-	//trap_Cvar_Set ("rpg_playIntro", "1");
+	/*trap_Cvar_Set ("rpg_playIntro", "1");*/
 }
 
 
@@ -1346,12 +1349,12 @@ static char *UI_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 	{
 		token = COM_ParseExt( &buffer, qtrue );
 
-		// Start with open braket
+		/* Start with open braket */
 		if ( !Q_stricmp( token, "{" ) ) 
 		{
 			for (i=0;i<CHARMAX;++i)
 			{
-				// Brackets for the numbers
+				/* Brackets for the numbers */
 				token = COM_ParseExt( &buffer, qtrue );
 				if ( !Q_stricmp( token, "{" ) ) 
 				{
@@ -1382,7 +1385,7 @@ static char *UI_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 			}
 		}
 
-		token = COM_ParseExt( &buffer, qtrue );	// Grab closing bracket
+		token = COM_ParseExt( &buffer, qtrue );	/* Grab closing bracket */
 		if ( !Q_stricmp( token, "}" ) ) 
 		{
 			break;
@@ -1420,7 +1423,7 @@ void UI_LoadFonts( void )
 		return;
 	}
 
-	// initialise the data area
+	/* initialise the data area */
 	memset(buffer, 0, sizeof(buffer));	
 
 	trap_FS_Read( buffer, len, f );
@@ -1544,12 +1547,12 @@ int UI_InitClassData( char* fileName ) {
 	int				classIndex=0;
 	char			*token;
 
-	//TiM - check if we've already loaded this file
+	/* TiM - check if we've already loaded this file */
 	if ( !Q_stricmp( uis.classSetName, fileName ) ) {
 		return qtrue;
 	}
 
-	//TiM - build the file name
+	/* TiM - build the file name */
 	Com_sprintf( filePath, sizeof( filePath ), "ext_data/classes/%s.classes", fileName );
 
 	fileLen = trap_FS_FOpenFile( filePath, &f, FS_READ );
@@ -1564,7 +1567,7 @@ int UI_InitClassData( char* fileName ) {
 		return qfalse;		
 	}*/
 
-	//init file buffer
+	/* init file buffer */
 	memset( buffer, 0, sizeof( buffer ) );
 
 	trap_FS_Read( buffer, fileLen, f );
@@ -1576,7 +1579,7 @@ int UI_InitClassData( char* fileName ) {
 
 	trap_FS_FCloseFile( f );
 
-	//Re-init class list
+	/* Re-init class list */
 	memset( uis.classData, 0, sizeof( uis.classData ) );
 
 	textPtr = buffer;
@@ -1602,7 +1605,7 @@ int UI_InitClassData( char* fileName ) {
 		if ( !Q_stricmpn( token, "{", 1 ) ) {
 			while ( 1 ) {
 
-				//formal Name
+				/* formal Name */
 				if ( !Q_stricmpn( token, "formalName", 10 ) ) {
 					if ( COM_ParseString( &textPtr, &token ) ) {
 						Com_Printf( S_COLOR_RED "ERROR: Error parsing formalName parameter in file: %s.\n", fileName );
@@ -1613,7 +1616,7 @@ int UI_InitClassData( char* fileName ) {
 					continue;
 				}
 
-				//console Name
+				/* console Name */
 				if ( !Q_stricmpn( token, "consoleName", 11 ) ) {
 					if ( COM_ParseString( &textPtr, &token ) ) {
 						Com_Printf( S_COLOR_RED "ERROR: Error parsing consoleName parameter in file: %s.\n", fileName );
@@ -1624,7 +1627,7 @@ int UI_InitClassData( char* fileName ) {
 					continue;
 				}
 				
-				//TiM : Disregard noShow Classes
+				/* TiM : Disregard noShow Classes */
 				if ( !Q_stricmp( token, "noShow" ) ) {
 					token = COM_Parse( &textPtr );
 
@@ -1639,7 +1642,7 @@ int UI_InitClassData( char* fileName ) {
 				if ( !token[0] )
 					break;
 
-				//skip any more braces. They're obviously color vals
+				/* skip any more braces. They're obviously color vals */
 				if ( !Q_stricmpn( token, "{", 1 ) ) {
 					SkipBracedSection( &textPtr );
 					continue;
@@ -1683,7 +1686,7 @@ int UI_PopulateRanksArray( char* ranks[] ) {
 	}
 
 	ranks[i] = "Other";
-	//ranks[i+1] = 0; //IMPORTANT: Spin controls need these or else values bleed into different controls
+	/*ranks[i+1] = 0; *//*IMPORTANT: Spin controls need these or else values bleed into different controls*/
 
 	return i;
 }
@@ -1704,28 +1707,30 @@ void UI_InitRanksData( char* ranksName ) {
 	if ( !Q_stricmp( uis.rankSet.rankSetName, ranksName ) )
 		goto refreshRank;
 
-	//Init the transfer space
+	/* Init the transfer space */
 	memset( &uis.rankSet.rankNames, 0, sizeof( uis.rankSet.rankNames ) );
 
-	//Create the file route
+	/* Create the file route */
 	Com_sprintf( filePath, sizeof( filePath ), "ext_data/ranksets/%s.ranks", ranksName );
 
-	//attempt to parse
+	/* attempt to parse */
 	if ( !BG_ParseRankNames( filePath, uis.rankSet.rankNames ) ) {
 		
-		//Rank attempt failed.  Try loading the defaults.  If we end up with no loaded ranks... many menu elements will start crapping. bad
+		/* Rank attempt failed.  Try loading the defaults.  If we end up with no loaded ranks... many menu elements will start crapping. bad */
 		if ( !BG_ParseRankNames( va( "ext_data/ranksets/%s.ranks", RANKSET_DEFAULT), uis.rankSet.rankNames ) )
 			trap_Error( va( "UI_InitRanksData: Was unable to load default rankset: %s", RANKSET_DEFAULT ) ); 
 	}
-	else { //nvm, all loaded good :)
-		//set the current rank CVAR so it'll use this rankset next time they start the game
+	else {  /*
+		 * nvm, all loaded good :)
+		 * set the current rank CVAR so it'll use this rankset next time they start the game
+		 */
 		trap_Cvar_Set( "ui_currentRankSet", ranksName );
 
-		//eh... to be on the safe side, save the name of the ranks in a local string
+		/* eh... to be on the safe side, save the name of the ranks in a local string */
 		Q_strncpyz( uis.rankSet.rankSetName, ranksName, sizeof( uis.rankSet.rankSetName ) );
 
 refreshRank:
-		//using our current cvar'd rank, do a compare.  if we find a match, set our player to that rank in the menu
+		/* using our current cvar'd rank, do a compare.  if we find a match, set our player to that rank in the menu */
 		for ( i=0, uis.currentRank=0; i < MAX_RANKS; i++ ) {
 			if ( !Q_stricmp( uis.rankSet.rankNames[i].consoleName, UI_Cvar_VariableString( "ui_playerRank" ) ) ) {
 				uis.currentRank = i;
@@ -1762,13 +1767,13 @@ settings menu, and the server settings menu.
 int UI_GetRankSets( void )
 {
 	int		numFiles, i;
-	char	fileBuffer[2048];
-	char	*filePtr;
-	//char	filePath[128];
+	char		fileBuffer[2048];
+	char		*filePtr;
+	/*char		filePath[128];*/
 	int		fileLen;
 
 	numFiles = trap_FS_GetFileList("ext_data/ranksets", ".ranks", fileBuffer, sizeof(fileBuffer) );
-	//Com_Printf( S_COLOR_RED "%s\n", filePtr);
+	/*Com_Printf( S_COLOR_RED "%s\n", filePtr);*/
 	
 	if ( numFiles == 1 )
 		return 1;
@@ -1786,13 +1791,13 @@ int UI_GetRankSets( void )
 		
 		fileLen = strlen(filePtr);
 
-		//Remove the extension
+		/*Remove the extension*/
 		if ( fileLen>6 && !Q_stricmp(filePtr +  fileLen - 6, ".ranks" ))
 		{
 			filePtr[fileLen-6] = '\0';
 		}
 
-		//Com_Printf( S_COLOR_RED "%s\n", filePtr );
+		/*Com_Printf( S_COLOR_RED "%s\n", filePtr );*/
 
 		Q_strncpyz( uis.rankSet.rankSetNames[i], filePtr, sizeof( uis.rankSet.rankSetNames[i] ) );
 		
@@ -1824,7 +1829,7 @@ int	UI_PopulateClassArray( char *classes[] ) {
 	}
 
 	classes[i] = "Other";
-	//classes[i+1] = 0;
+	/*classes[i+1] = 0;*/
 
 	return i;
 }
@@ -1840,13 +1845,13 @@ locally.
 int UI_GetClassSets( void )
 {
 	int		numFiles, i;
-	char	fileBuffer[2048];
-	char	*filePtr;
-	//char	filePath[128];
+	char		fileBuffer[2048];
+	char		*filePtr;
+	/*char		filePath[128];*/
 	int		fileLen;
 
 	numFiles = trap_FS_GetFileList("ext_data/classes", ".classes", fileBuffer, sizeof(fileBuffer) );
-	//Com_Printf( S_COLOR_RED "%s\n", filePtr);
+	/*Com_Printf( S_COLOR_RED "%s\n", filePtr);*/
 	
 	if ( numFiles == 1 )
 		return 1;
@@ -1864,13 +1869,13 @@ int UI_GetClassSets( void )
 		
 		fileLen = strlen(filePtr);
 
-		//Remove the extension
+		/* Remove the extension */
 		if ( fileLen>8 && !Q_stricmp(filePtr +  fileLen - 8, ".classes" ))
 		{
 			filePtr[fileLen-8] = '\0';
 		}
 
-		//Com_Printf( S_COLOR_RED "%s\n", filePtr );
+		/* Com_Printf( S_COLOR_RED "%s\n", filePtr ); */
 
 		Q_strncpyz( uis.classList[i], filePtr, sizeof( uis.classList[i] ) );
 		
@@ -1903,8 +1908,10 @@ int	UI_PopulateClassSetArray( char *classSets[] ) {
 	return i;
 }
 
-//TiM Hold onto this... it could prove useful later
-//Plus I don't want to delete it as I tore several layers of hair out coding it rofl
+/*
+ * TiM Hold onto this... it could prove useful later
+ * Plus I don't want to delete it as I tore several layers of hair out coding it rofl
+ */
 /*void	UI_InitRanksData( void ) {
 	int		numFiles, i=0, j=0;
 	char	fileBuffer[2048];
@@ -1965,17 +1972,17 @@ void UI_Init( void ) {
 
 	UI_InitGameinfo();
 
-	//Initialize the ranks data
+	/* Initialize the ranks data */
 	UI_InitRanksData( UI_Cvar_VariableString( "ui_currentRankSet" ) );
 	UI_GetRankSets();
 
 	UI_InitClassData( UI_Cvar_VariableString( "ui_currentClassSet" ) );
 	UI_GetClassSets();
 
-	// cache redundant calulations
+	/* cache redundant calulations */
 	trap_GetGlconfig( &uis.glconfig );
 
-	// for 640x480 virtualized screen
+	/* for 640x480 virtualized screen */
 	uis.scaley = uis.glconfig.vidHeight * (1.0/480.0);
 	uis.scalex = uis.glconfig.vidWidth * (1.0/640.0);
 /*	uis.scale = uis.glconfig.vidHeight * (1.0/480.0);
@@ -1988,7 +1995,7 @@ void UI_Init( void ) {
 		uis.bias = 0;
 	}
 */
-	//TiM - handle wide screens
+	/* TiM - handle wide screens */
 	if ( uis.glconfig.vidWidth * 480 > uis.glconfig.vidHeight * 640 ) 
 	{
 		uis.widescreen.ratio	= 640.0f*uis.scaley  * (1.0f/uis.glconfig.vidWidth);
@@ -2000,17 +2007,17 @@ void UI_Init( void ) {
 		uis.widescreen.bias		= 0;
 	}
 
-	// initialize the menu system
+	/* initialize the menu system */
 	Menu_Cache();
 
 	uis.activemenu = NULL;
 	uis.menusp     = 0;
 	trap_Cvar_Create ("ui_initialsetup", "0", CVAR_ARCHIVE );
 
-	//TiM - initiate the client side portion of the security code
+	/* TiM - initiate the client side portion of the security code */
 	UI_SecurityCodeSetup();
 
-	//trap_Cvar_Create ("rpg_playIntro", "1", CVAR_ARCHIVE ); //RPG-X | Phenix | 25/02/2005
+	/* trap_Cvar_Create ("rpg_playIntro", "1", CVAR_ARCHIVE ); *//*RPG-X | Phenix | 25/02/2005 */
 }
 
 /*
@@ -2021,20 +2028,20 @@ Adjusted for resolution and screen aspect ratio
 ================
 */
 void UI_AdjustFrom640( float *x, float *y, float *w, float *h ) {
-	// expect valid pointers
-//	*x = *x * uis.scale + uis.bias;
+	/* expect valid pointers */
+	/* *x = *x * uis.scale + uis.bias;*/
 	*x *= uis.scalex;
 	*y *= uis.scaley;
 	*w *= uis.scalex;
 	*h *= uis.scaley;
 
-	//handle widescreen projections
+	/* handle widescreen projections */
 	if ( UI_IsWidescreen() )
 	{
 		*x *= uis.widescreen.ratio;
 		*w *= uis.widescreen.ratio;
 	
-		//center the elements into the middle of the screen
+		/* center the elements into the middle of the screen */
 		if ( uis.widescreen.state  == WIDESCREEN_CENTER )
 			*x += uis.widescreen.bias;
 	}
@@ -2059,11 +2066,11 @@ void UI_DrawHandlePic( float x, float y, float w, float h, qhandle_t hShader ) {
 	float	t0;
 	float	t1;
 
-	//TiM - security check
+	/* TiM - security check */
 	if ( w == 0.0f || h == 0.0f )
 		return;
 
-	if( w < 0 ) {	// flip about vertical
+	if( w < 0 ) {	/* flip about vertical */
 		w  = -w;
 		s0 = 1;
 		s1 = 0;
@@ -2073,7 +2080,7 @@ void UI_DrawHandlePic( float x, float y, float w, float h, qhandle_t hShader ) {
 		s1 = 1;
 	}
 
-	if( h < 0 ) {	// flip about horizontal
+	if( h < 0 ) {	/* flip about horizontal */
 		h  = -h;
 		t0 = 1;
 		t1 = 0;
@@ -2135,7 +2142,7 @@ void UI_Refresh( int realtime )
 	uis.frametime = realtime - uis.realtime;
 	uis.realtime  = realtime;
 
-	//trap_Cvar_Set( "sys_lastactive", uis.realtime );
+	/*trap_Cvar_Set( "sys_lastactive", uis.realtime );*/
 	
 	if ( !( trap_Key_GetCatcher() & KEYCATCH_UI ) ) {
 		return;
@@ -2149,13 +2156,13 @@ void UI_Refresh( int realtime )
 
 		if (uis.activemenu->fullscreen)
 		{
-			// draw the background
+			/* draw the background */
 			trap_R_SetColor( colorTable[CT_BLACK]);
 			UI_DrawHandlePic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.whiteShader );
 		}
 		else if (!uis.activemenu->nobackground)
 		{
-			// draw the background
+			/* draw the background */
 			color[0] = colorTable[CT_BLACK][0];
 			color[1] = colorTable[CT_BLACK][1];
 			color[2] = colorTable[CT_BLACK][1];
@@ -2179,7 +2186,7 @@ void UI_Refresh( int realtime )
 
 	}
 
-	// draw cursor
+	/* draw cursor */
 	trap_R_SetColor( NULL );
 	if (uis.cursorDraw)
 	{
@@ -2189,16 +2196,18 @@ void UI_Refresh( int realtime )
 #ifndef NDEBUG
 	if (uis.debug)
 	{
-		// cursor coordinates
+		/* cursor coordinates */
 		uis.widescreen.state = WIDESCREEN_LEFT;
 		UI_DrawString( 0, 0, va("(%d,%d)",uis.cursorx,uis.cursory), UI_LEFT|UI_SMALLFONT, colorRed, qtrue );
 		uis.widescreen.state = WIDESCREEN_CENTER;
 	}
 #endif
 
-	// delay playing the enter sound until after the
-	// menu has been drawn, to avoid delay while
-	// caching images
+	/*
+ 	 * delay playing the enter sound until after the
+	 * menu has been drawn, to avoid delay while
+	 * caching images
+	 */
 	if (m_entersound)
 	{
 		trap_S_StartLocalSound( menu_in_sound, CHAN_LOCAL_SOUND );
@@ -2235,7 +2244,7 @@ static void UI_DrawNumField (int x, int y, int width, int value,int charWidth,in
 	if (width < 1)
 		return;
 
-	// draw number string
+	/* draw number string */
 	if (width > 15)
 		width = 15;
 
@@ -2270,9 +2279,9 @@ static void UI_DrawNumField (int x, int y, int width, int value,int charWidth,in
 	ptr = num;
 	while (*ptr && l)
 	{
-//if (*ptr == '-')
-//	frame = STAT_MINUS;
-//else
+/*if (*ptr == '-')
+	frame = STAT_MINUS;
+  else */
 			frame = *ptr -'0';
 
 		UI_DrawHandlePic( x,y, 16, 16, uis.smallNumbers[frame] );
@@ -2295,7 +2304,7 @@ void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI)
 	int i;
 	const char *text;
 
-	// Now that all the changes are made, print up the graphics
+	/* Now that all the changes are made, print up the graphics */
 	for (i=0;i<maxI;++i)
 	{
 		if (menuGraphics[i].type == MG_GRAPHIC)
@@ -2342,7 +2351,7 @@ void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI)
 		}
 		else if (menuGraphics[i].type == MG_NONE)
 		{
-			;	// Don't print anything
+			;	/* Don't print anything */
 		}
 	}
 }
@@ -2388,25 +2397,25 @@ static void UI_FrameTop_Graphics(menuframework_s *menu)
 {
 
 	trap_R_SetColor( colorTable[CT_DKPURPLE2] );
-	UI_DrawHandlePic(  30,  24,  47,  54, uis.whiteShader);	// Top left hand column
+	UI_DrawHandlePic(  30,  24,  47,  54, uis.whiteShader);	/* Top left hand column */
 
 	trap_R_SetColor( colorTable[CT_DKPURPLE3]);
-	UI_DrawHandlePic(  30,  81,  47,  34, uis.whiteShader);	// Middle left hand column
-	UI_DrawHandlePic(  30,  115,  128,  64, s_menuframe.cornerUpper);	// Corner
-	UI_DrawHandlePic(  100, 136,  49,  6.5, uis.whiteShader);	// Start of line across bottom of top third section
-	//ABOVE HAS LINE BUG 111 - 38 - 7
+	UI_DrawHandlePic(  30,  81,  47,  34, uis.whiteShader);	/* Middle left hand column */
+	UI_DrawHandlePic(  30,  115,  128,  64, s_menuframe.cornerUpper);	/* Corner */
+	UI_DrawHandlePic(  100, 136,  49,  6.5, uis.whiteShader);	/* Start of line across bottom of top third section */
+	/*ABOVE HAS LINE BUG 111 - 38 - 7 */
 
-	trap_R_SetColor( colorTable[CT_LTBROWN1]); ///
-	UI_DrawHandlePic( 152, 136, 135,   7, uis.whiteShader);	// 2nd line across bottom of top third section
+	trap_R_SetColor( colorTable[CT_LTBROWN1]);
+	UI_DrawHandlePic( 152, 136, 135,   7, uis.whiteShader);	/* 2nd line across bottom of top third section */
 
 	trap_R_SetColor( colorTable[CT_LTPURPLE2]);
-	UI_DrawHandlePic( 290, 136,  12,   7, uis.whiteShader);	// 3rd line across bottom of top third section
+	UI_DrawHandlePic( 290, 136,  12,   7, uis.whiteShader);	/* 3rd line across bottom of top third section */
 
-	trap_R_SetColor( colorTable[CT_LTBROWN1]); //RPG-X ADDITION
-	UI_DrawHandlePic( 305, 139,  60,   4, uis.whiteShader);	// 4th line across bottom of top third section
+	trap_R_SetColor( colorTable[CT_LTBROWN1]); /* RPG-X ADDITION */
+	UI_DrawHandlePic( 305, 139,  60,   4, uis.whiteShader);	/* 4th line across bottom of top third section */
 
-	//RPG-X REMOVE trap_R_SetColor( colorTable[CT_LTBROWN1]);
-	UI_DrawHandlePic( 368, 136,  111,   7, uis.whiteShader);	// 5th line across bottom of top third section
+	/*RPG-X REMOVE trap_R_SetColor( colorTable[CT_LTBROWN1]);*/
+	UI_DrawHandlePic( 368, 136,  111,   7, uis.whiteShader); /* 5th line across bottom of top third section */
 
 	if (menu->titleI)
 	{
@@ -2423,30 +2432,30 @@ UI_FrameBottom_Graphics
 static void UI_FrameBottom_Graphics(void)
 {
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
-	UI_DrawHandlePic(  30, 147, 128,  64, s_menuframe.cornerUpper2);	// Top corner
+	UI_DrawHandlePic(  30, 147, 128,  64, s_menuframe.cornerUpper2); /* Top corner */
 	UI_DrawHandlePic(  50, 147,  99,   7, uis.whiteShader);
 
-	trap_R_SetColor( colorTable[CT_LTBROWN1]); //DKBROWN1
+	trap_R_SetColor( colorTable[CT_LTBROWN1]); /* DKBROWN1 */
 	UI_DrawHandlePic( 152, 147, 135,   7, uis.whiteShader);
 
-	trap_R_SetColor( colorTable[CT_DKRED1]); //DKBROWN1
+	trap_R_SetColor( colorTable[CT_DKRED1]); /* DKBROWN1 */
 	UI_DrawHandlePic( 290, 147,  12,   7, uis.whiteShader);
 
 	trap_R_SetColor( colorTable[CT_LTBROWN1]);
 	UI_DrawHandlePic( 305, 147,  60,   4, uis.whiteShader);
 
-	trap_R_SetColor( colorTable[CT_LTGOLD1]); //DKBROWN1
+	trap_R_SetColor( colorTable[CT_LTGOLD1]); /* DKBROWN1 */
 	UI_DrawHandlePic( 368, 147, 111,   7, uis.whiteShader);
 
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
-	UI_DrawHandlePic(  30, 173,  47,  27, uis.whiteShader);	// Top left column (81453)
+	UI_DrawHandlePic(  30, 173,  47,  27, uis.whiteShader);	/* Top left column (81453) */
 
-	//Start of piece (431108)
-	UI_DrawHandlePic(  30, 392,  47,  33, uis.whiteShader);	// Bottom left column
-	UI_DrawHandlePic(  30, 425, 128,  64, s_menuframe.cornerLower);// Bottom Left Corner
+	/* Start of piece (431108) */
+	UI_DrawHandlePic(  30, 392,  47,  33, uis.whiteShader);	/* Bottom left column */
+	UI_DrawHandlePic(  30, 425, 128,  64, s_menuframe.cornerLower); /* Bottom Left Corner */
 
-	trap_R_SetColor( colorTable[CT_LTBLUE1]); //LTBROWN1]);
-	UI_DrawHandlePic( 96,  438, 268,  18, uis.whiteShader);	// Bottom front Line
+	trap_R_SetColor( colorTable[CT_LTBLUE1]); /* LTBROWN1]); */
+	UI_DrawHandlePic( 96,  438, 268,  18, uis.whiteShader);	/* Bottom front Line */
 
 	trap_R_SetColor(NULL);
 }
@@ -2463,9 +2472,9 @@ void UI_MenuBottomLineEnd_Graphics (const char *string,int color, qboolean *spac
 	trap_R_SetColor( colorTable[color]);
 	holdX = MENU_TITLE_X - (UI_ProportionalStringWidth( string,UI_SMALLFONT));
 	holdLength = (367 + 6) - holdX;
-	UI_DrawHandlePic( 367,  438,  holdLength,  18, uis.whiteShader);	// Bottom end line
+	UI_DrawHandlePic( 367,  438,  holdLength,  18, uis.whiteShader); /* Bottom end line */
 
-	//TiM - stop the text leaving the box in some instances
+	/* TiM - stop the text leaving the box in some instances */
 	if ( space != NULL )
 	{
 		if ( (holdLength < 0 ? -holdLength : holdLength ) < UI_ProportionalStringWidth( Q3_VERSION,UI_TINYFONT) )
@@ -2474,7 +2483,7 @@ void UI_MenuBottomLineEnd_Graphics (const char *string,int color, qboolean *spac
 			*space = qtrue;
 	}
 
-	//Com_Printf( S_COLOR_RED "Length: %i, Width: %i\n", holdLength, (UI_ProportionalStringWidth( Q3_VERSION,UI_TINYFONT)) );
+	/* Com_Printf( S_COLOR_RED "Length: %i, Width: %i\n", holdLength, (UI_ProportionalStringWidth( Q3_VERSION,UI_TINYFONT)) ); */
 }
 
 /*
@@ -2495,23 +2504,23 @@ void UI_MenuFrame(menuframework_s *menu)
 	{
 		menu->fullscreen			= qtrue;
 	}
-	else	// In game menu
+	else	/* In game menu */
 	{
 		menu->fullscreen			= qfalse;
 	}
 
-	// Graphic frame
-	UI_FrameTop_Graphics(menu);	// Top third
-	UI_FrameBottom_Graphics();	// Bottom two thirds
+	/* Graphic frame */
+	UI_FrameTop_Graphics(menu);	/* Top third */
+	UI_FrameBottom_Graphics();	/* Bottom two thirds */
 
-	// Add foot note
+	/* Add foot note */
 	if (menu->footNoteEnum)
 	{
 		UI_DrawProportionalString(  MENU_TITLE_X, 440, menu_normal_text[menu->footNoteEnum],UI_RIGHT | UI_SMALLFONT, colorTable[CT_LTORANGE]);
 		UI_MenuBottomLineEnd_Graphics (menu_normal_text[menu->footNoteEnum],CT_LTBROWN1, &space);
 	}
 
-	// Print version
+	/* Print version */
 	if ( space )
 		UI_DrawProportionalString(  371, 445, Q3_VERSION,UI_TINYFONT, colorTable[CT_BLACK]);
 }
@@ -2534,7 +2543,7 @@ void UI_MenuFrame2(menuframework_s *menu)
 	{
 		menu->fullscreen			= qtrue;
 	}
-	else	// In game menu
+	else	/* In game menu */
 	{
 		menu->fullscreen			= qfalse;
 	}
@@ -2546,18 +2555,18 @@ void UI_MenuFrame2(menuframework_s *menu)
 	}
 
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
-	UI_DrawHandlePic(  30, 25,  47,  119, uis.whiteShader);	// Top left column
-	UI_DrawHandlePic(  30, 147,  47,  53, uis.whiteShader);	// left column
+	UI_DrawHandlePic(  30, 25,  47,  119, uis.whiteShader);	/* Top left column */
+	UI_DrawHandlePic(  30, 147,  47,  53, uis.whiteShader);	/* left column */
 
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
-	//UI_DrawHandlePic(  30, 175,  47,  25, uis.whiteShader);	// Mid left column
-	UI_DrawHandlePic(  30, 392,  47,  33, uis.whiteShader);	// Bottom left column
-	UI_DrawHandlePic(  30, 425, 128,  64, s_menuframe.cornerLower);// Bottom Left Corner
+	/*UI_DrawHandlePic(  30, 175,  47,  25, uis.whiteShader);*/ /* Mid left column*/
+	UI_DrawHandlePic(  30, 392,  47,  33, uis.whiteShader);	/* Bottom left column */
+	UI_DrawHandlePic(  30, 425, 128,  64, s_menuframe.cornerLower); /* Bottom Left Corner */
 
 	trap_R_SetColor( colorTable[CT_LTBROWN1]);
-	UI_DrawHandlePic( 96,  438, 268,  18, uis.whiteShader);	// Bottom front Line
+	UI_DrawHandlePic( 96,  438, 268,  18, uis.whiteShader);	/* Bottom front Line */
 
-	// Add foot note
+	/* Add foot note */
 	if (menu->footNoteEnum)
 	{
 		UI_DrawProportionalString(  MENU_TITLE_X, 440, menu_normal_text[menu->footNoteEnum],UI_RIGHT | UI_SMALLFONT, colorTable[CT_LTORANGE]);
@@ -2565,7 +2574,7 @@ void UI_MenuFrame2(menuframework_s *menu)
 	}
 	trap_R_SetColor(NULL);
 
-	// Print version
+	/* Print version */
 	if ( space )
 		UI_DrawProportionalString(  371, 445, Q3_VERSION,UI_TINYFONT, colorTable[CT_BLACK]);
 }
@@ -2623,20 +2632,20 @@ UI_ParseMenuText
 */
 static void UI_ParseMenuText()
 {
-	char	*token;
+	char *token;
 	char *buffer;
-	int i;
-	int len;
-	//int j;
+	int  i;
+	int  len;
+	/*int j;*/
 
 	COM_BeginParseSession();
 
 	buffer = MenuText;
 
-	//RPG-X: TiM - Stop any D3 menu hacks in their tracks :P
-	//UI_AntiPlagiarise( buffer, 0 );
+ 	 /* RPG-X: TiM - Stop any D3 menu hacks in their tracks :P */
+	/*UI_AntiPlagiarise( buffer, 0 );*/
 
-	i = 1;	// Zero is null string
+	i = 1;	/* Zero is null string */
 	while ( buffer ) 
 	{
 		token = COM_ParseExt( &buffer, qtrue );
@@ -2645,7 +2654,7 @@ static void UI_ParseMenuText()
 		if (len)
 		{
 			menu_normal_text[i] = (buffer - (len + 1));
-			*(buffer - 1) = '\0';		//	Place an string end where is belongs.
+			*(buffer - 1) = '\0';		/* Place an string end where is belongs. */
 			i++;
 
 		}
@@ -2667,7 +2676,7 @@ static void UI_ParseMenuText()
 		}
 	}
 
-	//RPG-X: TiM- If 'RPG-X' is missing from any of the main menu titles, kick it ;)
+	/* RPG-X: TiM- If 'RPG-X' is missing from any of the main menu titles, kick it ;) */
 	/*for(j=1; j < 12; j++) {
 		UI_AntiPlagiarise( menu_normal_text[j], 1 );
 	}*/
@@ -2680,7 +2689,7 @@ UI_LoadMenuText
 */
 void UI_LoadMenuText()
 {
-	int len;//,i;
+	int len;/*,i;*/
 	fileHandle_t	f;
 	char	filename[MAX_QPATH];
 
@@ -2700,7 +2709,7 @@ void UI_LoadMenuText()
 		return;
 	}
 
-	// initialise the data area
+	/* initialise the data area */
 	memset(MenuText, 0, sizeof(MenuText));	
 
 	trap_FS_Read( MenuText, len, f );
@@ -2711,7 +2720,7 @@ void UI_LoadMenuText()
 
 }
 
-#define MAXBUTTONTEXT 50000 //15000 - Might need optimizing
+#define MAXBUTTONTEXT 50000 /*15000 - Might need optimizing*/
 char	ButtonText[MAXBUTTONTEXT];
 
 /*
@@ -2730,37 +2739,37 @@ static void UI_ParseButtonText()
 
 	buffer = ButtonText;
 
-	//RPG-X: TiM - Stop any D3 menu hacks in their tracks :P
-	//UI_AntiPlagiarise( buffer, 0 );
+	/* RPG-X: TiM - Stop any D3 menu hacks in their tracks :P */
+	/*UI_AntiPlagiarise( buffer, 0 );*/
 
-	i = 1;	// Zero is null string
+	i = 1;	/* Zero is null string */
 	while ( buffer ) 
 	{
-//		G_ParseString( &buffer, &token);
+		/*G_ParseString( &buffer, &token);*/
 		token = COM_ParseExt( &buffer, qtrue );
 
 		len = strlen(token);
 		if (len)
 		{
 
-			if ((len == 1) && (token[0] == '/'))	// A NULL?
+			if ((len == 1) && (token[0] == '/'))	/* A NULL? */
 			{
 				menu_button_text[i][0] = menuEmptyLine;
 				menu_button_text[i][1] = menuEmptyLine;
 			}
 			else
 			{
-				menu_button_text[i][0] = (buffer - (len + 1));	// The +1 is to get rid of the " at the beginning of the sting.
+				menu_button_text[i][0] = (buffer - (len + 1));	/* The +1 is to get rid of the " at the beginning of the string.*/
 			}
 
-			*(buffer - 1) = '\0';		//	Place an string end where is belongs.
+			*(buffer - 1) = '\0';		/* Place an string end where is belongs. */
 
 			token = COM_ParseExt( &buffer, qtrue );
 			len = strlen(token);
 			if (len)
 			{
-				menu_button_text[i][1] = (buffer - (len+1));	// The +1 is to get rid of the " at the beginning of the sting.
-				*(buffer-1) = '\0';		//	Place an string end where is belongs.
+				menu_button_text[i][1] = (buffer - (len+1));	/* The +1 is to get rid of the " at the beginning of the string. */
+				*(buffer-1) = '\0';		/* Place an string end where is belongs. */
 			}
 			++i;
 		}
@@ -2817,7 +2826,7 @@ void UI_LoadButtonText()
 		menu_button_text[i][1] = menuEmptyLine;
 	}
 
-	// initialise the data area
+	/* initialise the data area */
 	memset(ButtonText, 0, sizeof(ButtonText));	
 
 	trap_FS_Read( ButtonText, len, f );
@@ -2855,7 +2864,7 @@ void UI_LanguageFilename(char *baseName,char *baseExtension,char *finalName)
 
 	trap_Cvar_VariableStringBuffer( "g_language", language, 32 );
 
-	// If it's English then no extension
+	/* If it's English then no extension */
 	if (language[0]=='\0' || Q_stricmp ("ENGLISH",language)==0)
 	{
 		Com_sprintf(finalName,MAX_QPATH,"%s.%s",baseName,baseExtension);
@@ -2864,12 +2873,12 @@ void UI_LanguageFilename(char *baseName,char *baseExtension,char *finalName)
 	{
 		Com_sprintf(finalName,MAX_QPATH,"%s_%s.%s",baseName,language,baseExtension);
 
-		//Attempt to load the file
+		/* Attempt to load the file */
 		trap_FS_FOpenFile( finalName, &file, FS_READ );
 
-		if ( file == 0 )	//	This extension doesn't exist, go English.
+		if ( file == 0 ) /* This extension doesn't exist, go English. */
 		{
-			Com_sprintf(finalName,MAX_QPATH,"%s.%s",baseName,baseExtension);	//the caller will give the error if this isn't there
+			Com_sprintf(finalName,MAX_QPATH,"%s.%s",baseName,baseExtension); /* the caller will give the error if this isn't there */
 		}
 		else
 		{
@@ -2909,7 +2918,7 @@ void UI_SecurityCodeSetup ( void )
 	unsigned long			bit=0;
 	static qboolean			ui_SecuritySetup=qfalse;
 
-	//QVM Hack
+	/* QVM Hack */
 	if ( !ui_SecuritySetup )
 		ui_SecuritySetup = qtrue;
 	else
@@ -2935,7 +2944,7 @@ void UI_SecurityCodeSetup ( void )
 
 	code = (rpgxSecurityFile_t *)((byte *)buffer);
 
-	#if defined(__linux__) && !defined(Q3_VM)
+	#if defined(__linux__)
 	unsigned long ID = (buffer[3]<<24|buffer[2]<<16|buffer[1]<<8|buffer[0]);
 	unsigned long SECID = ('7'<<24|'X'<<16|'G'<<8|'R');
 	if ( !code || ID != SECID)
@@ -2952,10 +2961,10 @@ void UI_SecurityCodeSetup ( void )
 		return;
 	}
 
-	//Com_Printf( S_COLOR_RED "FileID: %u, RealID: %u. FileHash: %u, ConsoleHash: %u, DefHash: %u. FileCode: %u, ConsoleCode: %u, DefCode: %u.\n",
-	//		code->ID, SECURITY_ID, code->hash, atoul( sv_securityHash.string ), SECURITY_HASH, code->playerID, atoul( sv_securityCode.string ), SECURITY_PID );
+	/*Com_Printf( S_COLOR_RED "FileID: %u, RealID: %u. FileHash: %u, ConsoleHash: %u, DefHash: %u. FileCode: %u, ConsoleCode: %u, DefCode: %u.\n",
+			code->ID, SECURITY_ID, code->hash, atoul( sv_securityHash.string ), SECURITY_HASH, code->playerID, atoul( sv_securityCode.string ), SECURITY_PID );*/
 
-	//if hash is identical to console to default, then generate a new one
+	/* if hash is identical to console to default, then generate a new one */
 	if ( code->hash == atoul(sv_securityHash.string)
 			&&
 		code->hash == SECURITY_HASH )
@@ -2963,7 +2972,7 @@ void UI_SecurityCodeSetup ( void )
 		fileHandle_t		wf;
 		int					i;
 
-		//Com_Printf( S_COLOR_RED "Building new key!\n" );
+		/*Com_Printf( S_COLOR_RED "Building new key!\n" );*/
 
 		memset( &wCode, 0, sizeof( rpgxSecurityFile_t ) );
 
@@ -2971,12 +2980,12 @@ void UI_SecurityCodeSetup ( void )
 
 		code->ID = SECURITY_ID;
 
-		//generate our player hash
+		/* generate our player hash */
 		while ( code->hash == 0 || code->hash == SECURITY_HASH )
 		{
-			//set a pretty good random seed
+			/* set a pretty good random seed */
 			srand( trap_Milliseconds() );
-			//code->hash = (int)(rand() / (((double)RAND_MAX + 1)/ SECURITY_HASH));
+			/*code->hash = (int)(rand() / (((double)RAND_MAX + 1)/ SECURITY_HASH));*/
 			for ( i = 0; i < 32; i++ )
 			{
 				if ( (irandom(1, 2)-1 ) )
@@ -2984,15 +2993,15 @@ void UI_SecurityCodeSetup ( void )
 					bit += 1 << i;
 				}
 				
-				//bit = bit | (irandom(1, 2)-1);
-				//bit <<= 1;
+				/*bit = bit | (irandom(1, 2)-1);*/
+				/*bit <<= 1;*/
 			}
 
 			code->hash = bit;
 		}
 
-		//generate our player id
-		//TiM - shifted to client to be built off of IP
+		/* generate our player id */
+		/* TiM - shifted to client to be built off of IP */
 		while ( code->playerID == 0 || code->playerID == SECURITY_PID )
 		{
 			srand( (int)(trap_Milliseconds() * irandom( 0, 0x7FFF )) );
@@ -3002,15 +3011,14 @@ void UI_SecurityCodeSetup ( void )
 				code->playerID <<= 1;
 			}
 		}
-		//code->playerID = SECURITY_PID;
+		/*code->playerID = SECURITY_PID;*/
 
-		//generate random padding to make viewing this in a hex editor
-		//harder
-		//code->padding	= irandom( 0, 0xffff );
-		//code->padding2	= irandom( 0, 0xffff );
-		//code->padding3	= irandom( 0, 0xffff );
+		/*generate random padding to make viewing this in a hex editor harder*/
+		/*code->padding	= irandom( 0, 0xffff );*/
+		/*code->padding2	= irandom( 0, 0xffff );*/
+		/*code->padding3	= irandom( 0, 0xffff );*/
 		
-		//overwrite the file
+		/* overwrite the file */
 		trap_FS_FOpenFile( SECURITY_FILE, &wf, FS_WRITE );
 		trap_FS_Write( code, SECURITY_SIZE, wf );
 		trap_FS_FCloseFile( wf );
@@ -3018,8 +3026,8 @@ void UI_SecurityCodeSetup ( void )
 		trap_Cvar_Set( "sv_securityHash", va( "%u", code->hash ) );
 	}
 	
-	//TiM - NYARRR!!!!! ioEF has a weird config system which appears to trip this system.
-	//*sigh* I guess for now we'll have to isolate this for now
+	/* TiM - NYARRR!!!!! ioEF has a weird config system which appears to trip this system. */
+	/*  *sigh* I guess for now we'll have to isolate this for now */
 
 	/*else if ( code->hash != SECURITY_HASH 
 				&& 
@@ -3038,8 +3046,10 @@ void UI_SecurityCodeSetup ( void )
 		return;
 	}*/
 
-	//update the security code value and lock it each time
-	//from here, it is subsequently sent to the server on player connect
+	/*
+ 	 * update the security code value and lock it each time
+	 * from here, it is subsequently sent to the server on player connect
+	 */
 	trap_Cvar_Set( "sv_securityCode", va( "%u", code->playerID ) );
 
 }

@@ -4,6 +4,7 @@
 // This file is NOT included on native builds
 
 #ifdef Q3_VM
+#error "Q3_VM is defined - QVMs are no longer supported by RPG-X2"
 
 typedef int size_t;
 

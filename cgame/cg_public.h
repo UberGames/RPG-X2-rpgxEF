@@ -6,10 +6,6 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 
-
-// rpgxEF?
-#define XTRA 1
-
 #define	CMD_BACKUP			64	
 #define	CMD_MASK			(CMD_BACKUP - 1)
 // allow a lot of command backups for very fast systems
@@ -126,10 +122,7 @@ typedef enum {
 	CG_CEIL,
 	CG_TESTPRINTINT,
 	CG_TESTPRINTFLOAT,
-
-#ifdef XTRA
-	CG_R_REMAP_SHADER = 200,
-#endif
+	CG_R_REMAP_SHADER = 200, /* shader remapping */
 } cgameImport_t;
 //these must match up with cg_syscalls.asm
 

@@ -8,8 +8,6 @@ CC = gcc
 ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
 
-# cflags for the VM compiler
-VMCFLAGS = $(CFLAGS) -DQ3_VM
 # cflags for the compiler
 ifeq ($(PLATFORM), mingw32)
 SOCFLAGS = $(CFLAGS)

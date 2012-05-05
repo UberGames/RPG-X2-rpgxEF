@@ -72,19 +72,10 @@ typedef struct {
 	char luaFunc[MAX_QPATH];
 } cfx_t;
 
-#ifdef Q3_VM
-#define MAX_CFX_CNT 32
-
-typedef struct {
-	cfx_t *cfx[MAX_CFX_CNT];
-	int	  cnt;
-} cfxList_t;
-#else
 typedef struct {
 	cfx_t **cfx;
 	int	    cnt;
 } cfxList_t;
-#endif
 
 void		Lua_CFX_LoadMapFxFile(void);
 

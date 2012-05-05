@@ -947,26 +947,23 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand("spawnTEnt");
 	trap_AddCommand("flushTEnts");
 
-	/* XPRERIMENTAL */
-	trap_AddCommand("universalTrans");
-	/* END MOD  */
-
 	/* temp */
 	trap_AddCommand("ui_holodeck");
 
-	#ifdef XTRA
+	/* sql */
+	/* TODO some might be removed */
 	trap_AddCommand("userlogin");
 	trap_AddCommand("userAdd");
 	trap_AddCommand("sql_setup");
 	trap_AddCommand("userMod");
 	trap_AddCommand("userDel");
-	#endif
 
+	/* lua */
 	#ifdef CG_LUA
 	trap_AddCommand("lua_status");
 	#endif
 
-	/* CCAM */
+	/* cinematic cam test */
 	trap_AddCommand("camtest");
 	trap_AddCommand("camtestend");
 }
