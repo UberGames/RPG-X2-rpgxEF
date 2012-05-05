@@ -1,13 +1,14 @@
-// Copyright (C) 1999-2000 Id Software, Inc.
-//
+/*
+ * Copyright (C) 1999-2000 Id Software, Inc.
+ */
 #ifndef __KEYCODES_H__
 #define __KEYCODES_H__
 
-//
-// these are the key numbers that should be passed to KeyEvent
-//
+/*
+ * these are the key numbers that should be passed to KeyEvent
+ */
 
-// normal keys should be passed as lowercased ascii
+/* normal keys should be passed as lowercased ascii */
 
 typedef enum {
 	K_TAB = 9,
@@ -131,13 +132,15 @@ typedef enum {
 	K_AUX15,
 	K_AUX16,
 
-	K_LAST_KEY		// this had better be <256!
+	K_LAST_KEY		/* this had better be <256! */
 } keyNum_t;
 
 
-// The menu code needs to get both key and char events, but
-// to avoid duplicating the paths, the char events are just
-// distinguished by or'ing in K_CHAR_FLAG (ugly)
+/*
+ * The menu code needs to get both key and char events, but
+ * to avoid duplicating the paths, the char events are just
+ * distinguished by or'ing in K_CHAR_FLAG (ugly)
+ */
 #define	K_CHAR_FLAG		1024
 
 #endif
