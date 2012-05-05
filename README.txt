@@ -31,7 +31,10 @@ On Windows:
 - make clean removes all compiled files (including the 
   shared libraries)
 
-Cross Compiling:
+Cross Compiling for Windows:
+Not yet but hopefully soon.
+
+Mac OSX:
 Not yet but hopefully soon.
 
 Bug Reports and Patch/Feature Suggestions:
