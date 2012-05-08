@@ -1,11 +1,20 @@
 #include "g_local.h"
 
-extern void	InitMover( gentity_t *ent );
-extern gentity_t	*G_TestEntityPosition( gentity_t *ent );
+extern void InitMover( gentity_t *ent );
+extern gentity_t *G_TestEntityPosition( gentity_t *ent );
 void func_usable_use (gentity_t *self, gentity_t *other, gentity_t *activator);
+
+/**
+ * \brief Try to get solid again.
+ *
+ * Thinkfunc: Try to get solid again. If not possible (e.g. it's blocked)
+ * wait a frame and try again.
+ *
+ * @param self the entity itself
+ */
 void func_wait_return_solid( gentity_t *self )
 {
-	//once a frame, see if it's clear.
+	/* once a frame, see if it's clear. */
 	self->clipmask = CONTENTS_BODY;
 	if ( !(self->spawnflags&16) || G_TestEntityPosition( self ) == NULL )
 	{
@@ -24,7 +33,7 @@ void func_wait_return_solid( gentity_t *self )
 		}
 		*/
 		if ( !(self->spawnflags&1) && !(self->spawnflags & 1024) )
-		{//START_OFF doesn't effect area portals
+		{/* START_OFF doesn't effect area portals */
 			trap_AdjustAreaPortalState( self, qfalse );
 		}
 	}
@@ -36,20 +45,36 @@ void func_wait_return_solid( gentity_t *self )
 	}
 }
 
+/**
+ * \brief Default think function for the func_usable entity.
+ *
+ * Default think function for the func_usable entity.
+ *
+ * @param self the entity itself
+ */
 void func_usable_think( gentity_t *self )
 {
 	if ( self->spawnflags & 8 )
 	{
-		//self->r.svFlags |= SVF_PLAYER_USABLE;	//Replace the usable flag
+		/*self->r.svFlags |= SVF_PLAYER_USABLE;*/ /* Replace the usable flag */
 		self->use = func_usable_use;
-		self->think = 0/*NULL*/;
+		self->think = 0; /*NULL*/
 		self->nextthink = -1;
 	}
 }
 
+/**
+ * \brief Default use function for the func_usable entity.
+ *
+ * Defualt use function for the func_usable entity.
+ *
+ * @param self the entity itself
+ * @param another entity
+ * @param activator the activating entity
+ */
 void func_usable_use (gentity_t *self, gentity_t *other, gentity_t *activator)
-{//Toggle on and off
-	//Remap shader
+{/* Toggle on and off */
+	/* Remap shader */
 	if(self->targetShaderName && self->targetShaderNewName) {
 		float f = level.time * 0.001;
 		AddRemap(self->targetShaderName, self->targetShaderNewName, f);
@@ -57,21 +82,21 @@ void func_usable_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 	}
 
 
-	//RPG-X | GSIO01 | 09/05/2009:
-	if(self->spawnflags & 256) { // ADMINS_ONLY
+	/* RPG-X | GSIO01 | 09/05/2009: */
+	if(self->spawnflags & 256) { /* ADMINS_ONLY */
 		if(!IsAdmin(activator))
 			return;
 	}
 
-	if(self->flags & FL_LOCKED) // Deactivated
+	if(self->flags & FL_LOCKED) /*  Deactivated */
 		return;
 
-	if ( self->spawnflags & 8 )		// fixme: uurrgh!!!!  that's disgusting
-	{//ALWAYS_ON
-		//Remove the ability to use the entity directly
-		//self->r.svFlags &= ~SVF_PLAYER_USABLE;
-		//also remove ability to call any use func at all!
-		self->use = 0/*NULL*/;
+	if ( self->spawnflags & 8 )		/* fixme: uurrgh!!!!  that's disgusting */
+	{/* ALWAYS_ON */
+		/* Remove the ability to use the entity directly */
+		/*self->r.svFlags &= ~SVF_PLAYER_USABLE;*/
+		/*also remove ability to call any use func at all!*/
+		self->use = 0; /*NULL*/
 		
 		if(self->target && self->target[0])
 		{
@@ -90,7 +115,7 @@ void func_usable_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 		return;
 	}
 	else if ( !self->count )
-	{//become solid again
+	{/*become solid again*/
 		self->count = 1;
 		func_wait_return_solid( self );
 	}
@@ -110,20 +135,40 @@ void func_usable_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 			else
 				G_UseTargets(self, activator);
 		}
-		self->think = 0/*NULL*/;
+		self->think = 0; /*NULL*/
 		self->nextthink = -1;
 		if ( !(self->spawnflags&1) && !(self->spawnflags & 1024))
-		{//START_OFF doesn't effect area portals
+		{/* START_OFF doesn't effect area portals */
 			trap_AdjustAreaPortalState( self, qtrue );
 		}
 	}
 }
 
+/**
+ * \brief Default pain function for func_usable entity.
+ *
+ * Default pain function for func_sable entity.
+ *
+ * @param self the entity itself
+ * @param attacker the attacking entiy
+ * @param damage the ammount of damage
+ */
 void func_usable_pain(gentity_t *self, gentity_t *attacker, int damage)
 {
 	self->use( self, attacker, attacker );
 }
 
+/**
+ * \brief Default die function for the func_usable entity.
+ *
+ * Default die function for the func_usable entity.
+ *
+ * @param self the entity itself
+ * @param inflictor the inflictor
+ * @param attacker the attacker
+ * @param damage ammount of damage
+ * @param mod means of death
+ */
 void func_usable_die(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod)
 {
 	self->takedamage = qfalse;
@@ -154,6 +199,13 @@ A bmodel that can be used directly by the player's "activate" button
 "team" - This can only be used by this team (2 = blue, 1 = red)
 */
 
+/**
+ * \brief The spawn function of the func_usable entity.
+ *
+ * The spawn function of the func_usable entity.
+ *
+ * @param self the entity itself
+ */
 void SP_func_usable( gentity_t *self ) 
 {
 	trap_SetBrushModel( self, self->model );
@@ -161,7 +213,7 @@ void SP_func_usable( gentity_t *self )
 	VectorCopy( self->s.origin, self->s.pos.trBase );
 	VectorCopy( self->s.origin, self->r.currentOrigin );
 
-	//Com_Printf( "PointOrigin: { %f, %f, %f }\n", self->s.origin[0], self->s.origin[1], self->s.origin[2] );
+	/*Com_Printf( "PointOrigin: { %f, %f, %f }\n", self->s.origin[0], self->s.origin[1], self->s.origin[2] );*/
 
 	self->count = 1;
 	if (self->spawnflags & 1)
@@ -195,7 +247,7 @@ void SP_func_usable( gentity_t *self )
 		self->pain = func_usable_pain;
 	}
 	
-	//if the map has a usables file, get the data of of that
+	/*if the map has a usables file, get the data of of that*/
 	if ( rpg_scannablePanels.integer )
 	{
 		if ( level.hasScannableFile )
@@ -207,7 +259,7 @@ void SP_func_usable( gentity_t *self )
 
 			self->s.weapon = 0;
 
-			//TiM - check for a message integer
+			/*TiM - check for a message integer*/
 			G_SpawnInt( "messageNum", "0", &messageNum );
 
 			if(self->luaEntity)
@@ -222,7 +274,7 @@ void SP_func_usable( gentity_t *self )
 
 					if ( level.g_scannables[i] == messageNum )
 					{
-						self->s.weapon = i+1; //+1 offset so 0 becomes the default error
+						self->s.weapon = i+1; /*+1 offset so 0 becomes the default error*/
 						break;
 					}
 
@@ -230,7 +282,7 @@ void SP_func_usable( gentity_t *self )
 				}
 			}
 
-			//if no match was found, try the entities list if possible
+			/*if no match was found, try the entities list if possible*/
 			if ( self->s.weapon == 0 && level.hasEntScannableFile )
 			{
 				i=0;
@@ -250,7 +302,7 @@ void SP_func_usable( gentity_t *self )
 							if ( level.g_scannables[j] == level.g_entScannables[i][1] )
 							{
 								self->s.weapon = j+1;
-								i = MAX_ENTSCANNABLES+1; //break the outer loop hehe
+								i = MAX_ENTSCANNABLES+1; /*break the outer loop hehe*/
 								break;
 							}
 
@@ -266,28 +318,30 @@ void SP_func_usable( gentity_t *self )
 			{
 				self->s.eType = ET_TRIC_STRING;
 				
-				//DEBUG
-				//G_Printf( S_COLOR_RED "Entry found for entity: %i!\n", self-g_entities );
+				/*DEBUG*/
+				/*G_Printf( S_COLOR_RED "Entry found for entity: %i!\n", self-g_entities );*/
 
-				//Set bounding box for maxs/mins on tricorder rendering
-				VectorCopy( self->r.mins, self->s.origin2 ); //mins dimension
-				VectorCopy( self->r.maxs, self->s.angles2 ); //maxs
+				/*Set bounding box for maxs/mins on tricorder rendering*/
+				VectorCopy( self->r.mins, self->s.origin2 ); /*mins dimension*/
+				VectorCopy( self->r.maxs, self->s.angles2 ); /*maxs*/
 			}
 		}
 		else
 		{
-			//TiM: Humm... hopefully in my infinite hackiness, this won't screw anything up lol.
-			//Apparently this is the cause of Atlantis dying. The amount of scannable ents is making too
-			//much data for Q3 to handle.
-			//I've CVAR'd it off for now. Hopefully if/when the map gets fixed, it can be put back online.
-			if ( self->message ) { //If there is a message here, we gotz to get it over to CG
-				self->s.eType = ET_TRIC_STRING; //Set a special type we can use to identify this over on CG
+			/*
+ 			 * TiM: Humm... hopefully in my infinite hackiness, this won't screw anything up lol.
+			 * Apparently this is the cause of Atlantis dying. The amount of scannable ents is making too
+			 * much data for Q3 to handle.
+			 * I've CVAR'd it off for now. Hopefully if/when the map gets fixed, it can be put back online.
+			 */
+			if ( self->message ) { /* If there is a message here, we gotz to get it over to CG */
+				self->s.eType = ET_TRIC_STRING; /* Set a special type we can use to identify this over on CG */
 
-				//Com_Printf( S_COLOR_RED "USABLE MESSAGE: %s\n", self->message );
-				self->s.time2 = G_TricStringIndex( self->message ); //encode the message into an info string
-				//Set bounding box for maxs/mins on tricorder rendering
-				VectorCopy( self->r.mins, self->s.origin2 ); //mins dimension
-				VectorCopy( self->r.maxs, self->s.angles2 ); //maxs
+				/*Com_Printf( S_COLOR_RED "USABLE MESSAGE: %s\n", self->message );*/
+				self->s.time2 = G_TricStringIndex( self->message ); /* encode the message into an info string */
+				/* Set bounding box for maxs/mins on tricorder rendering */
+				VectorCopy( self->r.mins, self->s.origin2 ); /* mins dimension */
+				VectorCopy( self->r.maxs, self->s.angles2 ); /* maxs */
 			}
 		}
 	}
@@ -300,11 +354,10 @@ void SP_func_usable( gentity_t *self )
 	level.numBrushEnts++;
 }
 
-/*
-G_LoadMapConfigurations
-*/
 /**
 *	\brief loads usable strings
+*
+*	Loads the usable strings.
 *	\return sucessfully loaded?
 *	\author Ubergames - TiM
 */
@@ -326,21 +379,21 @@ qboolean G_SetupUsablesStrings( void )
 		return qfalse;
 	}	
 
-	//get the map name out of the server data
+	/* get the map name out of the server data */
 	trap_GetServerinfo( serverInfo, MAX_TOKEN_CHARS * sizeof(char) );
 
-	//setup the file route
+	/* setup the file route */
 	Com_sprintf( fileRoute, sizeof( fileRoute ), "maps/%s.usables", Info_ValueForKey( serverInfo, "mapname" ) );
 
 	file_len = trap_FS_FOpenFile( fileRoute, &f, FS_READ );
 
 	free(serverInfo);
 
-	//It's assumed most maps won't have this feature, so just exit 'gracefully'
+	/* It's assumed most maps won't have this feature, so just exit 'gracefully' */
 	if ( file_len<=1 )
 	{
 		trap_FS_FCloseFile( f );
-		//G_Printf( S_COLOR_YELLOW "WARNING: No file named %s was found.\n", fileRoute );
+		/* G_Printf( S_COLOR_YELLOW "WARNING: No file named %s was found.\n", fileRoute ); */
 		return qfalse;
 	}
 
@@ -350,7 +403,7 @@ qboolean G_SetupUsablesStrings( void )
 		return qfalse;
 	}
 
-	//fill the buffer with the file data
+	/* fill the buffer with the file data */
 	trap_FS_Read( buffer, file_len, f );
 	buffer[file_len] = '0';
 
@@ -368,7 +421,7 @@ qboolean G_SetupUsablesStrings( void )
 	COM_BeginParseSession();
 	textPtr = buffer;
 
-	i = 0;	//used for the main arrays indices
+	i = 0;	/* used for the main arrays indices */
 
 	while( 1 )
 	{
@@ -389,7 +442,7 @@ qboolean G_SetupUsablesStrings( void )
 
 			token = COM_Parse( &textPtr );
 
-			//expected format is 'id' <space> 'string'
+			/* expected format is 'id' <space> 'string' */
 			while ( Q_strncmp( token, "}", 1 ) )
 			{
 				if ( !token[0] )
@@ -420,13 +473,13 @@ qboolean G_SetupUsablesStrings( void )
 							continue;
 						}
 
-						token++; //skip the 'e'
+						token++; /* skip the 'e' */
 
 						level.g_entScannables[j][0] = atoi( token );
 						token = COM_ParseExt( &textPtr, qfalse );
 						level.g_entScannables[j][1] = atoi( token );
 
-						//there's no way clients are scannable in here, so just validate the entry b4 proceeding
+						/* there's no way clients are scannable in here, so just validate the entry b4 proceeding */
 						if ( level.g_entScannables[j][0] > MAX_CLIENTS-1 && level.g_entScannables[j][1] > 0 )
 							j++;
 
@@ -437,11 +490,11 @@ qboolean G_SetupUsablesStrings( void )
 				{
 					level.g_scannables[i] = atoi( token );
 
-					//ensure a valid number was passed, else ignore it
+					/* ensure a valid number was passed, else ignore it */
 					if ( level.g_scannables[i] > 0 )
 						i++;
 
-					//we don't need the text on the server side
+					/* we don't need the text on the server side */
 					SkipRestOfLine( &textPtr );
 
 					token = COM_Parse( &textPtr );
