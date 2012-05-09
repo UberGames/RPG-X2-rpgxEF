@@ -1,8 +1,8 @@
-//=======================================================
-//
-// This file contains entities that are used to call UIs
-//
-//=======================================================
+/*=======================================================
+ *
+ * This file contains entities that are used to call UIs
+ *
+  =======================================================*/
 
 #include "g_local.h"
 
@@ -23,7 +23,7 @@ DISABLED	Entity is disabled
 *	\author Ubergames - GSIO01
 */
 void ui_transporter_think(gentity_t *ent) {
-	if(!ent->activator || ent->sound1to2 >= 10000) { //player disconnect or was idle more than 10 seconds
+	if(!ent->activator || ent->sound1to2 >= 10000) { /* player disconnect or was idle more than 10 seconds */
 		ent->sound1to2 = 0;
 		ent->count = 0;
 		ent->nextthink = -1;
@@ -51,7 +51,7 @@ void ui_transporter_use(gentity_t *ent, gentity_t *other, gentity_t *activator) 
 	} else {
 		if(ent->flags & FL_LOCKED || ent->count) return;
 		target = ent->target_ent;
-		ent->count = 1; // in use indicator
+		ent->count = 1; /* in use indicator */
 		ent->touched = activator;
 		trap_SendServerCommand(activator-g_entities, va("ui_transporter %i", target-g_entities));
 		ent->nextthink = level.time + 2500;
@@ -66,7 +66,6 @@ void ui_transporter_use(gentity_t *ent, gentity_t *other, gentity_t *activator) 
 *	\author Ubergames - GSIO01
 */
 void ui_transporter_setup(gentity_t *ent) {
-	//int i;
 	gentity_t *target = NULL;
 
 	target = G_Find(target, FOFS(targetname), ent->target);
@@ -118,7 +117,7 @@ DISABLED	Entity is disabled
 "target"	trigger_holodeck to use with this ui_holodeck
 */
 void ui_holodeck_think(gentity_t *ent) {
-	if(!ent->activator || ent->sound1to2 >= 10000) { //player disconnect or was idle more than 10 seconds
+	if(!ent->activator || ent->sound1to2 >= 10000) { /* player disconnect or was idle more than 10 seconds */
 		ent->sound1to2 = 0;
 		ent->count = 0;
 		ent->nextthink = -1;
@@ -135,7 +134,7 @@ void ui_holodeck_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	} else {
 		if(ent->flags & FL_LOCKED || ent->count) return;
 		target = ent->target_ent;
-		ent->count = 1; // in use indicator
+		ent->count = 1; /* in use indicator */
 		ent->touched = activator;
 		trap_SendServerCommand(activator-g_entities, va("ui_holodeck %i", target-g_entities));
 		ent->nextthink = level.time + 2500;
@@ -143,7 +142,6 @@ void ui_holodeck_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 }
 
 void ui_holodeck_setup(gentity_t *ent) {
-	//int i;
 	gentity_t *target;
 
 	target = G_Find(NULL, FOFS(targetname), ent->target);
