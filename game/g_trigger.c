@@ -1,54 +1,74 @@
-// Copyright (C) 1999-2000 Id Software, Inc.
-//
+/*
+ * Copyright (C) 1999-2000 Id Software, Inc.
+ */
+
 #include "g_local.h"
 
-#define SF_SPECTATOR			(1<<0)
-#define SF_RANDOM				(1<<1)
+#define SF_SPECTATOR	(1<<0)
+#define SF_RANDOM	(1<<1)
 
-
+/**
+ * \brief Inits a trigger entity.
+ *
+ * Initializes trigger entities.
+ *
+ * @param self the trigger entity
+ */
 void InitTrigger( gentity_t *self ) {
 	if (!VectorCompare (self->s.angles, vec3_origin))
 		G_SetMovedir (self->s.angles, self->movedir);
 
-	if(!self->tmpEntity) // for spawnTent command
+	if(!self->tmpEntity) /* for spawnTent command */
 		trap_SetBrushModel( self, self->model );
-	self->r.contents = CONTENTS_TRIGGER;		// replaces the -1 from trap_SetBrushModel
+	self->r.contents = CONTENTS_TRIGGER;		/* replaces the -1 from trap_SetBrushModel */
 	self->r.svFlags = SVF_NOCLIENT;
 }
 
 
 // the wait time has passed, so set back up for another activation
+/**
+ * \brief Reactivate a trigger_multiple after the wait time has passed.
+ * 
+ * Reactivates the trigger_multiple after the wait time has passed.
+ *
+ * @param ent the trigger
+ */
 void multi_wait( gentity_t *ent ) {
 	ent->nextthink = 0;
 }
 
-
-// the trigger was just activated
-// ent->activator should be set to the activator so it can be held through a delay
-// so wait for the delay time before firing
+/**
+ * \brief Function that gets called when a trigger_multiple has been ... umm well triggered ;)
+ *
+ * The trigger_multiple was just activated. ent->activator should be set to the activator
+ * so it can be held through a delay. May wait for the delay time until firing.
+ *
+ * @param ent the trigger
+ * @param activator the activator
+ */
 void multi_trigger( gentity_t *ent, gentity_t *activator ) {
 	ent->activator = activator;
 	if ( ent->nextthink ) {
-		return;		// can't retrigger until the wait is over
+		return;		/* can't retrigger until the wait is over */
 	}
 
 	if ( activator->client && ((ent->spawnflags&4)||(ent->spawnflags&2)||(ent->spawnflags&1)) )
-	{//see if it's usable by this team
+	{/* see if it's usable by this team */
 		switch( activator->client->sess.sessionTeam )
 		{
 		case TEAM_RED:
 			if ( !(ent->spawnflags&1) ) {
-				return;//red is not allowed
+				return;/* red is not allowed */
 			}
 			break;
 		case TEAM_BLUE:
 			if ( !(ent->spawnflags&2) ) {
-				return;//blue is not allowed
+				return;/* blue is not allowed */
 			}
 			break;
 		default:
 			if ( (ent->spawnflags&4) ) {
-				return;//must be on a team
+				return;/* must be on a team */
 			}
 			break;
 		}
@@ -74,18 +94,38 @@ void multi_trigger( gentity_t *ent, gentity_t *activator ) {
 		ent->think = multi_wait;
 		ent->nextthink = level.time + ( ent->wait + ent->random * crandom() ) * 1000;
 	} else {
-		// we can't just remove (self) here, because this is a touch function
-		// called while looping through area links...
+		/*
+ 		 *  we can't just remove (self) here, because this is a touch function
+		 *  called while looping through area links...
+		 */
 		ent->touch = 0;
 		ent->nextthink = level.time + FRAMETIME;
 		ent->think = G_FreeEntity;
 	}
 }
 
+/**
+ * \brief Use function for trigger_multiple.
+ *
+ * Use function for trigger_multiple.
+ *
+ * @param ent the trigger
+ * @param other another entity
+ * @param activator the activator
+ */
 void Use_Multi( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	multi_trigger( ent, activator );
 }
 
+/**
+ * \brief Touch function for trigger_multiple.
+ *
+ * Touch function for trigger_multiple.
+ *
+ * @param self the trigger
+ * @param other touching entity
+ * @param trace a trace
+ */
 void Touch_Multi( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	if( !other->client ) {
 		return;
@@ -104,6 +144,13 @@ Variable sized repeatable trigger.  Must be targeted at one or more entities.
 so, the basic time between firing is a random time between
 (wait - random) and (wait + random)
 */
+/**
+ * \brief Spawn function of trigger_multiple.
+ *
+ * Spawn function of trigger_multiple.
+ *
+ * @param ent the trigger
+ */
 void SP_trigger_multiple( gentity_t *ent ) {
 	G_SpawnFloat( "wait", "0.5", &ent->wait );
 	G_SpawnFloat( "random", "0", &ent->random );
@@ -138,6 +185,13 @@ trigger_always
 ==============================================================================
 */
 
+/**
+ * \brief Think function of trigger_always.
+ *
+ * Think function of trigger_always.
+ *
+ * @param ent the trigger
+ */
 void trigger_always_think( gentity_t *ent ) {
 	G_UseTargets(ent, ent);
 
@@ -154,8 +208,15 @@ void trigger_always_think( gentity_t *ent ) {
 /*QUAKED trigger_always (.5 .5 .5) (-8 -8 -8) (8 8 8)
 This trigger will always fire.  It is activated by the world.
 */
+/**
+ * \brief Spawn function of trigger_multiple.
+ *
+ * Spawn function of trigger_multiple.
+ *
+ * @param ent the trigger
+ */
 void SP_trigger_always (gentity_t *ent) {
-	// we must have some delay to make sure our use targets are present
+	/* we must have some delay to make sure our use targets are present */
 	ent->nextthink = level.time + 300;
 	ent->think = trigger_always_think;
 }
@@ -169,6 +230,15 @@ trigger_push
 ==============================================================================
 */
 
+/**
+ * \brief Touch function of trigger_push.
+ *
+ * Touch function of trigger_push.
+ *
+ * @param self the trigger
+ * @param other the touching entity
+ * @param trace a trace
+ */
 void trigger_push_touch (gentity_t *self, gentity_t *other, trace_t *trace ) {
 	if ( !other->client ) {
 		return;
@@ -182,20 +252,20 @@ void trigger_push_touch (gentity_t *self, gentity_t *other, trace_t *trace ) {
 	}
 */
 	if ( other->client->ps.velocity[2] < 100 ) {
-		// don't play the event sound again if we are in a fat trigger
+		/* don't play the event sound again if we are in a fat trigger */
 		G_AddPredictableEvent( other, EV_JUMP_PAD, 0 );
 	}
 	VectorCopy (self->s.origin2, other->client->ps.velocity);
 }
 
 
-/*
-=================
-AimAtTarget
-
-Calculate origin2 so the target apogee will be hit
-=================
-*/
+/**
+ * \brief Calculate origin2 so the target apogee will be hit.
+ *
+ * Calculate origin2 so the target apogee will be hit.
+ *
+ * @param the trigger
+ */
 void AimAtTarget( gentity_t *self ) {
 	gentity_t	*ent;
 	vec3_t		origin;
@@ -219,7 +289,7 @@ void AimAtTarget( gentity_t *self ) {
 		return;
 	}
 
-	// set s.origin2 to the push velocity
+	/* set s.origin2 to the push velocity */
 	VectorSubtract ( ent->s.origin, origin, self->s.origin2 );
 	self->s.origin2[2] = 0;
 	dist = VectorNormalize( self->s.origin2);
@@ -235,10 +305,17 @@ void AimAtTarget( gentity_t *self ) {
 Must point at a target_position, which will be the apex of the leap.
 This will be client side predicted, unlike target_push
 */
+/**
+ * \brief Spawn function of trigger_push.
+ *
+ * Spawn function of trigger_push.
+ *
+ * @param self the trigger
+ */
 void SP_trigger_push( gentity_t *self ) {
 	InitTrigger (self);
 
-	// unlike other triggers, we need to send this one to the client
+	/* unlike other triggers, we need to send this one to the client */
 	self->r.svFlags &= ~SVF_NOCLIENT;
 
 	self->s.eType = ET_PUSH_TRIGGER;
@@ -253,13 +330,21 @@ void SP_trigger_push( gentity_t *self ) {
 	level.numBrushEnts++;
 }
 
-
+/**
+ * \brief Use function of target_push.
+ *
+ * Use function of target_push.
+ *
+ * @param self the entity
+ * @param other another entity
+ * @param activator the activator
+ */
 void Use_target_push( gentity_t *self, gentity_t *other, gentity_t *activator ) {
 	if ( !activator->client ) {
 		return;
 	}
 
-//RPG-X: J2J noclip use
+	/* RPG-X: J2J noclip use */
 	if ( activator->client->ps.pm_type != PM_NORMAL || activator->client->ps.pm_type != PM_NOCLIP) {
 		return;
 	}
@@ -270,7 +355,7 @@ void Use_target_push( gentity_t *self, gentity_t *other, gentity_t *activator ) 
 
 	VectorCopy (self->s.origin2, activator->client->ps.velocity);
 
-	// play fly sound every 1.5 seconds
+	/* play fly sound every 1.5 seconds */
 	if ( activator->fly_sound_debounce_time < level.time ) {
 		activator->fly_sound_debounce_time = level.time + 1500;
 		G_Sound( activator, self->noise_index );
@@ -282,6 +367,13 @@ Pushes the activator in the direction.of angle, or towards a target apex.
 "speed"		defaults to 1000
 if "ENERGYNOISE", play energy noise instead of windfly
 */
+/**
+ * \brief Spawn function of target_push.
+ *
+ * Spawn function of target_push.
+ *
+ * @param self the entity
+ */
 void SP_target_push( gentity_t *self ) {
 	if (!self->speed) {
 		self->speed = 1000;
@@ -292,7 +384,7 @@ void SP_target_push( gentity_t *self ) {
 	if ( self->spawnflags & 1 ) {
 		self->noise_index = G_SoundIndex("sound/ambience/forge/antigrav.wav");
 	} else {
-		self->noise_index = G_SoundIndex("sound/misc/windfly.wav");	//fixme need sound!
+		self->noise_index = G_SoundIndex("sound/misc/windfly.wav");	/* fixme need sound! */
 	}
 	if ( self->target ) {
 		VectorCopy( self->s.origin, self->r.absmin );
@@ -313,6 +405,13 @@ trigger_teleport
 
 #define MAX_TRANSPORTER_POINTS 16
 
+/**
+ * \brief Select a random spawn point.  
+ *
+ * Select a random spawn point.
+ * 
+ * @return a random spawn point
+ */
 gentity_t *SelectRandomSpawnPoint( void )
 {
 	gentity_t	*spot = NULL;
@@ -333,7 +432,7 @@ gentity_t *SelectRandomSpawnPoint( void )
 	}
 
 	if ( !count )
-	{	// no spawn points !!??!
+	{	/* no spawn points !!??! */
 		return NULL;
 	}
 
@@ -341,6 +440,15 @@ gentity_t *SelectRandomSpawnPoint( void )
 	return spots[ selection ];
 }
 
+/**
+ * \brief Touch function of trigger_teleport.
+ *
+ * Touch function of trigger_teleport.
+ *
+ * @param self the trigger
+ * @param other the touching entity
+ * @param trace a trace
+ */
 void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace )
 {
 	gentity_t	*dest;
@@ -360,19 +468,19 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 	if ( other->client->ps.pm_type == PM_DEAD ) {
 		return;
 	}
-	// Spectators only?
+	/* Spectators only? */
 	if ( ( self->spawnflags & SF_SPECTATOR ) && 
-		other->client->sess.sessionTeam != TEAM_SPECTATOR /*&& !(other->client->ps.eFlags&EF_ELIMINATED)*/ )
+		other->client->sess.sessionTeam != TEAM_SPECTATOR )
 	{
 		return;
 	}
 
 	clientNum = other->client->ps.clientNum;
 
-//BOOKMARK J2J
+	/* BOOKMARK J2J */
 	if (self->spawnflags & SF_RANDOM)
 	{
-		// find a random spawn point
+		/* find a random spawn point */
 		dest = SelectRandomSpawnPoint();
 	}
 	else
@@ -385,14 +493,14 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 		return;
 	}
 
-	//suspended
+	/* suspended */
 	if ( self->spawnflags & 8 )
 	{
-		// put the bottom of the player's bbox at the bottom of the target's bbox
+		/* put the bottom of the player's bbox at the bottom of the target's bbox */
 		VectorCopy(dest->s.origin, destPoint);
 		destPoint[2] += dest->r.mins[2]; 
 		destPoint[2] -= other->r.mins[2];
-		// fudge it upwards just a bit
+		/* fudge it upwards just a bit */
 		destPoint[2] += 1;
 	}
 	else
@@ -403,18 +511,20 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 		trap_Trace( &tr, dest->s.origin, dest->r.mins, dest->r.maxs, tracePoint, dest->s.number, MASK_PLAYERSOLID ); 
 		VectorCopy( tr.endpos, destPoint );
 
-		//offset the player's bounding box.
+		/* offset the player's bounding box. */
 		destPoint[2] += dest->r.mins[2];
 		destPoint[2] -= other->r.mins[2];
 
-		//add 1 to ensure non-direct collision
+		/* add 1 to ensure non-direct collision */
 		destPoint[2] += 1;
 	}
 
 	if (self->health)
 	{
-		//TiM - Transporter VFX
-		//Only if no spitting though. Having spitting transporter with these VFX would look freaky weird
+		/*
+ 		 * TiM - Transporter VFX
+		 * Only if no spitting though. Having spitting transporter with these VFX would look freaky weird
+		 */
 		if ( self->health == -1 && ( self->spawnflags & 4 ) ) {
 			if ( TransDat[clientNum].beamTime == 0 ) {
 				G_InitTransport( clientNum, destPoint, dest->s.angles );
@@ -426,7 +536,7 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 	}
 	else
 	{
-		//Transporter VFX
+		/* Transporter VFX */
 		if ( self->spawnflags & 4 ) {
 			if ( TransDat[clientNum].beamTime == 0 ) {
 				G_InitTransport( clientNum, destPoint, dest->s.angles );
@@ -443,6 +553,13 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 	}
 }
 
+/**
+ * \brief Think function of trigger_teleport.
+ *
+ * Think function of trigger_teleport.
+ *
+ * @param ent the trigger
+ */
 void trigger_teleport_think(gentity_t *ent) {
 	ent->nextthink = -1;
 	if(!(ent->flags & FL_LOCKED))
@@ -451,6 +568,15 @@ void trigger_teleport_think(gentity_t *ent) {
 		ent->flags ^= FL_CLAMPED;
 }
 
+/**
+ * \brief Use function of trigger_teleport.
+ *
+ * Use function of trigger_teleport.
+ *
+ * @param ent the trigger
+ * @param other another entity
+ * @param activator the activator
+ */
 void trigger_teleport_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	if(!Q_stricmp(ent->swapname, activator->target))
 		if(ent->flags & FL_LOCKED)
@@ -485,14 +611,23 @@ automatically near doors to allow spectators to move through them
  if you want no speed. The transporter VISUAL_FX flag will only work if the health
  is set to 0 or -1 as it cannot support 'spewing'.
 */
+/**
+ * \brief Spawn function of trigger_teleport.
+ *
+ * Spawn function of trigger_teleport.
+ *
+ * @param self the trigger
+ */
 void SP_trigger_teleport( gentity_t *self )
 {
 	char *temp;
 
 	InitTrigger (self);
 
-	// unlike other triggers, we need to send this one to the client
-	// unless is a spectator trigger
+	/*
+ 	 *  unlike other triggers, we need to send this one to the client
+	 *  unless is a spectator trigger
+	 */
 	if ( self->spawnflags & SF_SPECTATOR )
 	{
 		self->r.svFlags |= SVF_NOCLIENT;
@@ -550,24 +685,37 @@ NO_ADMIN		admins don't get hurt
 "dmg"			default 5 (whole numbers only)
 
 */
+/**
+ * \brief Use function of trigger_hurt.
+ *
+ * Use function of trigger hurt.
+ *
+ * @param self the trigger
+ * @param other another entity
+ * @param activator the activator
+ */
 void hurt_use( gentity_t *self, gentity_t *other, gentity_t *activator ) {
-	// GSIO01: this does not work
-	/*if ( self->r.linked ) {
-		trap_UnlinkEntity( self );
-	} else {
-		trap_LinkEntity( self );
-	}*/
-	// GSIO01: this will work:
 	self->count = !self->count;
 }
 
+/**
+ * \brief Touch function of trigger_hurt.
+ *
+ * Touch function of trigger_hurt.
+ *
+ * @param self the trigger
+ * @param other the touching entity
+ * @param trace a trace
+ */
 void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	int		dflags;
 
 	if(!self->count) return;
 
-	//RPG-X | Phenix | 8/8/204
-	//(If the guy is wearning an evosuit)
+	/*
+ 	 * RPG-X | Phenix | 8/8/204
+	 * (If the guy is wearning an evosuit)
+	 */
 	if ((self->spawnflags & 32) && (other->flags & FL_EVOSUIT)) {
 		return;
 	}
@@ -585,7 +733,7 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		return;
 	}
 
-	//RPG-X | Phenix | 9/8/2004
+	/* RPG-X | Phenix | 9/8/2004 */
 	if (other->health <= 1) {
 		return;
 	}
@@ -596,7 +744,7 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 		self->timestamp = level.time + FRAMETIME;
 	}
 
-	// play sound
+	/* play sound */
 	if ( !(self->spawnflags & 4) ) {
 		G_Sound( other, self->noise_index );
 	}
@@ -608,10 +756,17 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	G_Damage (other, self, self, NULL, NULL, self->damage, dflags, MOD_TRIGGER_HURT);
 }
 
+/**
+ * \brief Spawn function of trigger_hurt.
+ *
+ * Spawn function of trigger_hurt.
+ *
+ * @param self the trigger
+ */
 void SP_trigger_hurt( gentity_t *self ) {
 	InitTrigger (self);
 
-	//TiM - gets very annoying after a while
+	/* TiM - gets very annoying after a while */
 	self->noise_index = G_SoundIndex( "sound/world/electro.wav" );
 	self->touch = hurt_touch;
 
@@ -627,7 +782,7 @@ void SP_trigger_hurt( gentity_t *self ) {
 
 	self->count = !(self->spawnflags & 1);
 
-	// link in to the world if starting active | this won't work
+	/* link in to the world if starting active | this won't work */
 	/*if ( ! (self->spawnflags & 1) ) {
 		trap_LinkEntity (self);
 	}*/
@@ -660,25 +815,48 @@ so, the basic time between firing is a random time between
 (wait - random) and (wait + random)
 
 */
+/**
+ * \brief Think function of func_timer.
+ *
+ * Think function of func_timer.
+ *
+ * @param self the entity
+ */
 void func_timer_think( gentity_t *self ) {
 	G_UseTargets (self, self->activator);
-	// set time before next firing
+	/* set time before next firing */
 	self->nextthink = level.time + 1000 * ( self->wait + crandom() * self->random );
 }
 
+/**
+ * \brief Use function of func_timer.
+ *
+ * Use function of func_timer.
+ *
+ * @param self the entity
+ * @param other another entity
+ * @param activator the activator
+ */
 void func_timer_use( gentity_t *self, gentity_t *other, gentity_t *activator ) {
 	self->activator = activator;
 
-	// if on, turn it off
+	/* if on, turn it off */
 	if ( self->nextthink ) {
 		self->nextthink = 0;
 		return;
 	}
 
-	// turn it on
+	/* turn it on */
 	func_timer_think (self);
 }
 
+/**
+ * \brief Spawn function of func_timer.
+ *
+ * Spawn function of func_timer.
+ *
+ * @param self the entity
+ */
 void SP_func_timer( gentity_t *self ) {
 	G_SpawnFloat( "random", "1", &self->random);
 	G_SpawnFloat( "wait", "1", &self->wait );
@@ -705,6 +883,13 @@ This is used in combination with ui_transporter.
 "wait"			time to wait before trigger gets deactivated again(in seconds, default 5)
 "soundstart"	transport sound;
 */
+/**
+ * \brief Think function of trigger_transporter.
+ *
+ * Think function of trigger_transporter.
+ *
+ * @param ent the trigger
+ */
 void trigger_transporter_think(gentity_t *ent) {
 	if(Q_stricmp(ent->classname, "tent")) {
 		ent->nextthink = -1;
@@ -717,6 +902,13 @@ void trigger_transporter_think(gentity_t *ent) {
 	}
 }
 
+/**
+ * \brief Think function of trigger_transporter for server change.
+ *
+ * Think function of trigger_transporter for server change.
+ *
+ * @param ent the trigger
+ */
 void trigger_transporter_serverchange(gentity_t *ent) {
 	trap_SendServerCommand(ent->touched-g_entities, va("cg_connect \"%s\"\n", ent->targetname2));
 	G_FreeEntity(ent);
@@ -724,14 +916,22 @@ void trigger_transporter_serverchange(gentity_t *ent) {
 
 extern srvChangeData_t srvChangeData;
 
+/**
+ * \brief Touch function of trigger_transporter.
+ *
+ * Touch function of trigger_transporter.
+ *
+ * @param ent the trigger
+ * @param other the touching entity
+ * @param trace a trace
+ */
 void trigger_transporter_touch(gentity_t *ent, gentity_t *other, trace_t *trace) {
-	//char info[MAX_INFO_STRING];
-	char *srv;
-	vec3_t offset = { 0, 0, 12 };
-	vec3_t target;
-	gentity_t *targetEnt;
-	gentity_t *tent;
-	int	clientNum;
+	char 		*srv;
+	vec3_t 		offset = { 0, 0, 12 };
+	vec3_t 		target;
+	gentity_t 	*targetEnt;
+	gentity_t 	*tent;
+	int		clientNum;
 
 	if((ent->flags & FL_LOCKED) || (!other->client) || (other->flags & FL_CLAMPED)) return;
 
@@ -756,13 +956,6 @@ void trigger_transporter_touch(gentity_t *ent, gentity_t *other, trace_t *trace)
 
 		srv = srvChangeData.ip[ent->health];
 
-		/*ent->think = trigger_transporter_serverchange;
-		ent->nextthink = level.time + 3000;
-		TransDat[clientNum].beamTime = level.time + 8000;
-		other->client->ps.powerups[PW_BEAM_OUT] = level.time + 8000;
-		ent->touched = other;
-		ent->targetname2 = G_NewString(srv);*/
-		//:( this sucks:
 		tent = G_Spawn();
 		tent->think = trigger_transporter_serverchange;
 		tent->nextthink = level.time + 3000;
@@ -780,12 +973,26 @@ void trigger_transporter_touch(gentity_t *ent, gentity_t *other, trace_t *trace)
 	}
 }
 
+/**
+ * \brief Delay think function of trigger_transporter.
+ *
+ * Delay think function of trigger_transporter.
+ *
+ * @param ent the trigger
+ */
 void trigger_transporter_delay(gentity_t *ent) {
 	ent->think = trigger_teleport_think;
 	ent->nextthink = level.time + ent->wait;
 	ent->flags ^= FL_LOCKED;
 }
 
+/**
+ * \brief Spawn function of trigger_transporter.
+ *
+ * Spawn function of trigger_transporter.
+ *
+ * @param ent the trigger
+ */
 void SP_trigger_transporter(gentity_t *ent) {
 	char		*temp;
 	InitTrigger(ent);
@@ -829,6 +1036,15 @@ The damage the radiation does is calculated from these two values:
 
 Forumla is: dps = dmg / wait
 */
+/**
+ * \brief Touch function of trigger_radiation.
+ *
+ * Touch function of trigger_radiation.
+ *
+ * @param ent the trigger
+ * @param other the touching entity
+ * @param trace a trace
+ */
 void trigger_radiation_touch(gentity_t *ent, gentity_t *other, trace_t *trace) {
 	if(!other || !other->client || !ent->count) return;
 
@@ -843,18 +1059,41 @@ void trigger_radiation_touch(gentity_t *ent, gentity_t *other, trace_t *trace) {
 		ent->flags ^= FL_LOCKED;
 	}
 
-	// display radiation symbol?
+	/* TODO: display radiation symbol? */
 }
 
+/**
+ * \brief Think function of trigger_radiation.
+ *
+ * Think function of trigger_radiation.
+ *
+ * @param ent the trigger
+ */
 void trigger_radiation_think(gentity_t *ent) {
 	if(ent->flags & FL_LOCKED)
 		ent->flags ^= FL_LOCKED;
 }
 
+/**
+ * \brief Use function of trigger_radiation.
+ *
+ * Use function of trigger_radiation.
+ *
+ * @param ent the trigger
+ * @param other another entity
+ * @param activator the activator
+ */
 void trigger_radiation_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	ent->count = !ent->count;
 }
 
+/**
+ * \brief Spawn function of trigger_radiation.
+ *
+ * Spawn function of trigger_radiation.
+ *
+ * @param ent the trigger
+ */
 void SP_trigger_radiation(gentity_t *ent) {
 	
 	if(!ent->damage)
@@ -884,3 +1123,4 @@ void SP_trigger_radiation(gentity_t *ent) {
 	if(!ent->tmpEntity)
 		level.numBrushEnts++;
 }
+
