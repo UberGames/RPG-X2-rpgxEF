@@ -402,7 +402,7 @@ qboolean G_Sql_UserDB_CheckRight(int uid, int right) {
 	}
 
 	if(res == SQLITE_ROW) {
-		rights = (long)sqlite3_column_int64;
+		rights = (long)sqlite3_column_int64(stmt, 0);
 		if(right & right) {
 			return qtrue;
 		} else {
@@ -421,7 +421,51 @@ G_Sql_UserDB_AddRight
 ===============
 */
 qboolean G_Sql_UserDB_AddRight(int uid, int right) {
+	sqlite3_stmt *stmt;
+	int res;
+	long rights;
 
+	res = sqlite3_prepare_v2(user_db, SQL_USER_GET_RIGHTS, -1, &stmt, 0);
+	if(G_Sql_Check_PrepareReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_step(stmt);
+	if(G_Sql_Check_StepReturn(res)) {
+		return qfalse;
+	}
+
+	if(res == SQLITE_ROW) {
+		rights = (long)sqlite3_column_int64(stmt, 0);
+	} else {
+		return qfalse;
+	}
+
+	rights |= right;
+
+		rights |= right;
+
+	res = sqlite3_prepare_v2(user_db, SQL_USER_MOD_RIGHTS, -1, &stmt, 0);
+	if(G_Sql_Check_PrepareReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_bind_int(stmt, 1, rights);
+	if(G_Sql_Check_BindReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_bind_int(stmt, 2, uid);
+	if(G_Sql_Check_BindReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_step(stmt);
+	if(G_Sql_Check_StepReturn(res)) {
+		return qfalse;
+	}
+
+	return qtrue;
 }
 
 /*
@@ -430,7 +474,49 @@ G_Sql_UserDB_RemoveRight
 ===============
 */
 qboolean G_Sql_UserDB_RemoveRight(int uid, int right) {
+	sqlite3_stmt *stmt;
+	int res;
+	long rights;
 
+	res = sqlite3_prepare_v2(user_db, SQL_USER_MOD_RIGHTS, -1, &stmt, 0);
+	if(G_Sql_Check_PrepareReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_step(stmt);
+	if(G_Sql_Check_StepReturn(res)) {
+		return qfalse;
+	}
+	
+	if(res == SQLITE_ROW) {
+		rights = (long)sqlite3_column_int64(stmt, 0);
+	} else {
+		return qfalse;
+	}
+
+	rights &= right;
+
+	res = sqlite3_prepare_v2(user_db, SQL_USER_MOD_RIGHTS, -1, &stmt, 0);
+	if(G_Sql_Check_PrepareReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_bind_int(stmt, 1, rights);
+	if(G_Sql_Check_BindReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_bind_int(stmt, 2, uid);
+	if(G_Sql_Check_BindReturn(res)) {
+		return qfalse;
+	}
+
+	res = sqlite3_step(stmt);
+	if(G_Sql_Check_StepReturn(res)) {
+		return qfalse;
+	}
+
+	return qtrue;	
 }
 
 #endif //SQL
