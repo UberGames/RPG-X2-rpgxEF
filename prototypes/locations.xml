@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<locationsList>
+	<location>
+		<origin x="100" y="1000" z="-567" />
+		<angles x="90" y="0" z="10" />
+		<restricted />
+		<name>Name</name>
+	</location>
+</locationsList>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<serverChangeConfig>
+	<server>
+		<ip>78.54.34.93:27962</ip>
+		<name>Crazy RP Server</name>
+	</server>
+	<server>
+		<ip>gdev-rp.org</ip>
+		<name>GDev RP Server</name>
+	</server>
+</serverChangeConfig>

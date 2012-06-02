@@ -790,12 +790,12 @@ static qboolean G_LoadClassData( char* fileName )
 {
 	char			*buffer;
 	char			*textPtr, *token;
-	int				fileLen;
-	fileHandle_t	f;
+	int			fileLen;
+	fileHandle_t		f;
 	qboolean		classValid=qfalse;
-	int				classIndex=0;
-	int				weapon;
-	int				i;
+	int			classIndex=0;
+	int			weapon;
+	int			i;
 
 	//Init the storage place
 	memset( &g_classData, 0, sizeof ( g_classData ) );
@@ -807,16 +807,16 @@ static qboolean G_LoadClassData( char* fileName )
 		return qfalse;
 	}
 
-	if ( fileLen >= 32000 ) {
+	/*if ( fileLen >= 32000 ) {
 		G_Printf( S_COLOR_RED "ERROR: File %s was way too big.\n", fileName );
 		trap_FS_FCloseFile( f );
 		return qfalse;
-	}
+	}*/
 
-	buffer = (char *)malloc(32000 * sizeof(char));
+	buffer = (char *)malloc((fileLen+1) * sizeof(char));
 
 	if(!buffer) {
-		G_Printf( S_COLOR_RED "ERROR: Was unable to allocate %i bytes.\n", 32000 * sizeof(char) );
+		G_Printf( S_COLOR_RED "ERROR: Was unable to allocate %i bytes.\n", (fileLen+1) * sizeof(char) );
 		trap_FS_FCloseFile( f );
 		return qfalse;
 	}
@@ -1070,12 +1070,12 @@ void G_LoadHolodeckFile(void) {
 	char			fileRoute[MAX_QPATH];
 	char			mapRoute[MAX_QPATH];
 	char			*info;
-	fileHandle_t	f;
+	fileHandle_t		f;
 	char			*buffer;
-	int				file_len;
+	int			file_len;
 	char			*txtPtr, *token;
-	int				numProgs = 0;
-	//int				i;
+	int			numProgs = 0;
+	//int			i;
 
 	info = (char *)malloc(MAX_INFO_STRING * sizeof(char));
 	if(!info) {
@@ -1302,13 +1302,13 @@ mapChangeData_t mapChangeData;
 static void G_LoadMapChangeFile(void) {
 	char			fileRoute[MAX_QPATH];
 	//char			mapRoute[MAX_QPATH];
-	fileHandle_t	f;
+	fileHandle_t		f;
 	char			*buffer;
-	int				file_len;
+	int			file_len;
 	char			*txtPtr, *token;
 	char			*temp;
-	int				cnt = 0;
-	int				i = 0;
+	int			cnt = 0;
+	int			i = 0;
 
 	BG_LanguageFilename("mapchange", "cfg", fileRoute);
 
@@ -1407,14 +1407,14 @@ static void G_LoadLocationsFile( void )
 	char			fileRoute[MAX_QPATH];
 	char			mapRoute[MAX_QPATH];
 	char			*serverInfo;
-	fileHandle_t	f;
+	fileHandle_t		f;
 	char			*buffer;
-	int				file_len;
+	int			file_len;
 	char			*textPtr, *token;
 	vec3_t			origin, angles;
 	gentity_t		*ent;
 	char			*desc;
-	int				rest;
+	int			rest;
 
 	serverInfo = (char *)malloc(MAX_INFO_STRING * sizeof(char));
 	if(!serverInfo) {
@@ -1437,9 +1437,9 @@ static void G_LoadLocationsFile( void )
 	if ( !file_len )
 		return;
 
-	buffer = (char *)malloc(32000 * sizeof(char));
+	buffer = (char *)malloc((file_len+1) * sizeof(char));
 	if(!buffer) {
-		G_Printf(S_COLOR_RED "ERROR: Was unable to allocate %i bytes.\n", 32000 * sizeof(char));
+		G_Printf(S_COLOR_RED "ERROR: Was unable to allocate %i bytes.\n", (file_len+1) * sizeof(char));
 		trap_FS_FCloseFile(f);
 		return;
 	}
@@ -1456,7 +1456,7 @@ static void G_LoadLocationsFile( void )
 	buffer[file_len] = '\0';
 	trap_FS_FCloseFile( f );
 	
-	G_Printf( "Locations file %s located. Proceeding to load scan data.\n", fileRoute ); //GSIO01: why did this say "Usables file ..."? lol
+	G_Printf( "Locations file %s located. Proceeding to load scan data.\n", fileRoute ); //GSIO01: why did this say "Usables file ..."? lol ;)
 
 	COM_BeginParseSession();
 	textPtr = buffer;
@@ -1861,207 +1861,6 @@ extern team_t	initialBorgTeam;
 void G_InitModRules( void )
 {
 	numKilled = 0;
-}
-
-extern qboolean G_CallSpawn(gentity_t *ent);
-extern qboolean G_ParseField(const char *key, const char *value, gentity_t *ent);
-/*
-============
-G_LoadSpawnFile
-If there is a spawn file it will parse it and spawn/change things.
-
-Expected file Layout:
-SpawnFile 
-	{
-	Spawn
-	{
-		Entity
-		{
-			classname	<string> //needs to be there
-			<key>		<value>  //unlimited number of keys and values
-		}
-	}
-	Convert
-	{
-		Entity
-		{
-			"Bmodel"	"*<int>"
-			<key>		<value>
-		}
-		Entity
-		{
-			"targetname"	<string>
-			<key>			<value>
-		}
-		Entity
-		{
-			"target"		<string>
-			<key>			<value>
-		}
-	}
-	Remove
-	{
-		Entity
-		{
-			"Bmodel"	"*<int>"
-		}
-		Entity
-		{
-			"targetname"	<string>
-		}
-		Entity
-		{
-			"target"	<string>
-		}
-	}
-}
-============
-*/
-void G_LoadSpawnFile( void ) {
-/*	char			fileRoute[MAX_QPATH];
-	char			mapRoute[MAX_QPATH];
-	char			serverInfo[MAX_TOKEN_CHARS];
-	fileHandle_t	f;
-	char			buffer[29400];
-	int				file_len;
-	char			*textPtr, *token;
-	gentity_t		*newEnt;
-	char			tempKey[MAX_TOKEN_CHARS], tempValue[MAX_TOKEN_CHARS];
-	//vec3_t			tempVec;
-	//int				tempInt;
-	//float			tempFloat;
-
-	//get the map name out of the server data
-	trap_GetServerinfo( serverInfo, sizeof( serverInfo ) );
-
-	//setup the file route
-	Com_sprintf( mapRoute, sizeof( mapRoute ), "maps/%s.%s", Info_ValueForKey( serverInfo, "mapname" ), "spawn" );
-
-	file_len = trap_FS_FOpenFile( fileRoute, &f, FS_READ );
-
-	if ( !file_len )
-		return;
-
-	memset( buffer, 0, sizeof(buffer) );
-
-	trap_FS_Read( buffer, file_len, f );
-	buffer[file_len] = '0';
-	trap_FS_FCloseFile(f);
-	if(!buffer[0]) {
-		G_Printf( S_COLOR_RED "ERROR: Attempted to load %s, but no data was inside!\n", fileRoute );
-		return;
-	}
-
-	G_Printf( "Spawn file %s located. Proceeding to load scan data.\n", fileRoute );
-	
-	COM_BeginParseSession();
-	textPtr = buffer;
-	while(1) {
-		token = COM_Parse(&textPtr);
-		if(!token[0])
-			break;
-
-		while(1) {
-			token = COM_Parse(&textPtr);
-
-			if(!token[0]) return;
-
-			if(!Q_stricmpn(token, "SpawnFile", 9)) {
-				token = COM_Parse(&textPtr);
-				if ( Q_strncmp( token, "{", 1 ) != 0 )
-				{
-					G_Printf( S_COLOR_RED "ERROR: SpawnFile in %s had no opening brace ( { )!\n", fileRoute );
-					continue;
-				}
-
-				token = COM_Parse(&textPtr);
-				while(Q_stricmpn(token, "}", 1)) {
-					token = COM_Parse(&textPtr);
-					if(!Q_stricmpn(token, "Spawn", 5)) {
-						token = COM_Parse(&textPtr);
-						if( Q_strncmp(token, "{", 1)) {
-							G_Printf(S_COLOR_RED "ERROR: Spawn block in %s had no opening brace ( { )!\n", fileRoute);
-							continue;
-						}
-
-						token = COM_Parse(&textPtr);
-						while(Q_strncmp(token, "}", 1)) {
-							token = COM_Parse(&textPtr);
-							if(!Q_stricmpn(token, "Entity", 6)) {
-								if(Q_strncmp(token, "{", 1)) {
-									G_Printf(S_COLOR_RED, "ERROR: Entity in %s had no opening brace ( { )!\n", fileRoute);
-									continue;
-								}
-
-								token = COM_Parse(&textPtr);
-								if(!Q_strncmp(token, "classname", 9)) {
-									G_Printf(S_COLOR_RED, "ERROR: First key in Entity in Spawn block in %s was not \"classname\"!\n", fileRoute);
-									continue;
-								}
-
-								newEnt = G_Spawn();
-								if(!newEnt) continue;
-
-								newEnt->tmpEntity = qtrue;
-								
-								token = COM_Parse(&textPtr);
-								newEnt->classname = G_NewString(token);
-
-								// check if this entity is valid in Spawn block ...
-								if(!Q_strncmp(newEnt->classname, "func_", 5) // func entities are never valid as they need brushmodels
-									|| !Q_strncmp(newEnt->classname, "misc_", 5) // misc entities are all invalid for now
-									) {
-										G_FreeEntity(newEnt);
-										G_Printf(S_COLOR_RED "ERROR: Entities of type %s are invalid in Spawn Block!\n", token);
-										continue;
-								}
-								
-								while(Q_strncmp(token, "}", 1)) {
-									token = COM_Parse(&textPtr);
-									Com_sprintf(tempKey, sizeof(tempKey), "%s", token);
-									token = COM_Parse(&textPtr);
-									Com_sprintf(tempValue, sizeof(tempValue), "%s", token);
-									if(!G_ParseField(tempKey, tempValue, newEnt)) {
-										//GSIO01: oh well not part of fields ehh?
-										//then let's see what entities this is and check if you are valid for it
-									}
-								}
-							}
-						}
-					} else if(!Q_strncmp(token, "Convert", 7)) { 
-						//all entities in here are converted as long as the wanted conversion is valid
-						//criterias might be: 
-						//				do both have a brushmodel? 
-						//				do both have a origin brush? 
-						//				and so on
-						//because we simply can't convert a info_notnull to a func_door xD
-						token = COM_Parse(&textPtr);
-						if( Q_strncmp(token, "{", 1)) {
-							G_Printf(S_COLOR_RED "ERROR: Convert block in %s had no opening brace ( { )!\n", fileRoute);
-							continue;
-						}
-
-						//There are 3 ways to identify an entity 100 percent accurate:
-						//		by it's targetname (only if it is the only one with it)
-						//		by it's target (only if it is the only one targeting it)
-						//		by it's brushmodel (always 100% accurate but only works on brushentities)
-						//Entity IDs can't be used as loading the map locally or on a server
-						//might result in diffrent entity IDs.
-
-
-					} else if(!Q_strncmp(token, "Remove", 6)) {
-						token = COM_Parse(&textPtr);
-						if( Q_strncmp(token, "{", 1)) {
-							G_Printf(S_COLOR_RED "ERROR: Remove block in %s had no opening brace ( { )!\n", fileRoute);
-							continue;
-						}
-					}
-						
-
-				}
-			}
-		}
-	}*/
 }
 
 static void Dev_ShowTriggers(gentity_t *ent) {

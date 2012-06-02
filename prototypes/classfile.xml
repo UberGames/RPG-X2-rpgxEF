@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<classFile>
+	<class>
+		<consoleName>consoleName</consoleName>
+		<formalName>formalName</formalName>
+		<message>Message</message>
+		<modelSkin>Skin</modelSkin>
+		<weapons>
+			<weapon>WP_1</weapon>
+		</weapons>
+		<admin />
+		<marine />
+		<medical />
+		<isBorg />
+		<n00b />
+		<!-- client only after this -->
+		<radarColor red="0" green="128" blue="255" />
+		<iconColor red="0" green="128" blue="255" />
+		<hasRanks />
+		<noShow />
+	</class>
+</classFile>
