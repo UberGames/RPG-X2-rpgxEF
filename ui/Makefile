@@ -23,6 +23,14 @@ else
 EXT=so
 endif
 
+# warning level
+ifeq ($(DEBUG), 1)
+WL=-Wall
+else
+WL=-Wall -Wno-unused-but-set-variable 
+endif
+
+
 # ui objects
 OBJ = \
   ui_turbolift.o \
@@ -78,9 +86,9 @@ SOOBJ = \
 
 # do cc for shared libraries
 ifeq ($(DEBUG), 1)
-DO_SOCC = $(CC) $(SOCFLAGS) -Wall -g3 $(DEFINES) -o $@ -c $<
+DO_SOCC = $(CC) $(SOCFLAGS) $(WL) -g3 $(DEFINES) -o $@ -c $<
 else
-DO_SOCC = $(CC) $(SOCFLAGS) -Wall -Wno-unused-but-set-variable $(DEFINES) -o $@ -c $<
+DO_SOCC = $(CC) $(SOCFLAGS) $(WL) $(DEFINES) -o $@ -c $<
 endif
 
 build_so: DO_CC=$(DO_SOCC)
