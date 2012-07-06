@@ -338,7 +338,7 @@ void cycleCamera( gentity_t *self )
 		owner = G_Find( owner, FOFS(targetname), self->target );
 		if  ( owner == NULL )
 		{//still didn't find one
-			G_Printf( "Couldn't find target for misc_portal_surface\n" );
+			DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Couldn't find target for misc_portal_surface\n" ));
 			G_FreeEntity( self );
 			return;
 		}
@@ -370,7 +370,7 @@ void locateCamera( gentity_t *ent ) {
 	owner = G_Find( NULL, FOFS(targetname), ent->target );
 	if  ( owner == NULL )
 	{
-		G_Printf( "Couldn't find target for misc_partal_surface\n" );
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Couldn't find target for misc_partal_surface\n" ));
 		G_FreeEntity( ent );
 		return;
 	}

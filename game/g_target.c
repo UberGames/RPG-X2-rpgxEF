@@ -269,7 +269,7 @@ void SP_target_speaker( gentity_t *ent ) {
 	G_SpawnFloat( "random", "0", &ent->random );
 
 	if ( !G_SpawnString( "noise", "NOSOUND", &s ) && !ent->count ) { // if ent->count then it is a spawned sound, either by spawnEnt or *.spawn
-		G_Printf( "target_speaker without a noise key at %s", vtos( ent->s.origin ) );
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_speaker without a noise key at %s", vtos( ent->s.origin ) ));
 		G_FreeEntity(ent);//let's not error out so that we can use SP maps with their funky speakers.
 		return;
 	}
@@ -384,7 +384,7 @@ void target_laser_start (gentity_t *self)
 	if (self->target) {
 		ent = G_Find (NULL, FOFS(targetname), self->target);
 		if (!ent) {
-			G_Printf ("%s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target);
+			DEVELOPER(G_Printf (S_COLOR_YELLOW "[Entity-Error] %s at %s: %s is a bad target\n", self->classname, vtos(self->s.origin), self->target));
 			G_FreeEntity(self);
 			return;
 		}
@@ -434,7 +434,7 @@ void target_teleporter_use( gentity_t *self, gentity_t *other, gentity_t *activa
 		return;
 	dest = 	G_PickTarget( self->target );
 	if (!dest) {
-		G_Printf ("Couldn't find teleporter destination\n");
+		DEVELOPER(G_Printf (S_COLOR_YELLOW "[Entity-Error] Couldn't find teleporter destination\n"));
 		G_FreeEntity(self);
 		return;
 	}
@@ -489,7 +489,7 @@ account only when the VISUAL_FX flag is on.
 */
 void SP_target_teleporter( gentity_t *self ) {
 	if (!self->targetname)
-		G_Printf("untargeted %s at %s\n", self->classname, vtos(self->s.origin));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] untargeted %s at %s\n", self->classname, vtos(self->s.origin)));
 
 	if(self->spawnflags & 4)
 		self->flags ^= FL_LOCKED;
@@ -1544,7 +1544,7 @@ void SP_target_turbolift ( gentity_t *self )
 	//kill the ent if it isn't valid
 	if ( i <= 0 && !(self->tmpEntity))
 	{
-		G_Printf( S_COLOR_RED "ERROR: A turbolift entity does not have a valid deck number!\n" );
+		DEVELOPER(G_Printf( S_COLOR_YELLOW "[Entity-Error] A turbolift entity does not have a valid deck number!\n" ));
 		G_FreeEntity( self );
 		return;
 	}
@@ -1671,7 +1671,7 @@ void target_doorLock_use(gentity_t *ent, gentity_t *other, gentity_t* activator)
 	if(!Q_stricmp(target->classname, "func_door") || !Q_stricmp(target->classname, "func_door_rotating")) {
 		target->flags ^= FL_LOCKED;
 	} else {
-		G_Printf("Target %s of target_doorlock at %s is not a door!\n");
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Target %s of target_doorlock at %s is not a door!\n", ent->target, vtos(ent->s.origin)));
 		return;
 	}
 }
@@ -1679,7 +1679,7 @@ void target_doorLock_use(gentity_t *ent, gentity_t *other, gentity_t* activator)
 void SP_target_doorLock(gentity_t *ent) {
 	char *temp;
 	if(!ent->target) {
-		G_Printf("target_doorlock at %s without target!\n");
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_doorlock at %s without target!\n"));
 		G_FreeEntity(ent);
 		return;
 	}
@@ -1779,7 +1779,7 @@ void target_alert_remapShaders(int target_condition) {
 
 void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	if(!activator) {
-		G_Printf(S_COLOR_RED "Error: target_alert_use called with NULL activator.\n");
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_alert_use called with NULL activator.\n"));
 		return;
 	}
 	if(!Q_stricmp(activator->target, ent->swapname)) {
@@ -2167,7 +2167,7 @@ void SP_target_alert(gentity_t *ent) {
 
 	if(!ent->swapname || !ent->truename || !ent->falsename || !ent->bluename ||
 		!ent->truetarget || !ent->falsetarget || !ent->paintarget || !ent->targetname2) {
-			G_Printf(S_COLOR_RED "One or more needed keys for target_alert at %s where not set.\n", vtos(ent->s.origin));
+			DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] One or more needed keys for target_alert at %s where not set.\n", vtos(ent->s.origin)));
 		return;
 	}
 
@@ -2224,7 +2224,7 @@ void target_warp_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	gentity_t *target;
 
 	if(!activator) {
-		G_Printf(S_COLOR_RED "Error: target_warp_use called with NULL activator!\n");
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_warp_use called with NULL activator!\n"));
 		return;
 	}
 
@@ -2375,7 +2375,7 @@ void target_deactivate_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 
 void SP_target_deactivate(gentity_t *ent) {
 	if(!ent->target) {
-		G_Printf("target_deactivate at %s without target!\n", vtos(ent->r.currentOrigin));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_deactivate at %s without target!\n", vtos(ent->r.currentOrigin)));
 		return;
 	}
 
@@ -2484,7 +2484,7 @@ void target_levelchange_use(gentity_t *ent, gentity_t *other, gentity_t *activat
 
 void SP_target_levelchange(gentity_t *ent) {
 	if(!ent->target) {
-		G_Printf(S_COLOR_RED "target_levelchange without target at %s!\n", vtos(ent->s.origin));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_levelchange without target at %s!\n", vtos(ent->s.origin)));
 		G_FreeEntity(ent);
 		return;
 	}
@@ -2543,13 +2543,13 @@ void target_shaderremap_use(gentity_t *ent, gentity_t *other, gentity_t *activat
 
 void SP_target_shaderremap(gentity_t *ent) {
 	if(!ent->falsename) {
-		G_Printf(S_COLOR_RED "target_shaderremap without falsename-shader at %s!\n", vtos(ent->s.origin));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_shaderremap without falsename-shader at %s!\n", vtos(ent->s.origin)));
 		G_FreeEntity(ent);
 		return;
 	}
 
 	if(!ent->truename) {
-		G_Printf(S_COLOR_RED "target_shaderremap without truename-shader at %s!\n", vtos(ent->s.origin));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_shaderremap without truename-shader at %s!\n", vtos(ent->s.origin)));
 		G_FreeEntity(ent);
 		return;
 	}

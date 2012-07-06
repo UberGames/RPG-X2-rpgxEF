@@ -159,7 +159,7 @@ void SP_trigger_multiple( gentity_t *ent ) {
 
 	if ( ent->random >= ent->wait && ent->wait >= 0 ) {
 		ent->random = ent->wait - FRAMETIME;
-		G_Printf( "trigger_multiple has random >= wait\n" );
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Warning] trigger_multiple has random >= wait\n" ));
 	}
 
 	ent->touch = Touch_Multi;
@@ -489,7 +489,7 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 	}
 	if (!dest)
 	{
-		G_Printf ("Couldn't find teleporter destination\n");
+		DEVELOPER(G_Printf (S_COLOR_YELLOW "[Entity-Error] Couldn't find teleporter destination\n"));
 		return;
 	}
 
@@ -866,7 +866,7 @@ void SP_func_timer( gentity_t *self ) {
 
 	if ( self->random >= self->wait ) {
 		self->random = self->wait - FRAMETIME;
-		G_Printf( "func_timer at %s has random >= wait\n", vtos( self->s.origin ) );
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Warning] func_timer at %s has random >= wait\n", vtos( self->s.origin ) ));
 	}
 
 	if ( self->spawnflags & 1 ) {
@@ -998,7 +998,7 @@ void SP_trigger_transporter(gentity_t *ent) {
 	InitTrigger(ent);
 	
 	if(!ent->wait) {
-		G_Printf(S_COLOR_MAGENTA "Warning: trigger_transporter without wait at %s!\n", vtos(ent->s.origin));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] trigger_transporter without wait at %s!\n", vtos(ent->s.origin)));
 		G_FreeEntity(ent);
 		return;
 	}

@@ -732,6 +732,10 @@ void QDECL G_Printf( const char *fmt, ... ) {
 	vsprintf (text, fmt, argptr);
 	va_end (argptr);
 
+	if(trap_Cvar_VariableIntegerValue("developer")) {
+
+	}
+
 	#ifdef G_LUA
 	// Lua API callbacks
 	LuaHook_G_Print(text);

@@ -10,6 +10,13 @@
 
 //==================================================================
 
+
+// developer tools:
+// Prevents a single statement from beeing executed if developer isn't set
+// Usage Example DEVELOPER(G_Printf("Some Debug Message"));
+// NOTE that the ; of the statement is after the closing ) of the macro
+#define DEVELOPER(X) trap_Cvar_VariableIntegerValue("developer") ? X : " "
+
 // the "gameversion" client command will print this plus compile date
 //#define	GAMEVERSION	"RPG-X v",RPGX_VERSION
 //const char	GAMEVERSION[] = strcat("RPG-X v",RPGX_VERSION);
