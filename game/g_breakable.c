@@ -234,7 +234,7 @@ void breakable_spawn_trigger(gentity_t *ent) {
 	other = G_Spawn();
 
 	if(!other) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Unable to spawn trigger for func_breakable at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Unable to spawn trigger for func_breakable at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -713,7 +713,7 @@ void target_repair_link(gentity_t *ent) {
 	if(!target) {
 		target = G_Find(NULL, FOFS(targetname2), ent->target);
 		if(!target) {
-			DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_repair at %s with an unfound target: %s\n", vtos(ent->s.origin), ent->target));
+			DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_repair at %s with an unfound target: %s\n", vtos(ent->s.origin), ent->target););
 			return;
 		}
 	}
@@ -721,7 +721,7 @@ void target_repair_link(gentity_t *ent) {
 	ent->lastEnemy = target;
 
 	if(Q_stricmp(target->classname, "func_breakable")) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_repair at %s with an invalid target entity %s\n", vtos(ent->s.origin), target->classname));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_repair at %s with an invalid target entity %s\n", vtos(ent->s.origin), target->classname););
 		return;
 	}
 
@@ -733,7 +733,7 @@ void target_repair_link(gentity_t *ent) {
 */
 void SP_target_repair(gentity_t *ent) {
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_repair without target at %s\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_repair without target at %s\n", vtos(ent->s.origin)););
 		return;
 	}
 

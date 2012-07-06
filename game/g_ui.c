@@ -71,7 +71,7 @@ void ui_transporter_setup(gentity_t *ent) {
 	target = G_Find(target, FOFS(targetname), ent->target);
 
 	if(!target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_transporter without trigger_transporter as target at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_transporter without trigger_transporter as target at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -93,7 +93,7 @@ void ui_transporter_setup(gentity_t *ent) {
 void SP_ui_transporter(gentity_t *ent) {
 	
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_transporter without target at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_transporter without target at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -147,7 +147,7 @@ void ui_holodeck_setup(gentity_t *ent) {
 	target = G_Find(NULL, FOFS(targetname), ent->target);
 
 	if(!target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_holodekc without trigger_holodeck as target at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_holodekc without trigger_holodeck as target at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -161,7 +161,7 @@ void ui_holodeck_setup(gentity_t *ent) {
 
 void SP_ui_holodeck(gentity_t *ent) {
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_holodeck without target at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] ui_holodeck without target at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 	}
 

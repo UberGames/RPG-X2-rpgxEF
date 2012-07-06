@@ -510,7 +510,7 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 
 	if ( Q_stricmp( "item_botroam", ent->classname ) != 0 )
 	{//suppress error message about botroams as those are actually valid
-		DEVELOPER(G_Printf (S_COLOR_RED "%s doesn't have a spawn function\n", ent->classname));
+		DEVELOPER(G_Printf (S_COLOR_RED "%s doesn't have a spawn function\n", ent->classname););
 	}
 
 	#ifdef G_LUA

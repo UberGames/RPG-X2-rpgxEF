@@ -2045,7 +2045,7 @@ void Think_SetupTrainTargets( gentity_t *ent ) {
 	ent->nextTrain = G_Find( NULL, FOFS(targetname), ent->target );
 	if ( !ent->nextTrain ) {
 		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_train at %s with an unfound target\n",
-			vtos(ent->r.absmin) ));
+			vtos(ent->r.absmin) ););
 		return;
 	}
 
@@ -2057,7 +2057,7 @@ void Think_SetupTrainTargets( gentity_t *ent ) {
 
 		if ( !path->target ) {
 			DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Train corner at %s without a target\n",
-				vtos(path->s.origin) ));
+				vtos(path->s.origin) ););
 			return;
 		}
 
@@ -2069,7 +2069,7 @@ void Think_SetupTrainTargets( gentity_t *ent ) {
 			next = G_Find( next, FOFS(targetname), path->target );
 			if ( !next ) {
 				DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Train corner at %s without a target path_corner\n",
-					vtos(path->s.origin) ));
+					vtos(path->s.origin) ););
 				return;
 			}
 		} while ( strcmp( next->classname, "path_corner" ) );
@@ -2091,7 +2091,7 @@ Target: next path corner and other targets to fire
 */
 void SP_path_corner( gentity_t *self ) {
 	if ( !self->targetname ) {
-		DEVELOPER(G_Printf (S_COLOR_YELLOW "[Entity-Error] path_corner with no targetname at %s\n", vtos(self->s.origin)));
+		DEVELOPER(G_Printf (S_COLOR_YELLOW "[Entity-Error] path_corner with no targetname at %s\n", vtos(self->s.origin)););
 		G_FreeEntity( self );
 		return;
 	}
@@ -2129,7 +2129,7 @@ void SP_func_train (gentity_t *self) {
 	}
 
 	if ( !self->target ) {
-		DEVELOPER(G_Printf (S_COLOR_YELLOW "[Entity-Error] func_train without a target at %s\n", vtos(self->r.absmin)));
+		DEVELOPER(G_Printf (S_COLOR_YELLOW "[Entity-Error] func_train without a target at %s\n", vtos(self->r.absmin)););
 		G_FreeEntity( self );
 		return;
 	}
@@ -2726,7 +2726,7 @@ void SP_func_door_rotating ( gentity_t *ent ) {
 	// leave out, so we'll tell him if he does.
 	if ( !ent->distance ) {
 		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] %s at %s with no distance set.\n",
-		ent->classname, vtos(ent->s.origin)));
+		ent->classname, vtos(ent->s.origin)););
 		ent->distance = 90.0;
 	}
 	
@@ -2967,12 +2967,12 @@ void func_lightchange_setup(gentity_t *ent) {
 	gentity_t *bmodel;
 	bmodel = G_Find(NULL, FOFS(targetname), ent->target);
 	if(!bmodel) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Could not find target %s for func_lightchange at %s!\n", ent->target, vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Could not find target %s for func_lightchange at %s!\n", ent->target, vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
 	if(Q_stricmp(bmodel->classname, "func_brushmodel")) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_lightchange with invalid target entity of class %s at %s!\n", bmodel->classname, vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_lightchange with invalid target entity of class %s at %s!\n", bmodel->classname, vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -2990,7 +2990,7 @@ void func_lightchange_setup(gentity_t *ent) {
 
 void SP_func_lightchange(gentity_t *ent) {
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_lightchange without target at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_lightchange without target at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -3029,7 +3029,7 @@ void func_targetmover_link(gentity_t *ent) {
 
 	target = G_Find(NULL, FOFS(targetname), ent->target);
 	if(!target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_targetmover with unfound target %s at %s!\n", ent->target, vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_targetmover with unfound target %s at %s!\n", ent->target, vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -3077,7 +3077,7 @@ void SP_func_targetmover(gentity_t *ent) {
 	//qboolean liftDoor=qfalse;
 
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_targetmover without target at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_targetmover without target at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -3297,7 +3297,7 @@ void SP_func_mover(gentity_t *ent) {
 	float aspeed;
 	
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_mover without target at %s!\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] func_mover without target at %s!\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}

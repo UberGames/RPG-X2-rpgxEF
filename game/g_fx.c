@@ -894,7 +894,7 @@ void phaser_link(gentity_t *ent) {
 	gentity_t *target = NULL;
 	target = G_Find(target, FOFS(targetname), ent->target);
 	if(!target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Enity-Error] Could not find target %s for fx_phaser at %s!\n", ent->target, vtos(ent->r.currentOrigin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Enity-Error] Could not find target %s for fx_phaser at %s!\n", ent->target, vtos(ent->r.currentOrigin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -911,7 +911,7 @@ void SP_fx_phaser(gentity_t *ent) {
 	int		impact;
 	ent->count = PHASER_FX_UNLINKED;
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] fx_phaser at %s without target!\n", vtos(ent->r.currentOrigin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] fx_phaser at %s without target!\n", vtos(ent->r.currentOrigin)););
 		return;
 	}
 	G_SpawnFloat("scale", "20", &scale);
@@ -974,7 +974,7 @@ void fx_torpedo_link(gentity_t *ent) {
 	gentity_t *target = NULL;
 	target = G_Find(target, FOFS(targetname), ent->target);
 	if(!target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Could not find target %s for fx_torpedo at %s!\n", ent->target, vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Could not find target %s for fx_torpedo at %s!\n", ent->target, vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}
@@ -1000,7 +1000,7 @@ void fx_torpedo_link(gentity_t *ent) {
 void SP_fx_torpedo(gentity_t *ent) {
 	char	*sound;
 	if(!ent->target) {
-		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] fx_torpedo at %s without target\n", vtos(ent->s.origin)));
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] fx_torpedo at %s without target\n", vtos(ent->s.origin)););
 		G_FreeEntity(ent);
 		return;
 	}

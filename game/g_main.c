@@ -357,6 +357,8 @@ vmCvar_t        lua_modules;
 vmCvar_t        lua_allowedModules;
 #endif
 
+vmCvar_t	g_developer;
+
 // XPERIMENTAL
 //vmCvar_t	rpg_useLanguages;
 
@@ -637,7 +639,9 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &rpg_grenadeAltDamage, "rpg_grenadeAltDamage", "80", CVAR_ARCHIVE, 0, qfalse },
 	{ &rpg_tr116Damage, "rpg_tr116Damage", "150", CVAR_ARCHIVE, 0, qfalse },
 	{ &rpg_photonDamage, "rpg_photonDamage", "140", CVAR_ARCHIVE, 0, qfalse },
-	{ &rpg_photonAltDamage, "rpg_photonAltDamage", "140", CVAR_ARCHIVE, 0, qfalse }
+	{ &rpg_photonAltDamage, "rpg_photonAltDamage", "140", CVAR_ARCHIVE, 0, qfalse },
+
+	{ &g_developer, "g_developer", "0", CVAR_ARCHIVE, 0, qfalse }
 };
 
 static int	gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );

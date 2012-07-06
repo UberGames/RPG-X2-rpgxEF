@@ -10,13 +10,6 @@
 
 //==================================================================
 
-
-// developer tools:
-// Prevents a single statement from beeing executed if developer isn't set
-// Usage Example DEVELOPER(G_Printf("Some Debug Message"));
-// NOTE that the ; of the statement is after the closing ) of the macro
-#define DEVELOPER(X) trap_Cvar_VariableIntegerValue("developer") ? X : " "
-
 // the "gameversion" client command will print this plus compile date
 //#define	GAMEVERSION	"RPG-X v",RPGX_VERSION
 //const char	GAMEVERSION[] = strcat("RPG-X v",RPGX_VERSION);
@@ -1301,6 +1294,14 @@ extern vmCvar_t g_debugLua;
 extern vmCvar_t lua_allowedModules;
 extern vmCvar_t lua_modules;
 #endif
+
+extern vmCvar_t g_developer;
+// developer tools:
+// Prevents a single statement from beeing executed if developer isn't set
+#define DEVELOPER(X) if(g_developer.integer != 0) { \
+						X\
+					 } else
+
 
 #include "g_team.h" // teamplay specific stuff
 
