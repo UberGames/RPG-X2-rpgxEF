@@ -111,6 +111,37 @@ void SnapVectorTowards( vec3_t v, vec3_t to ) {
  */
 static void WP_FireHyperspanner(gentity_t *ent, qboolean alt_fire) {
 	float		modifier;
+	gentity_t   *validEnts[MAX_GENTITIES];
+	int			count = 0;
+	int			i, nearest = -1, nearestd = 512;
+	vec3_t		dVec;
+
+	/* find all vlaid entities in range */
+	count = G_RadiusListOfType("func_breakable", ent->s.origin, 512, NULL, validEnts);
+	//G_Printf("Found %d possible candidates\n", count);
+	if(count) {
+		trace_t tr;
+		for(i = 0; i < count; i++) {
+			//G_Printf("Checking entity: %d\n", i);
+			trap_Trace(&tr, ent->s.origin, NULL, NULL, validEnts[i]->s.origin, ent->s.number, MASK_SHOT);
+			if(tr.entityNum != validEnts[i]->s.number && tr.entityNum != ENTITYNUM_WORLD) {
+				continue;
+			}
+			//G_Printf("Nothing is blocking view ...\n");
+			VectorSubtract(ent->s.origin, validEnts[i]->s.origin, dVec);
+			if(VectorLength(dVec) < nearestd) {
+				nearest = validEnts[i]->s.number;
+				nearestd = VectorLength(dVec);
+				//G_Printf("New nearest Entity is %d with a distance of %d\n", nearest, nearestd);
+			}
+		}
+	} else {
+		return;
+	}
+
+	if(nearest == -1) {
+		return;
+	}
 
 	/* determine the repair rate modifier */
 	if(rpg_repairModifier.value < 0) {
@@ -121,9 +152,9 @@ static void WP_FireHyperspanner(gentity_t *ent, qboolean alt_fire) {
 
 	/* call G_Repair */
 	if(alt_fire) {
-		G_Repair(ent, HYPERSPANNER_ALT_RATE * modifier);
+		G_Repair(ent, &g_entities[nearest], HYPERSPANNER_ALT_RATE * modifier);
 	} else {
-		G_Repair(ent, HYPERSPANNER_RATE * modifier);
+		G_Repair(ent, &g_entities[nearest], HYPERSPANNER_RATE * modifier);
 	}
 }
 

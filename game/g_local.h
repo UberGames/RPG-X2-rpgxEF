@@ -827,6 +827,7 @@ void G_AddEvent( gentity_t *ent, int event, int eventParm );
 void G_SetOrigin( gentity_t *ent, vec3_t origin );
 void G_SetAngles( gentity_t *ent, vec3_t anlges ); //RPG-X | GSIO01 | 24.08.2009
 int G_RadiusList ( vec3_t origin, float radius,	gentity_t *ignore, qboolean takeDamage, gentity_t *ent_list[MAX_GENTITIES]);
+int G_RadiusListOfType(char *classname, vec3_t origin, float radius, gentity_t *ignore, gentity_t *entlist[MAX_GENTITIES]);
 gentity_t *G_GetNearestEnt(char *classname, vec3_t origin, float radius, gentity_t *ignore, qboolean takeDamage);
 gentity_t *G_GetNearestPlayer(vec3_t origin, float radius, gentity_t *ignore );
 
@@ -846,7 +847,7 @@ void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod);
 void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
 void TossClientItems( gentity_t *self, qboolean dis_con );
-void G_Repair(gentity_t *ent, float rate); //RPG-X | GSIO01 | 09/05/2009
+void G_Repair(gentity_t *ent, gentity_t *tr_ent, float rate); //RPG-X | GSIO01 | 09/05/2009
 
 // damage flags
 #define DAMAGE_RADIUS				0x00000001	// damage was indirect

@@ -1819,54 +1819,60 @@ G_Repair
 RPG-X | GSIO01 | 09/05/2009 
 ============
 */
-void G_Repair(gentity_t *ent, float rate) {
-	gentity_t	*target, *trigger;
+void G_Repair(gentity_t *ent, gentity_t *tr_ent, float rate) {
 	float		distance;
 	vec3_t		help, forward;
-	//trace_t		*trace;
-	if(!ent->client || !ent->touched) // check whether ent is a player and check if he has touched a breakable trigger
-		return;
-	trigger = ent->touched;
-	if(!trigger->touched)
-		return;
-	target = trigger->touched;
+	int			i;
+	float		max = 0;
+
 	// if count isn't 0 the breakable is not damaged and if target is no breakable it does not make sense to go on
-	if(target->count != 0 || Q_stricmp(target->classname, "func_breakable"))
+	if(tr_ent->count != 0 || Q_stricmp(tr_ent->classname, "func_breakable")) {
 		return; 
-	if(!(target->spawnflags & 256)) { // no REPAIRABLE flag set
+	}
+
+	if(!(tr_ent->spawnflags & 256)) { // no REPAIRABLE flag set
 		return;
 	}
+
 	// check if player is near the breakable
-	VectorSubtract(target->s.origin, ent->client->ps.origin, help);
+	VectorSubtract(tr_ent->s.origin, ent->client->ps.origin, help);
 	distance = VectorLength(help);
-	if(distance > 80)
+	for(i = 0; i < 3; i++) {
+		if(tr_ent->r.maxs[i] > max) {
+			max = tr_ent->r.maxs[i];
+		}
+	}
+	if(distance > 80 + max) {
 		return;
+	}
+
 	// check if the player is facing it
 	AngleVectors(ent->client->ps.viewangles, forward, NULL, NULL);
-	VectorSubtract(target->s.origin, ent->client->ps.origin, help);
-	if(DotProduct(help, forward) < 0.4)
+	VectorSubtract(tr_ent->s.origin, ent->client->ps.origin, help);
+	if(DotProduct(help, forward) < 0.4) {
 		return;
-	// check wheter the breakable still needs to be repaired
-	if(target->health < target->damage)
-		// still not repaired of let's go on
-		target->health += rate;
-	else {
-		// else restore it
-		target->s.solid = CONTENTS_BODY;
-		trap_SetBrushModel(target, target->model);
-		target->r.svFlags &= ~SVF_NOCLIENT;
-		target->s.eFlags &= ~EF_NODRAW;
-		InitBBrush(target);
-		target->health = target->damage;
-		if(target->health)
-			target->takedamage = qtrue;
-		target->use = breakable_use;
-		if(target->paintarget)
-			target->pain = breakable_pain;
-		target->clipmask = 0;
-		target->count = 1;
-		if(trigger->target)
-			G_UseTargets2(trigger, target, trigger->target);
 	}
-	ent->touched = NULL; // make sure this is NULL
+
+	// check wheter the breakable still needs to be repaired
+	if(tr_ent->health < tr_ent->damage) {
+		// still not repaired of let's go on
+		tr_ent->health += rate;
+	} else {
+		// else restore it
+		tr_ent->s.solid = CONTENTS_BODY;
+		trap_SetBrushModel(tr_ent, tr_ent->model);
+		tr_ent->r.svFlags &= ~SVF_NOCLIENT;
+		tr_ent->s.eFlags &= ~EF_NODRAW;
+		InitBBrush(tr_ent);
+		tr_ent->health = tr_ent->damage;
+		if(tr_ent->health)
+			tr_ent->takedamage = qtrue;
+		tr_ent->use = breakable_use;
+		if(tr_ent->paintarget)
+			tr_ent->pain = breakable_pain;
+		tr_ent->clipmask = 0;
+		tr_ent->count = 1;
+		if(tr_ent->target)
+			G_UseTargets2(tr_ent, tr_ent, tr_ent->target);
+	}
 }

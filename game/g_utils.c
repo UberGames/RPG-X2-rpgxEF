@@ -1080,6 +1080,66 @@ int G_RadiusList ( vec3_t origin, float radius,	gentity_t *ignore, qboolean take
 	return(ent_count);
 }
 
+int G_RadiusListOfType(char *classname, vec3_t origin, float radius, gentity_t *ignore, gentity_t *ent_list[MAX_GENTITIES]) {
+	float		dist;
+	gentity_t	*ent;
+	int			entityList[MAX_GENTITIES];
+	int			numListedEntities;
+	vec3_t		mins, maxs;
+	vec3_t		v;
+	int			i, e;
+	int			ent_count = 0;
+
+	if ( radius < 1 ) 
+	{
+		radius = 1;
+	}
+
+	for ( i = 0 ; i < 3 ; i++ ) 
+	{
+		mins[i] = origin[i] - radius;
+		maxs[i] = origin[i] + radius;
+	}
+
+	numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+
+	for ( e = 0 ; e < numListedEntities ; e++ ) 
+	{
+		ent = &g_entities[entityList[e]];
+
+		if ((ent == ignore) || !(ent->inuse) || strcmp(classname, ent->classname))
+			continue;
+
+		/* find the distance from the edge of the bounding box */
+		for ( i = 0 ; i < 3 ; i++ ) 
+		{
+			if ( origin[i] < ent->r.absmin[i] ) 
+			{
+				v[i] = ent->r.absmin[i] - origin[i];
+			} else if ( origin[i] > ent->r.absmax[i] ) 
+			{
+				v[i] = origin[i] - ent->r.absmax[i];
+			} else 
+			{
+				v[i] = 0;
+			}
+		}
+
+		dist = VectorLength( v );
+		if ( dist >= radius ) 
+		{
+			continue;
+		}
+		
+		/* ok, we are within the radius, add us to the incoming list */
+		ent_list[ent_count] = ent;
+		ent_count++;
+
+	}
+	/*  we are done, return how many we found */
+	return(ent_count);
+}
+
 /**
  * \brief Find the nearest entity
  *

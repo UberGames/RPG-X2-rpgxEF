@@ -21,9 +21,9 @@ void breakable_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, 
 			self->health = 0;
 	}
 
-	self->pain = 0/*NULL*/;
-	self->die  = 0/*NULL*/;
-	self->use  = 0/*NULL*/;
+	self->pain = 0;
+	self->die  = 0;
+	self->use  = 0;
 
 	self->takedamage = qfalse;
 
@@ -324,7 +324,7 @@ void SP_func_breakable( gentity_t *self )
 	VectorCopy(self->s.origin, self->pos1);
 	trap_LinkEntity(self);
 	InitBBrush( self );
-	breakable_spawn_trigger(self);
+	//breakable_spawn_trigger(self);
 
 	level.numBrushEnts++;
 }
@@ -677,7 +677,9 @@ void target_repair_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
 	target = ent->lastEnemy;
 
-	if(!(target->spawnflags & 256)) return;
+	if(!(target->spawnflags & 256)) {
+		return;
+	}
 
 	target->r.contents = CONTENTS_BODY;
 
@@ -697,8 +699,8 @@ void target_repair_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	target->clipmask = 0;
 	target->count = 1;
 
-	if(target->touched->target)
-		G_UseTargets2(target->touched, target, target->touched->target);
+	//if(target->touched->target)
+		//G_UseTargets2(target->touched, target, target->touched->target);
 }
 
 /**

@@ -339,7 +339,7 @@ static int Game_Repair(lua_State *L) {
 	
 	rate = (float)luaL_checknumber(L, 2);
 
-	G_Repair(lent->e, rate);
+	G_Repair(lent->e, NULL, rate); // FIXME ... trance ent?
 
 	return 1;
 }
