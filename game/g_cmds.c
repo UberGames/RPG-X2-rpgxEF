@@ -10,6 +10,7 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, cons
 
 extern void G_CheckReplaceQueen( int clientNum );
 extern qboolean	PlaceDecoy( gentity_t *ent );
+extern qboolean G_CallSpawn(gentity_t *ent);
 
 extern int	numKilled;
 extern clInitStatus_t clientInitialStatus[];
@@ -6311,19 +6312,17 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 	// Setup command-Execution
 
 	if(trap_Argc() < 1 ) {
-		G_PrintfClient(ent,		"Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]\n\
-								duration: total countdown-duration in seconds.\n\
-								intervall: intervall of audio warnings up to T-60 seconds in seconds.\n\
-								intervall-60: intervall of audio warnings within T-60 seconds in seconds.\n\
-								intervall-10: intervall of audio warnings within T-10 seconds in seconds.\n\
-								audio: set this 0 if you do want a muted countdown, else set this 1.\n\
-								target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.\n\
-								\n\
-								Usage: selfdestruct remaining\n\
-								This will give out the remaining countdown-time even if the count is muted.\n\
-								\n\
-								Usage: selfdestruct abort\n\
-								This will abort any self destruct running");
+		G_PrintfClient(ent,		"Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]\n");
+		G_PrintfClient(ent,		"duration: total countdown-duration in seconds.\n");
+		G_PrintfClient(ent,		"intervall: intervall of audio warnings up to T-60 seconds in seconds.\n");
+		G_PrintfClient(ent,		"intervall-60: intervall of audio warnings within T-60 seconds in seconds.\n");
+		G_PrintfClient(ent,		"intervall-10: intervall of audio warnings within T-10 seconds in seconds.\n");
+		G_PrintfClient(ent,		"audio: set this 0 if you do want a muted countdown, else set this 1.\n");
+		G_PrintfClient(ent,		"target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.\n");
+		G_PrintfClient(ent,		"\nUsage: selfdestruct remaining\n");
+		G_PrintfClient(ent,		"This will give out the remaining countdown-time even if the count is muted.\n");
+		G_PrintfClient(ent,		"\nUsage: selfdestruct abort\n");
+		G_PrintfClient(ent,		"This will abort any self destruct running");
 		return;
 	}
 	trap_Argv(1, arg, sizeof(arg));
@@ -6378,22 +6377,21 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		}
 		destructEnt->use(destructEnt, NULL, NULL); // Use-Function will simply manage the abort
 	} else {
-		G_PrintfClient(ent,		"Error: Invalid command-Argument. Arguments are start, remaining and abort\n\
-								Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]\n\
-								duration: total countdown-duration in seconds.\n\
-								intervall: intervall of audio warnings up to T-60 seconds in seconds.\n\
-								intervall-60: intervall of audio warnings within T-60 seconds in seconds.\n\
-								intervall-10: intervall of audio warnings within T-10 seconds in seconds.\n\
-								audio: set this 0 if you do want a muted countdown, else set this 1.\n\
-								target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.\n\
-								\n\
-								Usage: selfdestruct remaining\n\
-								This will give out the remaining countdown-time even if the count is muted.\n\
-								\n\
-								Usage: selfdestruct abort\n\
-								This will abort any self destruct running");
+		G_PrintfClient(ent,		"Error: Invalid command-Argument. Arguments are start, remaining and abort\n");
+		G_PrintfClient(ent,		"Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]\n");
+		G_PrintfClient(ent,		"duration: total countdown-duration in seconds.\n");
+		G_PrintfClient(ent,		"intervall: intervall of audio warnings up to T-60 seconds in seconds.\n");
+		G_PrintfClient(ent,		"intervall-60: intervall of audio warnings within T-60 seconds in seconds.\n");
+		G_PrintfClient(ent,		"intervall-10: intervall of audio warnings within T-10 seconds in seconds.\n");
+		G_PrintfClient(ent,		"audio: set this 0 if you do want a muted countdown, else set this 1.\n");
+		G_PrintfClient(ent,		"target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.\n\n");
+		G_PrintfClient(ent,		"Usage: selfdestruct remaining\n");
+		G_PrintfClient(ent,		"This will give out the remaining countdown-time even if the count is muted.\n\n");
+		G_PrintfClient(ent,		"Usage: selfdestruct abort\n");
+		G_PrintfClient(ent,		"This will abort any self destruct running");
 		return;
 	}
+}
 
 /*
 =================
@@ -6703,7 +6701,6 @@ static void Cmd_flushTentities_f(gentity_t *ent) {
 	}
 }
 
-extern qboolean G_CallSpawn(gentity_t *ent);
 /*
 =================
 Cmd_spawnTEntity_f

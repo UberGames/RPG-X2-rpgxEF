@@ -966,5 +966,7 @@ void CG_InitConsoleCommands( void ) {
 	/* cinematic cam test */
 	trap_AddCommand("camtest");
 	trap_AddCommand("camtestend");
+
+	trap_AddCommand("selfdestruct");
 }
 
