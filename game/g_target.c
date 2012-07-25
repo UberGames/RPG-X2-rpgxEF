@@ -2568,26 +2568,27 @@ wait: total Countdown-Time in secs
 count: warning intervall up to 60 secs in secs
 n00bCount: warning intervall within 60 secs in secs
 health: warning intervall within 10 secs in secs
-oldHealth: are audio warnings 1 or 0?
+flags: are audio warnings 1 or 0?
 target: Things to fire once the countdown hits 0
 
-moverstate: leveltime of countdowns end
+damage: leveltime of countdowns end
 spawnflags: 1 tells ent to free once aborted
 */
 
-void target_selfdestruct_use(gentity_t *ent) {
+void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	//with the use-function we're going to init aborts in a fairly simple manner: Fire warning notes...
 	trap_SendServerCommand( -1, va("servermsg \"Self Destruct sequence aborted.\""));
 	trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/abort.mp3\n" ) );
 	//set wait to -1...
-	ent->wait = -1
+	ent->wait = -1;
 	//and arrange for a think in a sec
-	ent->nextthink = level.time + 1000
+	ent->nextthink = level.time + 1000;
 	return;
+}
 
 void target_selfdestruct_think(gentity_t *ent) {
 	gentity_t*	client;	
-	float		ETAmin, ETAsec, temp;
+	double		ETAmin, ETAsec, temp;
 	int			i = 0;
 
 	//now we have 3 destinct stages the entity can think about.
@@ -2602,13 +2603,13 @@ void target_selfdestruct_think(gentity_t *ent) {
 			temp = ent->wait - ent->health;
 		}
 	}
-	ent->wait = temp
+	ent->wait = temp;
 
 	if (ent->wait > 0){
 		//The first is the intervall-warning-loop
 		//We're doing this to give a new warning, so let's do that. I'll need to do a language switch here sometime...
 		ETAsec = floor(modf((ent->wait / 60000), &ETAmin)*60);
-		if (ent->oldHealth == 1) {
+		if (ent->flags == 1) {
 			if (ETAsec > 0) //If we don't have secs we don't need to state that. 
 				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes and %s seconds.\"", ETAmin, ETAsec));
 			else
@@ -2627,27 +2628,28 @@ void target_selfdestruct_think(gentity_t *ent) {
 		}
 
 		//fail horribly if an intervall overshoots bang-time
-		if (ent->nextthink > ent->moverstate)
-			ent->nextthink = ent->moverstate;
+		if (ent->nextthink > ent->damage)
+			ent->nextthink = ent->damage;
 
 	} else if (ent->wait == 0) { //bang time ^^
 
 		//Loop trough all clients on the server.
 		for(i = 0; i < level.numConnectedClients; i++) {
-			client = = &g_entities[i];
-			if (!client->flags &= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
-				G_Damage (NULL, NULL, NULL, NULL, NULL, 999999, NULL, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
-		}
+			client = &g_entities[i];
+			//if (!client->flags &= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
+				G_Damage (NULL, NULL, NULL, NULL, NULL, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
+		//}
 		//let's hear it
 		trap_SendServerCommand( -1, va("playSnd sound/weapons/explosions/explode2.wav\n" ) );
 		//let's be shakey for a sec... I hope lol ^^
-		trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 999999, (level.time + 1000) );
+		trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 999999, (level.time + 1000) ) );
+		}
 	
 	} else if (ent->wait < 0) {
 
 		//we have aborted and the note should be out so let's reset
-		ent->nextthink = -1
-		ent->wait = ent->splashDamage
+		ent->nextthink = -1;
+		ent->wait = ent->splashDamage;
 		//free ent if it was command-spawned
 		if (ent->spawnflags == 1)
 			G_FreeEntity(ent);
@@ -2657,13 +2659,14 @@ void target_selfdestruct_think(gentity_t *ent) {
 }
 
 void SP_target_selfdestruct(gentity_t *ent) {
-	float		ETAmin, ETAsec, temp;
+	double		ETAmin, ETAsec;
+	float		temp;
 	//I'd like a failsave-check here at some point...
 
 	//There's a little bit of math to do here so let's do that.
 	//convert all times from secs to millisecs if that hasn't been done in an earlier pass.
 
-	if (!ent->painDebounceTime){
+	if (!ent->splashRadius){
 		temp = ent->wait * 1000;
 		ent->wait = temp;
 		temp = ent->count * 1000;
@@ -2672,18 +2675,18 @@ void SP_target_selfdestruct(gentity_t *ent) {
 		ent->n00bCount = temp;
 		temp = ent->health * 1000;
 		ent->health = temp;
-		ent->painDebounceTime = 1;
+		ent->splashRadius = 1;
 	}
 
 	//we'll need to back up the total for a possible reset.
-	ent->splashDamage = ent->wait
+	ent->splashDamage = ent->wait;
 
 	//let's find out when this thing will hit hard
-	ent->moverstate = ent->wait + level.time
+	ent->damage = ent->wait + level.time;
 
 	//time's set so let's let everyone know that we're counting. I'll need to do a language switch here sometime...
 	ETAsec = floor(modf((ent->wait / 60000), &ETAmin)*60);
-	if (ent->oldHealth == 1) {
+	if (ent->flags == 1) {
 		if (ETAsec > 0) //If we don't have secs we don't need to state that. 
 			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes and %s seconds.\"", ETAmin, ETAsec));
 		else
@@ -2699,19 +2702,19 @@ void SP_target_selfdestruct(gentity_t *ent) {
 	if (ent->wait == 1200000) {
 		trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/20-a1.mp3\n" ) );
 	} else if (ent->wait == 900000) {
-		if (ent->oldHealth == 1)
+		if (ent->flags == 1)
 			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/15-a1.mp3\n" ) );
 		else
 			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/15-a0.mp3\n" ) );
 	} else if (ent->wait == 600000) {
 		trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/10-a1.mp3\n" ) );
 	} else if (ent->wait == 300000) {
-		if (ent->oldHealth == 1)
+		if (ent->flags == 1)
 			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/5-a1.mp3\n" ) );
 		else
 			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/5-a0.mp3\n" ) );
 	} else {
-		if (ent->oldHealth == 1)
+		if (ent->flags == 1)
 			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/X-a1.mp3\n" ) );
 		else
 			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/X-a0.mp3\n" ) );
@@ -2734,8 +2737,8 @@ void SP_target_selfdestruct(gentity_t *ent) {
 	}
 
 	//fail horribly if an intervall overshoots bang-time
-	if (ent->nextthink > ent->moverstate)
-		ent->nextthink = ent->moverstate;
+	if (ent->nextthink > ent->damage)
+		ent->nextthink = ent->damage;
 
 	trap_LinkEntity(ent);
 }
