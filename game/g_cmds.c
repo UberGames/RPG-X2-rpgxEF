@@ -6284,6 +6284,117 @@ static void Cmd_alert_f(gentity_t *ent) {
 
 /*
 =================
+Cmd_selfdestruct_f
+Harry Young | 25/07/2012
+UNTESTED
+=================
+*/
+static void Cmd_selfdestruct_f(gentity_t *ent) {
+	gentity_t	*destructEnt;
+	char		arg[16], arg2[16], arg3[16], arg4[16], arg5[16], arg6[16], arg7[16];
+	float		ETAmin, ETAsec;
+	if(!ent || !ent->client)
+		return;
+
+	#ifndef SQL
+	if ( !IsAdmin( ent ) ) {
+		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as an admin.\n\" ") );
+		return;
+	}
+	#else
+	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, /*need to fill this*/ ) ) {
+		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
+		return;
+	}
+	#endif
+
+	// Setup command-Execution
+
+	if(trap_Argc() < 1 ) {
+		G_PrintfClient(ent,		"Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]\n\
+								duration: total countdown-duration in seconds.\n\
+								intervall: intervall of audio warnings up to T-60 seconds in seconds.\n\
+								intervall-60: intervall of audio warnings within T-60 seconds in seconds.\n\
+								intervall-10: intervall of audio warnings within T-10 seconds in seconds.\n\
+								audio: set this 0 if you do want a muted countdown, else set this 1.\n\
+								target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.\n\
+								\n\
+								Usage: selfdestruct remaining\n\
+								This will give out the remaining countdown-time even if the count is muted.\n\
+								\n\
+								Usage: selfdestruct abort\n\
+								This will abort any self destruct running");
+		return;
+	trap_Argv(1, arg, sizeof(arg));
+
+	if (!Q_stricmp(arg, "start") {
+		//Is there sth running alrerady?
+		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
+		if(destructEnt) {
+			G_PrintfClient(ent, "There is already a self destruct in progress, aborting setup.\n");
+			return;
+		}
+
+		//There is not so let's set this up.
+		destructEnt = G_Spawn();
+		destructEnt->classname = "target_selfdestruct";
+		trap_Argv(2, arg2, sizeof(arg2));
+		destructEnt->wait = atoi(arg2);
+		trap_Argv(3, arg3, sizeof(arg3));
+		destructEnt->count = atoi(arg3);
+		trap_Argv(4, arg4, sizeof(arg4));
+		destructEnt->n00bCount = atoi(arg4);
+		trap_Argv(5, arg5, sizeof(arg5));
+		destructEnt->health = atoi(arg5);
+		trap_Argv(6, arg6, sizeof(arg6));
+		destructEnt->wait = atoi(arg6);
+		if(trap_Argc() == 7) {
+			trap_Argv(7, arg7, sizeof(arg7));
+			destructEnt->target = atoi(arg7);
+		}
+		G_CallSpawn(destructEnt); //Spawn-Function will also manage init, so we need to call that.
+	} else if (!Q_stricmp(arg, "remaining") {
+		//Is there sth running alrerady?
+		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
+		if(!destructEnt) {
+			G_PrintfClient(ent, "There no self destruct in progress, aborting call.\n");
+			return;
+		}
+
+		//we need the remaining time in minutes and seconds from taht entity. Just ask them off and have the command do the math.
+		ETAsec = floor(modf(((destructEnt->moverstate - leveltime)/60000), &ETAmin)*60); //break it apart, put off the minutes and return the floored secs
+		if (ETAsec > 0) //If we don't have secs we don't need to state that. Need to do a language-switch here...
+			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes and %s seconds.\"", ETAmin, ETAsec));
+		else
+			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes.\"", ETAmin));
+	} else if (!Q_stricmp(arg, "abort") {
+		//Is there sth running alrerady?
+		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
+		if(!destructEnt) {
+			G_PrintfClient(ent, "There no self destruct in progress, aborting call.\n");
+			return;
+		}
+		destructEnt->use(destructEnt, NULL, NULL); // Use-Function will simply manage the abort
+	} else {
+		G_PrintfClient(ent,		"Error: Invalid command-Argument. Arguments are start, remaining and abort\n\
+								Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]\n\
+								duration: total countdown-duration in seconds.\n\
+								intervall: intervall of audio warnings up to T-60 seconds in seconds.\n\
+								intervall-60: intervall of audio warnings within T-60 seconds in seconds.\n\
+								intervall-10: intervall of audio warnings within T-10 seconds in seconds.\n\
+								audio: set this 0 if you do want a muted countdown, else set this 1.\n\
+								target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.\n\
+								\n\
+								Usage: selfdestruct remaining\n\
+								This will give out the remaining countdown-time even if the count is muted.\n\
+								\n\
+								Usage: selfdestruct abort\n\
+								This will abort any self destruct running");
+		return;
+	}
+
+/*
+=================
 Cmd_admin_centerprint_f
 GSIO01 | 12/05/2009
 =================
@@ -7793,6 +7904,8 @@ void ClientCommand( int clientNum )
 		Cmd_changeFreq(ent);
 	else if (Q_stricmp(cmd, "alert") == 0)
 		Cmd_alert_f(ent);
+	else if (Q_stricmp(cmd, "selfdestruct") == 0)
+		Cmd_selfdestruct_f(ent);
 	else if (Q_stricmp(cmd, "msg2") == 0)
 		Cmd_admin_centerprint_f(ent);
 	else if (Q_stricmp(cmd, "forcevote") == 0)
