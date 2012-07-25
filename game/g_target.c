@@ -2578,7 +2578,7 @@ spawnflags: 1 tells ent to free once aborted
 void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	//with the use-function we're going to init aborts in a fairly simple manner: Fire warning notes...
 	trap_SendServerCommand( -1, va("servermsg \"Self Destruct sequence aborted.\""));
-	trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/abort.mp3\n" ) );
+	G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/abort.mp3"));
 	//set wait to -1...
 	ent->wait = -1;
 	//and arrange for a think in a sec
@@ -2611,9 +2611,9 @@ void target_selfdestruct_think(gentity_t *ent) {
 		ETAsec = floor(modf((ent->wait / 60000), &ETAmin)*60);
 		if (ent->flags == 1) {
 			if (ETAsec > 0) //If we don't have secs we don't need to state that. 
-				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes and %s seconds.\"", ETAmin, ETAsec));
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds.\"", ETAmin, ETAsec));
 			else
-				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes.\"", ETAmin));
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin));
 		}
 
 		// with that out of the way let's set the next think
@@ -2640,7 +2640,7 @@ void target_selfdestruct_think(gentity_t *ent) {
 				G_Damage (NULL, NULL, NULL, NULL, NULL, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
 		//}
 		//let's hear it
-		trap_SendServerCommand( -1, va("playSnd sound/weapons/explosions/explode2.wav\n" ) );
+		G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
 		//let's be shakey for a sec... I hope lol ^^
 		trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 999999, (level.time + 1000) ) );
 		}
@@ -2688,36 +2688,39 @@ void SP_target_selfdestruct(gentity_t *ent) {
 	ETAsec = floor(modf((ent->wait / 60000), &ETAmin)*60);
 	if (ent->flags == 1) {
 		if (ETAsec > 0) //If we don't have secs we don't need to state that. 
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes and %s seconds.\"", ETAmin, ETAsec));
+			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds.\"", ETAmin, ETAsec));
 		else
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes.\"", ETAmin));
+			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin));
 	} else {
 		if (ETAsec > 0) //If we don't have secs we don't need to state that. 
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes and %s seconds. There will be no further audio warnings.\"", ETAmin, ETAsec));
+			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %0.f seconds. There will be no further audio warnings.\"", ETAmin, ETAsec));
 		else
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes. There will be no further audio warnings.\"", ETAmin));
+			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes. There will be no further audio warnings.\"", ETAmin));
 	}
+
+	ent->r.svFlags |= SVF_BROADCAST;
+	trap_LinkEntity(ent);
 
 	//Additionally we have some audio files ready to go in english with automatic german counterparts. Play them as well.
 	if (ent->wait == 1200000) {
-		trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/20-a1.mp3\n" ) );
+		G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/20-a1.mp3"));
 	} else if (ent->wait == 900000) {
 		if (ent->flags == 1)
-			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/15-a1.mp3\n" ) );
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/15-a1.mp3"));
 		else
-			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/15-a0.mp3\n" ) );
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/15-a0.mp3"));
 	} else if (ent->wait == 600000) {
-		trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/10-a1.mp3\n" ) );
+		G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/10-a1.mp3"));
 	} else if (ent->wait == 300000) {
 		if (ent->flags == 1)
-			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/5-a1.mp3\n" ) );
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/5-a1.mp3"));
 		else
-			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/5-a0.mp3\n" ) );
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/5-a0.mp3"));
 	} else {
 		if (ent->flags == 1)
-			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/X-a1.mp3\n" ) );
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/X-a1.mp3"));
 		else
-			trap_SendServerCommand( -1, va("playSnd sound/voice/selfdestruct/X-a0.mp3\n" ) );
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/X-a0.mp3"));
 	}
 
 	// Now all that's left is to plan the next think.
