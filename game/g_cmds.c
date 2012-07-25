@@ -6331,7 +6331,7 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		//Is there sth running alrerady?
 		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
 		if(destructEnt) {
-			G_PrintfClient(ent, "There is already a self destruct in progress, aborting setup.\n");
+			G_PrintfClient(ent, "There's already a self destruct in progress, aborting setup.\n");
 			return;
 		}
 
@@ -6347,22 +6347,23 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		trap_Argv(5, arg5, sizeof(arg5));
 		destructEnt->health = atoi(arg5);
 		trap_Argv(6, arg6, sizeof(arg6));
-		destructEnt->wait = atoi(arg6);
+		destructEnt->oldHealth = atoi(arg6);
 		if(trap_Argc() == 7) {
 			trap_Argv(7, arg7, sizeof(arg7));
 			destructEnt->target = atoi(arg7);
 		}
+		destructEnt->spawnflags = 1 //tells ent to free once aborted.
 		G_CallSpawn(destructEnt); //Spawn-Function will also manage init, so we need to call that.
 	} else if (!Q_stricmp(arg, "remaining") {
 		//Is there sth running alrerady?
 		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
 		if(!destructEnt) {
-			G_PrintfClient(ent, "There no self destruct in progress, aborting call.\n");
+			G_PrintfClient(ent, "There's no self destruct in progress, aborting call.\n");
 			return;
 		}
 
 		//we need the remaining time in minutes and seconds from taht entity. Just ask them off and have the command do the math.
-		ETAsec = floor(modf(((destructEnt->moverstate - leveltime)/60000), &ETAmin)*60); //break it apart, put off the minutes and return the floored secs
+		ETAsec = floor(modf(((destructEnt->moverstate - level.time)/60000), &ETAmin)*60); //break it apart, put off the minutes and return the floored secs
 		if (ETAsec > 0) //If we don't have secs we don't need to state that. Need to do a language-switch here...
 			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %s minutes and %s seconds.\"", ETAmin, ETAsec));
 		else
@@ -6371,7 +6372,7 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		//Is there sth running alrerady?
 		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
 		if(!destructEnt) {
-			G_PrintfClient(ent, "There no self destruct in progress, aborting call.\n");
+			G_PrintfClient(ent, "There's no self destruct in progress, aborting call.\n");
 			return;
 		}
 		destructEnt->use(destructEnt, NULL, NULL); // Use-Function will simply manage the abort
