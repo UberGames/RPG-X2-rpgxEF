@@ -2656,7 +2656,6 @@ void target_selfdestruct_think(gentity_t *ent) {
 		}
 
 	} else if (ent->wait == 0) { //bang time ^^
-<<<<<<< HEAD
 		//if we have a target fire that, else kill everyone that is not marked as escaped.
 		//if (!ent->target) {
 			//Loop trough all clients on the server.
@@ -2678,21 +2677,6 @@ void target_selfdestruct_think(gentity_t *ent) {
 	//	} else {
 	//		G_UseTargets(ent, ent);
 	//	}  
-=======
-
-		//Loop trough all clients on the server.
-		for(i = 0; i < level.numConnectedClients; i++) {
-			client = &g_entities[i];
-			//if (!client->flags &= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
-				G_Damage (client, NULL, NULL, NULL, NULL, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
-		//}
-		//let's hear it
-			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
-		//let's be shakey for a sec... I hope lol ^^
-			trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 999999, (level.time + 1000) ) );
-		}
-	
->>>>>>> origin/master
 	} else if (ent->wait < 0) {
 
 		//we have aborted and the note should be out or ended and everyone should be dead so let's reset
