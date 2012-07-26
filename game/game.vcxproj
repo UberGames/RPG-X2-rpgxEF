@@ -243,6 +243,7 @@
     <ClCompile Include="lgc.c" />
     <ClCompile Include="linit.c" />
     <ClCompile Include="liolib.c" />
+    <ClCompile Include="list.c" />
     <ClCompile Include="llex.c" />
     <ClCompile Include="lmathlib.c" />
     <ClCompile Include="lmem.c" />
@@ -511,6 +512,7 @@
     <ClInclude Include="ldo.h" />
     <ClInclude Include="lfunc.h" />
     <ClInclude Include="lgc.h" />
+    <ClInclude Include="list.h" />
     <ClInclude Include="llex.h" />
     <ClInclude Include="llimits.h" />
     <ClInclude Include="lmem.h" />
