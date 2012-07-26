@@ -2586,27 +2586,25 @@ static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]
 	gentity_t *safePlayers[MAX_GENTITIES];
 	qboolean add = qtrue;
 
-	if(selfdestructSafeZones == NULL) {
+	if(selfdestructSafeZones == NULL || selfdestructSafeZones->length == 0) {
 		return 0;
 	}
 
+	// go through all safe zones and compose a list of sade players
 	iter = list_iterator(selfdestructSafeZones, FRONT);
-	for(i = 0; i < selfdestructSafeZones->length; i++) {
-		sz = (safeZone_t *)list_current(iter);
-
+	for(sz = (safeZone_t *)list_next(iter); sz != NULL; sz = (safeZone_t *)list_next(iter)) {
 		num = trap_EntitiesInBox(sz->mins, sz->maxs, entlist, MAX_GENTITIES);
 		for(n = 0; n < num; n++) {
-			if(g_entities[entlist[n]].client) {
+			if(entlist[n] < g_maxclients.integer) {
 				safePlayers[cur] = &g_entities[entlist[n]];
 				cur++;
 			}
 		}
-
-		list_next(iter);
 	}
 
-	for(i = 0; i < MAX_GENTITIES; i++) {
-		for(n = 0; n < cur + 1; n++) {
+	// now use that information to determines all unsafe players
+	for(i = 0; i < MAX_CLIENTS; i++) {
+		for(n = 0; n < cur; n++) {
 			if(&g_entities[i] == safePlayers[n]) {
 				add = qfalse;
 				break;
@@ -2618,7 +2616,7 @@ static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]
 		}
 	}
 
-	return cur2 + 1;
+	return cur2;
 }
 
 void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
@@ -2703,7 +2701,7 @@ void target_selfdestruct_think(gentity_t *ent) {
 
 	} else if (ent->wait == 0) { //bang time ^^
 		//if we have a target fire that, else kill everyone that is not marked as escaped.
-		if (!ent->target) {
+		if (!ent->target || !ent->target[0]) {
 			int num;
 			gentity_t *ents[MAX_GENTITIES];
 
@@ -2882,17 +2880,18 @@ void SP_target_safezone(gentity_t *ent) {
 		selfdestructSafeZones = create_list();
 	}
 
+	if(!ent->luaEntity) {
+		trap_SetBrushModel(ent, ent->model);
+	}
 	VectorCopy(ent->r.maxs, sz->maxs);
 	VectorCopy(ent->r.mins, sz->mins);
-	sz->maxs[0] += ent->s.origin[0];
-	sz->maxs[1] += ent->s.origin[1];
-	sz->maxs[2] += ent->s.origin[2];
-	sz->mins[0] += ent->s.origin[0];
-	sz->mins[0] += ent->s.origin[0];
-	sz->mins[0] += ent->s.origin[0];
+	VectorAdd(ent->s.origin, ent->r.mins, sz->mins);
+	VectorAdd(ent->s.origin, ent->r.maxs, sz->maxs);
+	ent->r.contents = CONTENTS_NONE;
+	trap_LinkEntity(ent);
 	
 	list_add(selfdestructSafeZones, sz, sizeof(safeZone_s));
 	
-	free(ent);
+	G_FreeEntity(ent);
 }
 
