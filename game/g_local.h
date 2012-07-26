@@ -2055,4 +2055,10 @@ struct luaAlertState_s {
 
 luaAlertState_t *luaAlertState;
 
+typedef struct safeZone_s safeZone_t;
+struct safeZone_s {
+	vec3_t maxs;
+	vec3_t mins;
+} safeZone_s;
+
 #endif //_G_LOCAL_H_

@@ -1,6 +1,7 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 #include "g_local.h"
+#include "list.h"
 //#include <windows.h> //TiM : WTF?
 
 //==========================================================
@@ -2575,6 +2576,51 @@ damage: leveltime of countdowns end
 spawnflags: 1 tells ent to free once aborted
 */
 
+list_p selfdestructSafeZones;
+
+static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]) {
+	int i, n, num, cur = 0, cur2 = 0;
+	list_iter_p iter;
+	safeZone_t* sz;
+	int entlist[MAX_GENTITIES];
+	gentity_t *safePlayers[MAX_GENTITIES];
+	qboolean add = qtrue;
+
+	if(selfdestructSafeZones == NULL) {
+		return 0;
+	}
+
+	iter = list_iterator(selfdestructSafeZones, FRONT);
+	for(i = 0; i < selfdestructSafeZones->length; i++) {
+		sz = (safeZone_t *)list_current(iter);
+
+		num = trap_EntitiesInBox(sz->mins, sz->maxs, entlist, MAX_GENTITIES);
+		for(n = 0; n < num; n++) {
+			if(g_entities[entlist[n]].client) {
+				safePlayers[cur] = &g_entities[entlist[n]];
+				cur++;
+			}
+		}
+
+		list_next(iter);
+	}
+
+	for(i = 0; i < MAX_GENTITIES; i++) {
+		for(n = 0; n < cur + 1; n++) {
+			if(&g_entities[i] == safePlayers[n]) {
+				add = qfalse;
+				break;
+			}
+		}
+		if(add) {
+			ents[cur2] = &g_entities[i];
+			cur2++;
+		}
+	}
+
+	return cur2 + 1;
+}
+
 void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	//with the use-function we're going to init aborts in a fairly simple manner: Fire warning notes...
 	trap_SendServerCommand( -1, va("servermsg \"Self Destruct sequence aborted.\""));
@@ -2657,10 +2703,16 @@ void target_selfdestruct_think(gentity_t *ent) {
 
 	} else if (ent->wait == 0) { //bang time ^^
 		//if we have a target fire that, else kill everyone that is not marked as escaped.
-		//if (!ent->target) {
+		if (!ent->target) {
+			int num;
+			gentity_t *ents[MAX_GENTITIES];
+
+
+			num = target_selfdestruct_get_unsafe_players(ents);
+
 			//Loop trough all clients on the server.
-			for(i = 0; i < level.numConnectedClients; i++) {
-				client = &g_entities[i];
+			for(i = 0; i < num; i++) {
+				client = ents[i];
 				//if (!client->ent&= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
 				G_Damage (client, ent, ent, 0, 0, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
 			}
@@ -2674,9 +2726,9 @@ void target_selfdestruct_think(gentity_t *ent) {
 			ent->wait = -1;
 			ent->nextthink = level.time + 1000;
 			return;
-	//	} else {
-	//		G_UseTargets(ent, ent);
-	//	}  
+		} else {
+			G_UseTargets(ent, ent);
+		}  
 	} else if (ent->wait < 0) {
 
 		//we have aborted and the note should be out or ended and everyone should be dead so let's reset
@@ -2819,3 +2871,28 @@ void SP_target_selfdestruct(gentity_t *ent) {
 
 	trap_LinkEntity(ent);
 }
+
+/*QUAKED target_safezone (1 0 0) ? 
+This is a safezone for the self destruct sequence.
+*/
+void SP_target_safezone(gentity_t *ent) {
+	safeZone_t* sz = (safeZone_t *)malloc(sizeof(safeZone_s));
+
+	if(selfdestructSafeZones == NULL) {
+		selfdestructSafeZones = create_list();
+	}
+
+	VectorCopy(ent->r.maxs, sz->maxs);
+	VectorCopy(ent->r.mins, sz->mins);
+	sz->maxs[0] += ent->s.origin[0];
+	sz->maxs[1] += ent->s.origin[1];
+	sz->maxs[2] += ent->s.origin[2];
+	sz->mins[0] += ent->s.origin[0];
+	sz->mins[0] += ent->s.origin[0];
+	sz->mins[0] += ent->s.origin[0];
+	
+	list_add(selfdestructSafeZones, sz, sizeof(safeZone_s));
+	
+	free(ent);
+}
+
