@@ -2637,12 +2637,12 @@ void target_selfdestruct_think(gentity_t *ent) {
 		for(i = 0; i < level.numConnectedClients; i++) {
 			client = &g_entities[i];
 			//if (!client->flags &= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
-				G_Damage (NULL, NULL, NULL, NULL, NULL, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
+				G_Damage (client, NULL, NULL, NULL, NULL, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
 		//}
 		//let's hear it
-		G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
 		//let's be shakey for a sec... I hope lol ^^
-		trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 999999, (level.time + 1000) ) );
+			trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 999999, (level.time + 1000) ) );
 		}
 	
 	} else if (ent->wait < 0) {
