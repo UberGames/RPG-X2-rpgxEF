@@ -2599,6 +2599,8 @@ void target_selfdestruct_think(gentity_t *ent) {
 	} else {
 		if (ent->wait > 10000 ) {
 			temp = ent->wait - ent->n00bCount;
+		} else if (ent->wait == 0) { //overshot goal...
+			ent->wait = 0; //continue won't work here and I'm not sure about return and break so I'll just do sth pointless...
 		} else {
 			temp = ent->wait - ent->health;
 		}
@@ -2610,10 +2612,30 @@ void target_selfdestruct_think(gentity_t *ent) {
 		//We're doing this to give a new warning, so let's do that. I'll need to do a language switch here sometime...
 		ETAsec = floor(modf((ent->wait / 60000), &ETAmin)*60);
 		if (ent->flags == 1) {
-			if (ETAsec > 0) //If we don't have secs we don't need to state that. 
-				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds.\"", ETAmin, ETAsec));
-			else
-				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin));
+			if (ETAmin > 1) { // stating minutes
+				if (ETAsec > 1) // stating seconds
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds.\"", ETAmin, ETAsec ));
+				if (ETAsec == 1) // stating second
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f second.\"", ETAmin, ETAsec ));
+				if (ETAsec == 0) // stating minutes only
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin ));
+			} 
+			if (ETAmin == 1) { // stating minutes
+				if (ETAsec > 1) // stating seconds
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f seconds.\"", ETAmin, ETAsec ));
+				if (ETAsec == 1) // stating second
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f second.\"", ETAmin, ETAsec ));
+				if (ETAsec == 0) // stating minutes only
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute.\"", ETAmin ));
+			} 
+			if (ETAmin == 0) { // stating minutes
+				if (ETAsec > 1) // stating seconds
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f seconds.\"", ETAsec ));
+				if (ETAsec == 1) // stating second
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f second.\"", ETAsec ));
+				if (ETAsec == 0) // savety measure only
+					trap_SendServerCommand( -1, va("servermsg \"Self Destruct executing.\""));
+			} 
 		}
 
 		// with that out of the way let's set the next think
@@ -2628,26 +2650,36 @@ void target_selfdestruct_think(gentity_t *ent) {
 		}
 
 		//fail horribly if an intervall overshoots bang-time
-		if (ent->nextthink > ent->damage)
+		if (ent->nextthink > ent->damage){
 			ent->nextthink = ent->damage;
+			ent->wait = 0;
+		}
 
 	} else if (ent->wait == 0) { //bang time ^^
-
-		//Loop trough all clients on the server.
-		for(i = 0; i < level.numConnectedClients; i++) {
-			client = &g_entities[i];
-			//if (!client->flags &= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
-				G_Damage (NULL, NULL, NULL, NULL, NULL, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
-		//}
-		//let's hear it
-		G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
-		//let's be shakey for a sec... I hope lol ^^
-		trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 999999, (level.time + 1000) ) );
-		}
-	
+		//if we have a target fire that, else kill everyone that is not marked as escaped.
+		//if (!ent->target) {
+			//Loop trough all clients on the server.
+			for(i = 0; i < level.numConnectedClients; i++) {
+				client = &g_entities[i];
+				//if (!client->ent&= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
+				G_Damage (client, ent, ent, 0, 0, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
+			}
+			//let's hear it
+			G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
+			//let's be shakey for a sec... I hope lol ^^
+			trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", 9999, ( 1000 + ( level.time - level.startTime ) ) ) );
+			//let's clear the lower right corner
+			trap_SendServerCommand( -1, va("servermsg \" \""));
+			//we're done here so let's finish up in a sec.	
+			ent->wait = -1;
+			ent->nextthink = level.time + 1000;
+			return;
+	//	} else {
+	//		G_UseTargets(ent, ent);
+	//	}  
 	} else if (ent->wait < 0) {
 
-		//we have aborted and the note should be out so let's reset
+		//we have aborted and the note should be out or ended and everyone should be dead so let's reset
 		ent->nextthink = -1;
 		ent->wait = ent->splashDamage;
 		//free ent if it was command-spawned
@@ -2687,15 +2719,55 @@ void SP_target_selfdestruct(gentity_t *ent) {
 	//time's set so let's let everyone know that we're counting. I'll need to do a language switch here sometime...
 	ETAsec = floor(modf((ent->wait / 60000), &ETAmin)*60);
 	if (ent->flags == 1) {
-		if (ETAsec > 0) //If we don't have secs we don't need to state that. 
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds.\"", ETAmin, ETAsec));
-		else
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin));
+		if (ETAmin > 1) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds.\"", ETAmin, ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f second.\"", ETAmin, ETAsec ));
+			if (ETAsec == 0) // stating minutes only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin ));
+		} 
+		if (ETAmin == 1) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f seconds.\"", ETAmin, ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f second.\"", ETAmin, ETAsec ));
+			if (ETAsec == 0) // stating minutes only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute.\"", ETAmin ));
+		} 
+		if (ETAmin == 0) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f seconds.\"", ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f second.\"", ETAsec ));
+			if (ETAsec == 0) // savety measure only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct executing.\""));
+		} 
 	} else {
-		if (ETAsec > 0) //If we don't have secs we don't need to state that. 
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %0.f seconds. There will be no further audio warnings.\"", ETAmin, ETAsec));
-		else
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes. There will be no further audio warnings.\"", ETAmin));
+		if (ETAmin > 1) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds. There will be no further audio warnings.\"", ETAmin, ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f second. There will be no further audio warnings.\"", ETAmin, ETAsec ));
+			if (ETAsec == 0) // stating minutes only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes. There will be no further audio warnings.\"", ETAmin ));
+		} 
+		if (ETAmin == 1) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f seconds. There will be no further audio warnings.\"", ETAmin, ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f second. There will be no further audio warnings.\"", ETAmin, ETAsec ));
+			if (ETAsec == 0) // stating minutes only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute. There will be no further audio warnings.\"", ETAmin ));
+		} 
+		if (ETAmin == 0) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f seconds. There will be no further audio warnings.\"", ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f second. There will be no further audio warnings.\"", ETAsec ));
+			if (ETAsec == 0) // savety measure only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct executing.\""));
+		} 
 	}
 
 	ent->r.svFlags |= SVF_BROADCAST;
@@ -2740,8 +2812,10 @@ void SP_target_selfdestruct(gentity_t *ent) {
 	}
 
 	//fail horribly if an intervall overshoots bang-time
-	if (ent->nextthink > ent->damage)
+	if (ent->nextthink > ent->damage){
 		ent->nextthink = ent->damage;
+		ent->wait = 0;
+	}
 
 	trap_LinkEntity(ent);
 }

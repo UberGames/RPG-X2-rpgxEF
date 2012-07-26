@@ -6310,28 +6310,13 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 	#endif
 
 	// Setup command-Execution
-
-	if(trap_Argc() < 1 ) {
-		G_PrintfClient(ent,		"Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]");
-		G_PrintfClient(ent,		"duration: total countdown-duration in seconds.");
-		G_PrintfClient(ent,		"intervall: intervall of audio warnings up to T-60 seconds in seconds.");
-		G_PrintfClient(ent,		"intervall-60: intervall of audio warnings within T-60 seconds in seconds.");
-		G_PrintfClient(ent,		"intervall-10: intervall of audio warnings within T-10 seconds in seconds.");
-		G_PrintfClient(ent,		"audio: set this 0 if you do want a muted countdown, else set this 1.");
-		G_PrintfClient(ent,		"target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.");
-		G_PrintfClient(ent,		"\nUsage: selfdestruct remaining");
-		G_PrintfClient(ent,		"This will give out the remaining countdown-time even if the count is muted.");
-		G_PrintfClient(ent,		"\nUsage: selfdestruct abort");
-		G_PrintfClient(ent,		"This will abort any self destruct running");
-		return;
-	}
 	trap_Argv(1, arg, sizeof(arg));
 
 	if (!Q_stricmp(arg, "start")) {
 		//Is there sth running alrerady?
 		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
 		if(destructEnt) {
-			G_PrintfClient(ent, "There's already a self destruct in progress, aborting setup.");
+			G_PrintfClient(ent, "^1ERROR: There's already a self destruct in progress, aborting setup.");
 			return;
 		}
 
@@ -6353,41 +6338,79 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 			destructEnt->target = G_NewString(arg7);
 		}
 		destructEnt->spawnflags = 1; //tells ent to free once aborted.
-		G_CallSpawn(destructEnt); //Spawn-Function will also manage init, so we need to call that.
+
+		//we need to check a few things here to make sure the entity works properly. Else we free it.
+		if ( destructEnt->wait > 0 || destructEnt->count > 0 || destructEnt->n00bCount > 0 || destructEnt->health > 0 ){ 
+			G_CallSpawn(destructEnt); //Spawn-Function will also manage init, so we need to call that.
+		} else { //sth's wrong so lets tell them what is.
+			G_PrintfClient(ent, "^1ERROR: The following arguments are missing:");
+			if ( destructEnt->wait == 0 )
+				G_PrintfClient(ent, "^1duration must not be 0."); 
+			if ( destructEnt->count == 0 )
+				G_PrintfClient(ent, "^1intervall must not be 0."); 
+			if ( destructEnt->n00bCount == 0 )
+				G_PrintfClient(ent, "^1intervall-60 must not be 0."); 
+			if ( destructEnt->health == 0 )
+				G_PrintfClient(ent, "^1intervall-10 must not be 0."); 
+			G_PrintfClient(ent, "^1Removing entity.");
+			G_FreeEntity(destructEnt);
+		}
 	} else if (!Q_stricmp(arg, "remaining")) {
 		//Is there sth running alrerady?
 		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
 		if(!destructEnt) {
-			G_PrintfClient(ent, "There's no self destruct in progress, aborting call.");
+			G_PrintfClient(ent, "^1ERROR: There's no self destruct in progress, aborting call.");
 			return;
 		}
 
-		//we need the remaining time in minutes and seconds from taht entity. Just ask them off and have the command do the math.
-		ETAsec = floor(modf(((destructEnt->damage - level.time)/60000), &ETAmin)*60); //break it apart, put off the minutes and return the floored secs
-		if (ETAsec > 0) //If we don't have secs we don't need to state that. Need to do a language-switch here...
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %s.0f seconds.\"", ETAmin, ETAsec));
-		else
-			trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin));
+		//we need the remaining time in minutes and seconds from that entity. Just ask them off and have the command do the math.
+		ETAsec = floor(modf((( floor(destructEnt->damage / 1000) - floor(level.time / 1000) ) / 60), &ETAmin)*60); //break it apart, put off the minutes and return the floored secs
+		if (ETAmin > 1) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f seconds.\"", ETAmin, ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes and %.0f second.\"", ETAmin, ETAsec ));
+			if (ETAsec == 0) // stating minutes only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minutes.\"", ETAmin ));
+		} 
+		if (ETAmin == 1) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f seconds.\"", ETAmin, ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute and %.0f second.\"", ETAmin, ETAsec ));
+			if (ETAsec == 0) // stating minutes only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f minute.\"", ETAmin ));
+		} 
+		if (ETAmin == 0) { // stating minutes
+			if (ETAsec > 1) // stating seconds
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f seconds.\"", ETAsec ));
+			if (ETAsec == 1) // stating second
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct in %.0f second.\"", ETAsec ));
+			if (ETAsec == 0) // savety measure only
+				trap_SendServerCommand( -1, va("servermsg \"Self Destruct executing.\""));
+		} 
 	} else if (!Q_stricmp(arg, "abort")) {
 		//Is there sth running alrerady?
 		destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
 		if(!destructEnt) {
-			G_PrintfClient(ent, "There's no self destruct in progress, aborting call.");
+			G_PrintfClient(ent, "^1ERROR: There's no self destruct in progress, aborting call.");
 			return;
 		}
 		destructEnt->use(destructEnt, NULL, NULL); // Use-Function will simply manage the abort
 	} else {
-		G_PrintfClient(ent,		"Error: Invalid command-Argument. Arguments are start, remaining and abort");
-		G_PrintfClient(ent,		"Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]");
-		G_PrintfClient(ent,		"duration: total countdown-duration in seconds.");
-		G_PrintfClient(ent,		"intervall: intervall of audio warnings up to T-60 seconds in seconds.");
-		G_PrintfClient(ent,		"intervall-60: intervall of audio warnings within T-60 seconds in seconds.");
-		G_PrintfClient(ent,		"intervall-10: intervall of audio warnings within T-10 seconds in seconds.");
+		G_PrintfClient(ent,		"^1ERROR: Invalid or no command-Argument. Arguments are start, remaining and abort");
+		G_PrintfClient(ent,		"^3Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [target]");
+		G_PrintfClient(ent,		"duration: total countdown-duration in seconds. Must not be 0.");
+		G_PrintfClient(ent,		"intervall: intervall of audio warnings up to T-60 seconds in seconds. Must not be 0.");
+		G_PrintfClient(ent,		"intervall-60: intervall of audio warnings within T-60 seconds in seconds. Must not be 0.");
+		G_PrintfClient(ent,		"intervall-10: intervall of audio warnings within T-10 seconds in seconds. Must not be 0.");
 		G_PrintfClient(ent,		"audio: set this 0 if you do want a muted countdown, else set this 1.");
-		G_PrintfClient(ent,		"target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will kill all clients.");
-		G_PrintfClient(ent,		"\nUsage: selfdestruct remaining");
-		G_PrintfClient(ent,		"This will give out the remaining countdown-time even if the count is muted.");
-		G_PrintfClient(ent,		"\nUsage: selfdestruct abort");
+		G_PrintfClient(ent,		"target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will play some effects and kill all clients that are not within a target_escapevehicle.");
+		G_PrintfClient(ent,		"^2Hint: Make sure your duration and intervalls are synced up. There is a failsave for the countdown to hit it's mark however there is nothing to make sure that you don't get your warnings at unexpected times...");
+		G_PrintfClient(ent,		"^2Try this for example: selfdestruct start 131 10 10 1 1");
+		G_PrintfClient(ent,		"\n^3Usage: selfdestruct remaining");
+		G_PrintfClient(ent,		"This will give out the remaining countdown-time to all clients even if the count is muted.");
+		G_PrintfClient(ent,		"\n^3Usage: selfdestruct abort");
 		G_PrintfClient(ent,		"This will abort any self destruct running");
 		return;
 	}
