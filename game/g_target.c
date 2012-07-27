@@ -1,7 +1,7 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 #include "g_local.h"
-//#include "list.h"
+#include "list.h"
 //#include <windows.h> //TiM : WTF?
 
 //==========================================================
@@ -2575,10 +2575,6 @@ target: Things to fire once the countdown hits 0
 damage: leveltime of countdowns end
 spawnflags: 1 tells ent to free once aborted
 */
-
-//list_p selfdestructSafeZones;
-
-#if 0
 static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]) {
 	int i, n, num, cur = 0, cur2 = 0;
 	list_iter_p iter;
@@ -2594,6 +2590,9 @@ static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]
 	// go through all safe zones and compose a list of sade players
 	iter = list_iterator(selfdestructSafeZones, FRONT);
 	for(sz = (safeZone_t *)list_next(iter); sz != NULL; sz = (safeZone_t *)list_next(iter)) {
+		if(!sz->active) {
+			continue;
+		}
 		num = trap_EntitiesInBox(sz->mins, sz->maxs, entlist, MAX_GENTITIES);
 		for(n = 0; n < num; n++) {
 			if(entlist[n] < g_maxclients.integer && g_entities[entlist[n]].client) {
@@ -2619,55 +2618,9 @@ static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]
 		}
 	}
 
+	free(iter);
 	return cur2;
 }
-#else 
-static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]) {
-	int i, n, num, cur = 0, cur2 = 0;
-	int entlist[MAX_GENTITIES];
-	gentity_t *safePlayers[MAX_GENTITIES];
-	qboolean add = qtrue;
-	vec3_t maxs, mins;
-	gentity_t *ent;
-
-	// go through all safe zones and compose a list of sade players
-	for(i = 0; i < MAX_GENTITIES; i++) {
-		ent = &g_entities[i];
-		if(!ent || !ent->inuse) {
-			continue;
-		}
-		if(Q_stricmp(ent->classname, "target_safezone") || !ent->count) {
-			continue;
-		}
-		VectorAdd(ent->s.origin, ent->r.maxs, maxs);
-		VectorAdd(ent->s.origin, ent->r.mins, mins);
-		
-		num = trap_EntitiesInBox(mins, maxs, entlist, MAX_GENTITIES);
-		for(n = 0; n < num; n++) {
-			if(entlist[n] < g_maxclients.integer) {
-				safePlayers[cur] = &g_entities[entlist[n]];
-				cur++;
-			}
-		}
-	}
-
-	// now use that information to determines all unsafe players
-	for(i = 0; i < g_maxclients.integer; i++) {
-		for(n = 0; n < cur; n++) {
-			if(&g_entities[i] == safePlayers[n]) {
-				add = qfalse;
-				break;
-			}
-		}
-		if(add) {
-			ents[cur2] = &g_entities[i];
-			cur2++;
-		}
-	}
-
-	return cur2;
-}
-#endif
 
 void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	//with the use-function we're going to init aborts in a fairly simple manner: Fire warning notes...
@@ -2761,7 +2714,6 @@ void target_selfdestruct_think(gentity_t *ent) {
 			//Loop trough all clients on the server.
 			for(i = 0; i < num; i++) {
 				client = ents[i];
-				//if (!client->ent&= FL_ESCAPEPOD) //anyone knowing how to set up this flag?
 				G_Damage (client, ent, ent, 0, 0, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
 			}
 			//let's hear it
@@ -2923,39 +2875,48 @@ void SP_target_selfdestruct(gentity_t *ent) {
 /*QUAKED target_safezone (1 0 0) ? STARTON
 This is a safezone for the self destruct sequence.
 */
-void target_safezone_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-	ent->count = !ent->count;
+void target_safezone_destructor(void *p) {
+	safeZone_t *sz = (safeZone_t *)p;
+
+	if(p == NULL) {
+		return;
+	}
+
+	if(sz->name != NULL) {
+		free(sz->name);
+	}
+	free(sz);
 }
 
 void SP_target_safezone(gentity_t *ent) {
-	/*safeZone_t* sz = (safeZone_t *)malloc(sizeof(safeZone_s));
+	safeZone_t* sz = (safeZone_t *)malloc(sizeof(safeZone_s));
+
+	if(!ent->targetname || !ent->targetname[0]) {
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Safezone without targetname at %s.\n", vtos(ent->s.origin)););
+		return;
+	}
 
 	if(selfdestructSafeZones == NULL) {
 		selfdestructSafeZones = create_list();
-	}*/
+		selfdestructSafeZones->destructor = target_safezone_destructor;
+	}
 
 	if(!ent->luaEntity) {
 		trap_SetBrushModel(ent, ent->model);
 	}
-	/*VectorCopy(ent->r.maxs, sz->maxs);
+	VectorCopy(ent->r.maxs, sz->maxs);
 	VectorCopy(ent->r.mins, sz->mins);
 	VectorAdd(ent->s.origin, ent->r.mins, sz->mins);
-	VectorAdd(ent->s.origin, ent->r.maxs, sz->maxs);*/
+	VectorAdd(ent->s.origin, ent->r.maxs, sz->maxs);
 	ent->r.contents = CONTENTS_NONE;
 	ent->r.svFlags |= SVF_NOCLIENT;
-
-	if(ent->spawnflags & 1) {
-		ent->count = 1;
-	} else {
-		ent->count = 0;
-	}
-
-	ent->use = target_safezone_use;
-
 	trap_LinkEntity(ent);
+	sz->name = (char *)malloc(strlen(ent->targetname)+1);
+	strcpy(sz->name, ent->targetname);
+	sz->active = (qboolean)(ent->spawnflags & 1);
 	
-	/*list_add(selfdestructSafeZones, sz, sizeof(safeZone_s));*/
+	list_add(selfdestructSafeZones, sz, sizeof(safeZone_s));
 	
-	//G_FreeEntity(ent);
+	G_FreeEntity(ent);
 }
 

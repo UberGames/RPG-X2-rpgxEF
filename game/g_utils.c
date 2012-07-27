@@ -339,6 +339,8 @@ gentity_t *G_PickTarget (char *targetname)
  */
 void G_UseTargets2( gentity_t *ent, gentity_t *activator, char *target ) {
 	gentity_t		*t;
+	list_iter_p		szIter;
+	safeZone_t		*sz;
 	
 	if ( !ent ) {
 		return;
@@ -503,6 +505,14 @@ void G_UseTargets2( gentity_t *ent, gentity_t *activator, char *target ) {
 		if ( !ent->inuse ) {
 			G_Printf(va("Entity %i was removed while using targets\n", t->s.number)); /* RPG-X | GSIO01 | 22.10.09: a little bit more information for the mapper */
 			return;
+		}
+	}
+
+	/* self destruct safe zones */
+	szIter = list_iterator(selfdestructSafeZones, FRONT);
+	for(sz = (safeZone_t *)list_next(szIter); sz != NULL; sz = (safeZone_t *)list_next(szIter)) {
+		if(!strcmp(sz->name, target)) {
+			sz->active = (qboolean)!sz->active;
 		}
 	}
 }

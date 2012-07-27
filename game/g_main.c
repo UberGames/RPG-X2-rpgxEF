@@ -2216,6 +2216,11 @@ void G_ShutdownGame( int restart ) {
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		BotAIShutdown( restart );
 	}
+
+	// free self destruct safe zones
+	if(selfdestructSafeZones != NULL) {
+		destroy_list(selfdestructSafeZones);
+	}
 }
 
 

@@ -7,6 +7,7 @@
 #include "q_shared.h"
 #include "bg_public.h"
 #include "g_public.h"
+#include "list.h"
 
 //==================================================================
 
@@ -2055,10 +2056,13 @@ struct luaAlertState_s {
 
 luaAlertState_t *luaAlertState;
 
-/*typedef struct safeZone_s safeZone_t;
+list_p selfdestructSafeZones;
+typedef struct safeZone_s safeZone_t;
 struct safeZone_s {
-	vec3_t maxs;
-	vec3_t mins;
-} safeZone_s;*/
+	char*		name;
+	qboolean	active;
+	vec3_t		maxs;
+	vec3_t		mins;
+} safeZone_s;
 
 #endif //_G_LOCAL_H_
