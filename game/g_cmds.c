@@ -1697,10 +1697,6 @@ static void Cmd_SayArea( gentity_t *ent, char* text)
 
 		if ( trap_InPVS( client->ps.origin, OtherPlayer->client->ps.origin ) )
 		{
-			//XPERIMENTAL
-			/*if(rpg_useLanguages.integer)
-				G_LanguageMod(text, ent->client->ps.clientNum, OtherPlayer->client->ps.clientNum);*/
-
 			//Communicate to the player	
 			G_SayTo( ent, OtherPlayer, SAY_TELL, COLOR_GREEN, va("%s^2: ", pers->netname), text );
 		}

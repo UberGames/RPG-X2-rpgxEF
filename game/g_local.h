@@ -495,17 +495,6 @@ typedef struct {
 	float		pms_height;			//player model system, height
 } clientPersistant_t;
 
-//XPE
-/**
-*	\brief Contains information for a user an experimental system implementing alien languages.
-*
-*/
-typedef struct {
-	int			language;
-	qboolean	hasUniversal;
-} languageData_t;
-//XPE end
-
 /** \struct gclient_s
 *
 *	this structure is cleared on each ClientSpawn(),
@@ -1986,12 +1975,6 @@ void Use_Multi(gentity_t *ent, gentity_t *other, gentity_t *activator);
 
 //OUMS
 
-//XPE
-#define MAX_LANGUAGES 32 //!< Maximum ammoutn of different languages
-int G_AddPlayerLanguage(char *name, int clientNum);
-//extern vmCvar_t rpg_useLanguages;
-//XPE END
-
 /**	\typedef holoData_t
 *	Pointer to \link holoData_s \endlink
 *
@@ -2056,6 +2039,7 @@ struct luaAlertState_s {
 
 luaAlertState_t *luaAlertState;
 
+// self destruct
 list_p selfdestructSafeZones;
 typedef struct safeZone_s safeZone_t;
 struct safeZone_s {

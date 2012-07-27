@@ -359,9 +359,6 @@ vmCvar_t        lua_allowedModules;
 
 vmCvar_t	g_developer;
 
-// XPERIMENTAL
-//vmCvar_t	rpg_useLanguages;
-
 
 static cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -609,8 +606,6 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &rpg_server5, "rpg_server5", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &rpg_server6, "rpg_server6", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &rpg_allowSPLevelChange, "rpg_allowSPLevelChange", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
-	//XPERIMENTAL
-	//{ &rpg_useLanguages, "rpg_useLanguages", "1", CVAR_ARCHIVE, 0, qfalse }
 	
 	{ &dev_showTriggers, "dev_showTriggers", "0", CVAR_ARCHIVE, 0, qfalse }
 	

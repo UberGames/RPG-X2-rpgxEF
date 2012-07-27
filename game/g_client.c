@@ -982,7 +982,6 @@ void ClientUserinfoChanged( int clientNum ) {
 	char	sHeight[10];
 	char	sWeight[10];
 	//int		silentCloak;
-	//int		y; //XPERIMENTAL
 	clientPersistant_t *pers;
 	clientSession_t *sess;
 
