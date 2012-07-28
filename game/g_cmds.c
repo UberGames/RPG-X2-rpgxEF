@@ -7320,19 +7320,6 @@ static void Cmd_spawnTentity_f(gentity_t *ent) {
 	}
 }
 
-/*
-=================
-Cmd_UniversalTrans_f
-=================
-*/
-static void Cmd_UniversalTrans_f(gentity_t *ent) {
-	/*if(!rpg_useLanguages.integer) {
-		trap_SendServerCommand(ent->client->ps.clientNum, "print \"Languages aren't enabled.\n\"");
-		return;
-	}*/
-	ent->client->languages->hasUniversal = !ent->client->languages->hasUniversal;
-}
-
 static void Cmd_UiHolodeck_f(gentity_t *ent) {
 	trap_SendServerCommand(ent-g_entities, "ui_holodeck 1");
 }
@@ -7950,8 +7937,6 @@ void ClientCommand( int clientNum )
 		Cmd_spawnTentity_f(ent);
 	else if (Q_stricmp(cmd, "flushTEnts") == 0)
 		Cmd_flushTentities_f(ent);
-	else if (Q_stricmp(cmd, "universalTrans") == 0)
-		Cmd_UniversalTrans_f(ent);
 	else if (Q_stricmp(cmd, "ui_transporterLoc") == 0)
 		Cmd_UiTransporterLoc_f(ent);
 	else if (Q_stricmp(cmd, "ui_transporterExt") == 0)

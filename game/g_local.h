@@ -586,10 +586,6 @@ struct gclient_s {
 	int			fraggerTime;					//!< For rpg_fraggerSpawnDelay
 												//	RPG-X | Marcin | 03/01/2009
 
-	/*int			playerRace;					//RPG-X | GSIO | experimental implementation of languages and universal translator
-	qboolean	*universalTrans;*/
-	languageData_t *languages;
-
 	// for sql
 	char		*userName;						//!< username (not player name) in the sql database
 	int			uid;							//!< uiser id of the player in the sql database 
