@@ -2068,7 +2068,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		BotAISetup( restart );
 		BotAILoadMap( restart );
-		G_InitBots( restart );
+		G_InitBots( (qboolean)restart );
 	}
 
 	G_InitModRules();
@@ -2160,6 +2160,16 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 			t->nextthink = level.time + 1000;
 		}
 	}
+
+
+#ifdef SQL
+	if(G_Sql_Init()) {
+		G_Printf("SQL initialization successful.\n");
+	} else {
+		G_Printf(S_COLOR_RED "Error: SQL initialization failed!\n");
+	}
+#endif
+
 /*************************************************************************************************/
 
 	G_Printf("                       ,.                      \n");	G_Printf("          ..:,        :Xt.       ,:.            \n");
@@ -2216,6 +2226,10 @@ void G_ShutdownGame( int restart ) {
 	if(selfdestructSafeZones != NULL) {
 		destroy_list(selfdestructSafeZones);
 	}
+
+#ifdef SQL
+	G_Sql_Shutdown();
+#endif
 }
 
 

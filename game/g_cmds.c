@@ -2,6 +2,7 @@
 //
 
 #include "g_local.h"
+#include "g_sql.h"
 
 //#include <windows.h>
 
@@ -246,7 +247,7 @@ static void Cmd_Give_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 1) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_GIVE) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -440,7 +441,7 @@ static void Cmd_God_f (gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 2) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_GOD) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -493,7 +494,7 @@ static void Cmd_Noclip_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 4) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_NOCLIP) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -1205,7 +1206,7 @@ static void Cmd_Cloak_f( gentity_t *ent )
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 8) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_CLOAK) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -1257,7 +1258,7 @@ static void Cmd_EvoSuit_f( gentity_t *ent )
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 16) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_EVOSUIT) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -1298,7 +1299,7 @@ static void Cmd_Flight_f( gentity_t *ent )
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 32) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FLIGHT) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -1981,7 +1982,7 @@ void Cmd_ForceVote_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 536870912) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCEVOTE) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2079,7 +2080,7 @@ void Cmd_ForceName_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 64) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCENAME) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2171,7 +2172,7 @@ void Cmd_ShakeCamera_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 1073741824) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_SHAKE) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2258,7 +2259,7 @@ void Cmd_ForceClass_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 268435456) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCECLASS) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2351,7 +2352,7 @@ void Cmd_ForceKill_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 128) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCEKILL) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2482,7 +2483,7 @@ void Cmd_ForceKillRadius_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 128) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCEKILL) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2606,7 +2607,7 @@ void Cmd_TargetKick_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 256) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_KICK) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2680,7 +2681,7 @@ void Cmd_Drag_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 512) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_DRAG) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2799,7 +2800,7 @@ void Cmd_UnDrag_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 512) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_DRAG) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -2964,7 +2965,7 @@ void Cmd_disarm_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 1024) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_DISARM) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3164,7 +3165,7 @@ void Cmd_ForceRank_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 2048) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCERANK) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3434,7 +3435,7 @@ void Cmd_Revive_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 4096) || !rpg_medicsrevive.integer ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_REVIVE) || !rpg_medicsrevive.integer ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3599,7 +3600,7 @@ void Cmd_n00b_f( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 8192) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_NOOB) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3663,7 +3664,7 @@ static void Cmd_admin_message( gentity_t *ent)
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 16384) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_MESSAGE) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3728,7 +3729,7 @@ static void Cmd_ForceModel_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 32768) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCEMODEL) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3802,7 +3803,7 @@ static void Cmd_PlayMusic_f( gentity_t *ent )
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 65536) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, 65536) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3841,7 +3842,7 @@ static void Cmd_StopMusic_f( gentity_t *ent )
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 65536) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_MUSIC) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3869,7 +3870,7 @@ static void Cmd_PlaySound_f( gentity_t *ent )
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 131072) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_SOUND) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -3972,7 +3973,7 @@ static void Cmd_UseEnt_f ( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 262144) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_USEENT) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -4058,7 +4059,7 @@ void Cmd_EntList_f ( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 2147483648) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_USEENT) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -4320,7 +4321,7 @@ void Cmd_BeamToLoc_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 524288) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_BEAM) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -4495,7 +4496,7 @@ void Cmd_ForcePlayer_f ( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 1048576) ) {
+	if ( !IsAdmin( ent ) || G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCEPLAYER) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -4603,7 +4604,7 @@ void Cmd_BeamToPlayer_f( gentity_t	*ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 524288) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_BEAM) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -5075,7 +5076,7 @@ void Cmd_fxGun_f ( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 2097152) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FX) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -5313,7 +5314,7 @@ void Cmd_flushFX_f( gentity_t	*ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 2097152) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FX) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -5337,7 +5338,7 @@ void Cmd_spawnChar_f( gentity_t	*ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 4194304) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_CHARS) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -5372,7 +5373,7 @@ void Cmd_fluchChars_f( gentity_t *ent ) //GSIO01: fluch Chars ehhh? you know flu
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 4194304) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_CHARS) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -5411,9 +5412,9 @@ void Cmd_flushDropped_f( gentity_t *ent )
 
 	trap_Argv( 1, arg, sizeof(arg) );
 	if ( !arg[0] ) {
-		ans = 0;
+		ans = (qboolean)0;
 	} else {
-		ans = atoi( arg );
+		ans = (qboolean)atoi( arg );
 	}
 
 	for ( i=0, locEnt=g_entities; i < level.num_entities; locEnt++, i++ ) {
@@ -5453,7 +5454,7 @@ static void Cmd_Kick2_f( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 256) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_KICK) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -5557,7 +5558,7 @@ static void Cmd_ClampInfo_f( gentity_t* ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 8388608) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_CLAMP) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -5914,7 +5915,7 @@ static void Cmd_lockDoor_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 16777216) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_CLAMP) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6000,7 +6001,7 @@ static void Cmd_ffColor_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 33554432) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FFSTUFF) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6084,7 +6085,7 @@ static void Cmd_unlockAll_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 16777216) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_LOCK) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6137,7 +6138,7 @@ static void Cmd_lockAll_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 16777216) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_LOCK) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6170,7 +6171,7 @@ static void Cmd_changeFreq(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 33554432) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FFSTUFF) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6218,7 +6219,7 @@ static void Cmd_alert_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 67108864) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_ALERT) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6299,7 +6300,7 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, /*need to fill this*/ ) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, /*need to fill this*/-1 ) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6433,7 +6434,7 @@ static void Cmd_admin_centerprint_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 16384) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_MESSAGE) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6685,7 +6686,7 @@ static void Cmd_flushTentities_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 134217728) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_TESS) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -6750,7 +6751,7 @@ static void Cmd_spawnTentity_f(gentity_t *ent) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || !qboolean G_Sql_UserDB_CheckRight(ent->client->uid, 134217728) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_TESS) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -7448,7 +7449,8 @@ static void UI_DEBUG(gentity_t *ent) {
 	G_Printf(S_COLOR_GREEN "%s\n", arg);
 }
 
-#ifdef OLDSQL // SQL
+#define SQL
+#ifdef SQL
 /*
 =================
 Cmd_SqlLogin_f
@@ -7457,7 +7459,7 @@ Cmd_SqlLogin_f
 static void Cmd_SqlLogin_f(gentity_t *ent) {
 	char uName[MAX_TOKEN_CHARS];
 	char pwd[MAX_TOKEN_CHARS];
-	int res;
+	qboolean res;
 	int clientNum;
 	gclient_t *client;
 
@@ -7473,24 +7475,98 @@ static void Cmd_SqlLogin_f(gentity_t *ent) {
 	trap_Argv(1, uName, sizeof(uName));
 	trap_Argv(2, pwd, sizeof(pwd));
 
-	res = trap_SQL_UserLogin(sql_dbName.string, uName, pwd);
+	res = G_Sql_UserDB_Login(uName, pwd, clientNum);
 
-	if(res > 0) {
+	if(res) {
 		trap_SendServerCommand(clientNum, "print \"Login Successful.\n\"");
-		client->uid = res;
-		res = trap_SQL_UserCheckRight(sql_dbName.string, client->uid, "admin");
-		if(res) {
-			client->LoggedAsAdmin = qtrue;
-			ClientUserinfoChanged(clientNum);
-			trap_SendServerCommand(clientNum, "print \"You have been grated full admin access.\n\"");
-		}
-	} else if (res == 0) {
-		trap_SendServerCommand(clientNum, "print \"Login failed. An SQL error occured.\n\"");
 	} else {
 		trap_SendServerCommand(clientNum, "print \"Login failed. Wrong password or username?\n\"");
 	}
 }
 
+/*
+=================
+Cmd_SqlUserAdd_f
+=================
+*/
+static void Cmd_SqlUserAdd_f(gentity_t *ent) {
+	char uName[MAX_TOKEN_CHARS];
+	char password[MAX_TOKEN_CHARS];
+	qboolean res;
+
+	if(!sql_use.integer || !ent || !ent->client) return;
+
+	if(!IsAdmin(ent)) {
+		return;
+	}
+
+	if(trap_Argc() < 2) {
+		return;
+	}
+
+	trap_Argv(1, uName, sizeof(uName));
+	trap_Argv(2, password, sizeof(password));
+
+	res = G_Sql_UserDB_Add(uName, password);
+
+	if(!res) {
+		trap_SendServerCommand(ent->client->ps.clientNum, "print \"User could not be added.\n\"");
+	} else {
+		trap_SendServerCommand(ent->client->ps.clientNum, va("print \"User was added.\n\""));
+	}
+}
+
+/*
+=================
+Cmd_SqlUserMod_f
+=================
+*/
+static void Cmd_SqlUserMod_f(gentity_t *ent) {
+	char uName[MAX_TOKEN_CHARS];
+	char right[MAX_TOKEN_CHARS];
+	long lright;
+	int value;
+	qboolean res;
+	int clientNum;
+
+	if(!sql_use.integer || !ent || !ent->client) return;
+
+	if(!IsAdmin(ent)) {
+		return;
+	}	
+
+	if(trap_Argc() < 3) {
+		return;
+	}
+
+	clientNum = ent->client->ps.clientNum;
+
+	trap_Argv(3, uName, sizeof(uName));
+	value = atoi(uName);
+	trap_Argv(1, uName, sizeof(uName));
+	trap_Argv(2, right, sizeof(right));
+
+	/* TODO finish me */
+	res = qfalse;
+
+	switch(res) {
+		case 1:
+			trap_SendServerCommand(clientNum, "print \"Seems to have worked.\n\"");
+			break;
+		case 2:
+			trap_SendServerCommand(clientNum, "print \"User does not exist.\n\"");
+			break;
+		case 3:
+			trap_SendServerCommand(clientNum, "print \"No entry for user found. Created one.\n\"");
+			break;
+		case 0:
+			trap_SendServerCommand(clientNum, "print \"An SQL Error occured, check server log for more information.\n\"");
+			break;
+	}
+}
+#endif
+
+#ifdef OLDSQL
 /*
 =================
 Cmd_SqlSetup_f
@@ -7516,89 +7592,6 @@ static void Cmd_SqlSetup_f(gentity_t *ent) {
 			break;
 		case 0:
 			trap_SendServerCommand(clientNum, "print \"An SQL Error occured, see server log for more information.\n\"");
-			break;
-	}
-}
-
-/*
-=================
-Cmd_SqlUserAdd_f
-=================
-*/
-static void Cmd_SqlUserAdd_f(gentity_t *ent) {
-	char uName[MAX_TOKEN_CHARS];
-	char password[MAX_TOKEN_CHARS];
-	int res;
-	int clientNum;
-
-	if(!sql_use.integer || !ent || !ent->client) return;
-
-	if(!IsAdmin(ent)) {
-		return;
-	}
-
-	if(trap_Argc() < 2) {
-		return;
-	}
-
-	clientNum = ent->client->ps.clientNum;
-
-	trap_Argv(1, uName, sizeof(uName));
-	trap_Argv(2, password, sizeof(password));
-
-	res = trap_SQL_UserAdd(sql_dbName.string, uName, password);
-
-	if(res <= 0) {
-			trap_SendServerCommand(clientNum, "print \"An SQL Error occured, serr server lof gor more information.\n\"");
-			return;
-	} else {
-			trap_SendServerCommand(clientNum, va("print \"The user %s was added with ID %i.\n\"", uName, res));
-	}
-}
-
-/*
-=================
-Cmd_SqlUserMod_f
-=================
-*/
-static void Cmd_SqlUserMod_f(gentity_t *ent) {
-	char uName[MAX_TOKEN_CHARS];
-	char right[MAX_TOKEN_CHARS];
-	int value;
-	int res;
-	int clientNum;
-
-	if(!sql_use.integer || !ent || !ent->client) return;
-
-	if(!IsAdmin(ent)) {
-		return;
-	}	
-
-	if(trap_Argc() < 3) {
-		return;
-	}
-
-	clientNum = ent->client->ps.clientNum;
-
-	trap_Argv(3, uName, sizeof(uName));
-	value = atoi(uName);
-	trap_Argv(1, uName, sizeof(uName));
-	trap_Argv(2, right, sizeof(right));
-
-	res = trap_SQL_UserMod(sql_dbName.string, uName, right, value);
-
-	switch(res) {
-		case 1:
-			trap_SendServerCommand(clientNum, "print \"Seems to have worked.\n\"");
-			break;
-		case 2:
-			trap_SendServerCommand(clientNum, "print \"User does not exist.\n\"");
-			break;
-		case 3:
-			trap_SendServerCommand(clientNum, "print \"No entry for user found. Created one.\n\"");
-			break;
-		case 0:
-			trap_SendServerCommand(clientNum, "print \"An SQL Error occured, check server log for more information.\n\"");
 			break;
 	}
 }
@@ -7945,15 +7938,19 @@ void ClientCommand( int clientNum )
 		Cmd_UiHolodeck_f(ent);
 	else if (Q_stricmp(cmd, "ui_debug") == 0)
 		UI_DEBUG(ent);
-	#ifdef OLDSQL // SQL
+#ifdef SQL
 	else if (Q_stricmp(cmd, "userlogin") == 0)
 		Cmd_SqlLogin_f(ent);
-	else if (Q_stricmp(cmd, "sql_setup") == 0)
-		Cmd_SqlSetup_f(ent);
 	else if (Q_stricmp(cmd, "userAdd") == 0)
 		Cmd_SqlUserAdd_f(ent);
 	else if (Q_stricmp(cmd, "userMod") == 0)
 		Cmd_SqlUserMod_f(ent);
+#endif
+	#ifdef OLDSQL // SQL
+	else if (Q_stricmp(cmd, "sql_setup") == 0)
+		Cmd_SqlSetup_f(ent);
+	else if (Q_stricmp(cmd, "userAdd") == 0)
+		Cmd_SqlUserAdd_f(ent);
 	else if (Q_stricmp(cmd, "userDel") == 0)
 		Cmd_SqlUserDel_f(ent);
 	#endif

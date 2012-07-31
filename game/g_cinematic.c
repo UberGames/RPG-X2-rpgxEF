@@ -24,6 +24,7 @@ void Cinematic_ActivateCameraMode(gentity_t *ent, gentity_t *target) {
 	VectorCopy(ent->r.currentOrigin, client->origOrigin);
 	SetClientViewAngle(ent, target->s.angles);
 	G_SetOrigin(ent, target->r.currentOrigin);
+	VectorCopy(target->r.currentOrigin, ent->client->ps.origin);
 	trap_LinkEntity(ent);
 }
 

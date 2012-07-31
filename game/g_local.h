@@ -15,6 +15,11 @@
 //#define	GAMEVERSION	"RPG-X v",RPGX_VERSION
 //const char	GAMEVERSION[] = strcat("RPG-X v",RPGX_VERSION);
 #define GAMEVERSION			"rpg-x2"
+
+#ifndef BASEPATH
+#define BASEPATH			"rpgxEF"
+#endif
+
 //#define RPGX_SERECT_PASS	"HRkq1yF22o06Zng9FZXH5sle"	//"��������ƫ�������ŵ���� ���"
 
 #define BODY_QUEUE_SIZE		8
@@ -979,6 +984,7 @@ qboolean	G_Sql_UserDB_AddRight(int uid, int right);
 qboolean	G_Sql_UserDB_RemoveRight(int uid, int right);
 qboolean	G_Sql_UserDB_Del(const char *uName);
 qboolean	G_Sql_UserDB_Login(const char *uName, const char *pwd, int clientnum);
+int			G_Sql_UserDB_GetUID(const char *uName);
 
 //RPG-X: J2J - Nice neat struct to hold info for admin tricorder transport..//////
 //TiM: I may be a complete nutter here, but I'm gonna try and mod this to see if we can mosey SP transportery FX in here

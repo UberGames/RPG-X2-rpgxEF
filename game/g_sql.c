@@ -11,15 +11,15 @@
 #include "g_local.h"
 #include "md5.h"
 
-extern vmCvar_t sql_dbName;
-extern vmCvar_t sql_use;
-extern vmCvar_t sql_server;
-extern vmCvar_t sql_user;
-extern vmCvar_t sql_password;
-extern vmCvar_t sql_port;
+//extern vmCvar_t sql_dbName;
+//extern vmCvar_t sql_use;
+//extern vmCvar_t sql_server;
+//extern vmCvar_t sql_user;
+//extern vmCvar_t sql_password;
+//extern vmCvar_t sql_port;
 
-extern void QDECL G_Printf( const char *fmt, ... );
-extern void QDECL G_PrintfClient( gentity_t *ent, const char *fmt, ...);
+//extern void QDECL G_Printf( const char *fmt, ... );
+//extern void QDECL G_PrintfClient( gentity_t *ent, const char *fmt, ...);
 
 sqlite3	*user_db;
 qboolean sql_ready = qfalse;
@@ -111,9 +111,9 @@ qboolean G_Sql_Init(void) {
 
 	if(!sql_use.integer) return qtrue;
 
-	res = sqlite3_open("db/users.db", &user_db);
+	res = sqlite3_open(BASEPATH "/db/users.db", &user_db);
 	if(res != SQLITE_OK) {
-		G_Printf(S_COLOR_RED "SQL ERROR: %s\n", sqlite3_errmsg(user_db));
+		G_Printf(S_COLOR_RED "[SQL-Error] %s\n", sqlite3_errmsg(user_db));
 		return qfalse;
 	}
 
@@ -171,6 +171,7 @@ G_Sql_Shutdown
 void G_Sql_Shutdown(void) {
 
 	if(!sql_use.integer) return;
+	if(sql_ready == qfalse) return;
 
 	sql_ready = qfalse;
 	sqlite3_close(user_db);
@@ -184,6 +185,11 @@ G_Sql_UserDB_Del
 qboolean G_Sql_UserDB_Del(const char *uName) {
 	sqlite3_stmt *stmt;
 	int res, id = -1;
+
+	if(!sql_ready) {
+		G_Printf(S_COLOR_RED "[SQL-Error] SQL is not initialized!\n");
+		return qfalse;
+	}
 
 	res = sqlite3_prepare_v2(user_db, "SELECT id FROM rpgx_users WHERE username = :UNAME", -1, &stmt, 0);
 	if(G_Sql_Check_PrepareReturn(res)) {
@@ -211,7 +217,7 @@ qboolean G_Sql_UserDB_Del(const char *uName) {
 	sqlite3_finalize(stmt);
 
 	if(id == -1) {
-		G_Printf(S_COLOR_RED "SQL ERROR: no user %s found\n", uName);
+		G_Printf(S_COLOR_RED "[SQL-Error] No user %s found\n", uName);
 		return qfalse;
 	}
 
@@ -251,10 +257,15 @@ qboolean G_Sql_UserDB_Del(const char *uName) {
 G_Sql_UserAdd
 ===============
 */
-qboolean Do_Sql_UserAdd(const char *uName, const char *password) {
+qboolean G_Sql_UserDB_Add(const char *uName, const char *password) {
 	sqlite3_stmt *stmt;
 	int res, id;
 	char *hashedpw;
+
+	if(!sql_ready) {
+		G_Printf(S_COLOR_RED "[SQL-Error] SQL is not initialized!\n");
+		return qfalse;
+	}
 
 	res = sqlite3_prepare_v2(user_db, SQL_USER_GET_UID, -1, &stmt, 0);
 	if(G_Sql_Check_PrepareReturn(res)) {
@@ -339,10 +350,15 @@ qboolean Do_Sql_UserAdd(const char *uName, const char *password) {
 G_Sql_UserDB_login
 ===============
 */
-qboolean G_Sql_UserDB_login(const char *uName, const char *pwd, int clientnum) {
+qboolean G_Sql_UserDB_Login(const char *uName, const char *pwd, int clientnum) {
 	sqlite3_stmt *stmt;
 	int res, id;
 	char *hashedpw;
+
+	if(!sql_ready) {
+		G_Printf(S_COLOR_RED "[SQL-Error] SQL is not initialized!\n");
+		return qfalse;
+	}
 
 	res = sqlite3_prepare_v2(user_db, SQL_USER_LOGIN, -1, &stmt, 0);
 	if(G_Sql_Check_PrepareReturn(res)) {
@@ -368,12 +384,37 @@ qboolean G_Sql_UserDB_login(const char *uName, const char *pwd, int clientnum) {
 	if(res == SQLITE_ROW) {
 		id = sqlite3_column_int(stmt, 0);
 		level.clients[clientnum].uid = id;
-		return qtrue;
 	} else {
 		return qfalse;
 	}
 
-	return qfalse;
+	res = sqlite3_prepare_v2(user_db, SQL_USER_CHECK_ADMIN, -1, &stmt, 0);
+	if(G_Sql_Check_PrepareReturn(res)) {
+		level.clients[clientnum].uid = -1;
+		return qfalse;
+	}
+
+	res = sqlite3_bind_int(stmt, 1, id);
+	if(G_Sql_Check_BindReturn(res)) {
+		level.clients[clientnum].uid = -1;
+		return qfalse;
+	}
+
+	res = sqlite3_step(stmt);
+	if(G_Sql_Check_StepReturn(res)) {
+		level.clients[clientnum].uid = -1;
+		return qfalse;
+	}
+
+	if(res == SQLITE_ROW) {
+		level.clients[clientnum].LoggedAsAdmin = qtrue;
+	} else {
+		level.clients[clientnum].uid = -1;
+		return qfalse;
+	}
+
+
+	return qtrue;
 }
 
 /*
@@ -385,6 +426,11 @@ qboolean G_Sql_UserDB_CheckRight(int uid, int right) {
 	sqlite3_stmt *stmt;
 	int res;
 	long rights;
+
+	if(!sql_ready) {
+		G_Printf(S_COLOR_RED "[SQL-Error] SQL is not initialized!\n");
+		return qfalse;
+	}
 
 	res = sqlite3_prepare_v2(user_db, SQL_USER_GET_RIGHTS, -1, &stmt, 0);
 	if(G_Sql_Check_PrepareReturn(res)) {
@@ -404,14 +450,18 @@ qboolean G_Sql_UserDB_CheckRight(int uid, int right) {
 	if(res == SQLITE_ROW) {
 		rights = (long)sqlite3_column_int64(stmt, 0);
 		if(right & right) {
+			sqlite3_finalize(stmt);
 			return qtrue;
 		} else {
+			sqlite3_finalize(stmt);
 			return qfalse;
 		}
 	} else {
+		sqlite3_finalize(stmt);
 		return qfalse;
 	}
 
+	sqlite3_finalize(stmt);
 	return qfalse;
 }
 
@@ -424,6 +474,11 @@ qboolean G_Sql_UserDB_AddRight(int uid, int right) {
 	sqlite3_stmt *stmt;
 	int res;
 	long rights;
+
+	if(!sql_ready) {
+		G_Printf(S_COLOR_RED "[SQL-Error] SQL is not initialized!\n");
+		return qfalse;
+	}
 
 	res = sqlite3_prepare_v2(user_db, SQL_USER_GET_RIGHTS, -1, &stmt, 0);
 	if(G_Sql_Check_PrepareReturn(res)) {
@@ -440,10 +495,9 @@ qboolean G_Sql_UserDB_AddRight(int uid, int right) {
 	} else {
 		return qfalse;
 	}
+	sqlite3_finalize(stmt);
 
 	rights |= right;
-
-		rights |= right;
 
 	res = sqlite3_prepare_v2(user_db, SQL_USER_MOD_RIGHTS, -1, &stmt, 0);
 	if(G_Sql_Check_PrepareReturn(res)) {
@@ -465,6 +519,7 @@ qboolean G_Sql_UserDB_AddRight(int uid, int right) {
 		return qfalse;
 	}
 
+	sqlite3_finalize(stmt);
 	return qtrue;
 }
 
@@ -477,6 +532,11 @@ qboolean G_Sql_UserDB_RemoveRight(int uid, int right) {
 	sqlite3_stmt *stmt;
 	int res;
 	long rights;
+
+	if(!sql_ready) {
+		G_Printf(S_COLOR_RED "[SQL-Error] SQL is not initialized!\n");
+		return qfalse;
+	}
 
 	res = sqlite3_prepare_v2(user_db, SQL_USER_MOD_RIGHTS, -1, &stmt, 0);
 	if(G_Sql_Check_PrepareReturn(res)) {
@@ -493,6 +553,7 @@ qboolean G_Sql_UserDB_RemoveRight(int uid, int right) {
 	} else {
 		return qfalse;
 	}
+	sqlite3_finalize(stmt);
 
 	rights &= right;
 
@@ -516,7 +577,43 @@ qboolean G_Sql_UserDB_RemoveRight(int uid, int right) {
 		return qfalse;
 	}
 
+	sqlite3_finalize(stmt);
 	return qtrue;	
+}
+
+/*
+===============
+G_Sql_UserDB_GetUID
+===============
+*/
+int	G_Sql_UserDB_GetUID(const char *uName) {
+	sqlite3_stmt *stmt;
+	int res;
+	int uid;
+
+	if(!uName || !uName[0] || !sql_ready) {
+		return -1;
+	}
+
+	res = sqlite3_prepare_v2(user_db, SQL_USER_GET_UID, -1, &stmt, 0);
+	if(G_Sql_Check_PrepareReturn(res)) {
+		return -1;
+	}
+
+	res = sqlite3_bind_text(stmt, 1, uName, sizeof(uName), SQLITE_STATIC);
+	if(G_Sql_Check_BindReturn(res)) {
+		return -1;
+	}
+
+	res = sqlite3_step(stmt);
+	if(res == SQLITE_ROW) {
+		uid = sqlite3_column_int(stmt, 0);
+	} else {
+		return -1;
+	}
+
+	sqlite3_finalize(stmt);
+	return uid;
 }
 
 #endif //SQL

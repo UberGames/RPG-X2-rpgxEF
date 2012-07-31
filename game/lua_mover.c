@@ -366,6 +366,7 @@ static const luaL_Reg lib_mover[] = {
 	{"HaltAngles", Mover_HaltAngles},
 	{"AsTrain", Mover_AsTrain},
 	{"SetPosition", Mover_SetPosition},
+	{"SetOrigin", Mover_SetPosition},
 	{"ToPosition", Mover_ToPosition},
 	{"SetAngles", Mover_SetAngles},
 	{"ToAngles", Mover_ToAngles},

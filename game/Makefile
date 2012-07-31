@@ -62,6 +62,7 @@ OBJ = \
   g_items.o \
   g_fx.o \
   g_combat.o \
+  g_sql.o \
   g_cmds.o \
   g_client.o \
   g_breakable.o \
@@ -69,7 +70,6 @@ OBJ = \
   g_arenas.o \
   g_active.o \
   g_cinematic.o \
-  g_sql.o \
   bg_slidemove.o \
   bg_pmove.o \
   bg_oums.o \

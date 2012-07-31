@@ -21,7 +21,7 @@
 #define SQL_USER_DELETE 			"DELETE FROM rpgx_users WHERE username = :UNAME"
 #define SQL_USER_DELTE_RIGHTS 			"DELETE FROM rpgx_userRights WHERE id = :ID"
 #define SQL_USER_ADD 				"INSERT INTO rpgx_users VALUES(NULL,:USERNAME,:PASSWORD)"
-#define SQL_USER_ADD_RIGHTS 			"INSERT INTO rpgx_userRights VALUES(NULL, 0, 0, :ID)"
+#define SQL_USER_ADD_RIGHTS 			"INSERT INTO rpgx_userRights VALUES(:ID, 0, 0)"
 #define SQL_USER_MOD_RIGHTS 			"UPDATE rpgx_userRights SET rights = :RIGHTS WHERE id = :ID"
 #define SQL_USER_GET_RIGHTS 			"SELECT rights FROM rpgx_userRights WHERE id = :ID"
 #define SQL_USER_CHECK_ADMIN 			"SELECT admin FROM rpgx_userRights WHERE id = :ID"
@@ -62,7 +62,7 @@ typedef enum {
 	SQLF_FORCECLASS			= 268435456,
 	SQLF_FORCEVOTE			= 536870912,
 	SQLF_SHAKE			= 1073741824,
-	SQLF_ENTLIST			= 2147483648
+	//SQLF_ENTLIST			= 2147483648 // that is to big ... using SQLF_USEENT for entitylist as it makes sense
 } sql_userflags;
 
 #endif // _G_SQL_H_
