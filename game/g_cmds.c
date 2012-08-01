@@ -4496,7 +4496,7 @@ void Cmd_ForcePlayer_f ( gentity_t *ent ) {
 		return;
 	}
 	#else
-	if ( !IsAdmin( ent ) || G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCEPLAYER) ) {
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_FORCEPLAYER) ) {
 		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
 		return;
 	}
@@ -7449,7 +7449,6 @@ static void UI_DEBUG(gentity_t *ent) {
 	G_Printf(S_COLOR_GREEN "%s\n", arg);
 }
 
-#define SQL
 #ifdef SQL
 /*
 =================

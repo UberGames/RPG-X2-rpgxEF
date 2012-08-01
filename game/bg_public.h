@@ -167,8 +167,6 @@ typedef enum
 #define CS_RED_GROUP		16		//!< used to send down what the group the red team is
 #define CS_BLUE_GROUP		17		//!< used to send down what the group the blue team is
 
-#define CS_SHADERSTATE		180 		//!< used for shader remapping
-
 #define	CS_ITEMS			27		//!< string of 0's and 1's that tell which items are present
 //TiM: Ooooh! a gap between 27 + 32! Exploitationism!
 #define CS_CAMERA_SHAKE		28		//!<holds the intensity + duration for camera shakes.
@@ -176,8 +174,8 @@ typedef enum
 #define CS_CON_FAIL			29		//!<If a connection fails - Display this message
 #define CS_CLASS_DATA		30		//!<Class data passed to the client from the server (to allow players not requiring class data locally)
 #define CS_TURBOLIFT_DATA	31
-
-#define	CS_MODELS			32
+#define CS_SHADERSTATE		32 		//!< used for shader remapping
+#define	CS_MODELS			33
 #define	CS_SOUNDS			(CS_MODELS+MAX_MODELS)
 #define	CS_PLAYERS			(CS_SOUNDS+MAX_SOUNDS)
 #define CS_LOCATIONS		(CS_PLAYERS+MAX_CLIENTS)

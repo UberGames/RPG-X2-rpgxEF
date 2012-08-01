@@ -111,6 +111,8 @@ typedef enum {
 	CG_MEMORY_REMAINING,
     CG_R_REGISTERSHADER3D,  //59
     CG_CVAR_SET_NO_MODIFY,  // 60
+	CG_R_REMAP_SHADER,
+
 	CG_MEMSET = 100,
 	CG_MEMCPY,
 	CG_STRNCPY,
@@ -122,7 +124,6 @@ typedef enum {
 	CG_CEIL,
 	CG_TESTPRINTINT,
 	CG_TESTPRINTFLOAT,
-	CG_R_REMAP_SHADER = 200, /* shader remapping */
 } cgameImport_t;
 //these must match up with cg_syscalls.asm
 
