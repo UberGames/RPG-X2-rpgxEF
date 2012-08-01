@@ -13,7 +13,7 @@ Gives all the weapons specified here in the list.
 EG "WP_5 | WP_14" etc
 (Don't forget the spaces!)
 */
-void Use_Target_Give( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
+static void Use_Target_Give( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	int			i;
 	playerState_t *ps = &activator->client->ps;
 
@@ -87,7 +87,7 @@ void SP_target_give( gentity_t *ent )
 	ent->use = Use_Target_Give;
 
 	// don't need to send this to clients
-	ent->r.svFlags &= SVF_NOCLIENT;
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 
@@ -98,7 +98,7 @@ void SP_target_give( gentity_t *ent )
 takes away all the activators powerups.
 Used to drop flight powerups into death puts.
 */
-void Use_target_remove_powerups( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
+static void Use_target_remove_powerups( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	if ( !activator || !activator->client ) {
 		return;
 	}
@@ -114,6 +114,10 @@ void Use_target_remove_powerups( gentity_t *ent, gentity_t *other, gentity_t *ac
 
 void SP_target_remove_powerups( gentity_t *ent ) {
 	ent->use = Use_target_remove_powerups;
+
+	// don't need to send this to clients
+	ent->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(ent);
 }
 
 
@@ -125,7 +129,7 @@ SELF   use the entity as activator instead of it's own activator when using it's
 "wait" seconds to pause before firing targets.
 "random" delay variance, total delay = delay +/- random seconds
 */
-void Think_Target_Delay( gentity_t *ent ) {
+static void Think_Target_Delay( gentity_t *ent ) {
 	#ifdef G_LUA
 	if(ent->luaTrigger)
 	{
@@ -145,7 +149,7 @@ void Think_Target_Delay( gentity_t *ent ) {
 		G_UseTargets( ent, ent->activator );
 }
 
-void Use_Target_Delay( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
+static void Use_Target_Delay( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 	ent->nextthink = level.time + ( ent->wait + ent->random * crandom() ) * 1000;
 	ent->think = Think_Target_Delay;
 	ent->activator = activator;
@@ -161,7 +165,7 @@ void SP_target_delay( gentity_t *ent ) {
 	ent->use = Use_Target_Delay;
 
 	// don't need to send this to clients
-	ent->r.svFlags &= SVF_NOCLIENT;
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 
@@ -176,7 +180,7 @@ TEAMSCORE - points are added to activator's team's score, not the individual
 The activator is given this many points.
 */
 void Team_AddScore( int team, int points );
-void Use_Target_Score (gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void Use_Target_Score (gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	if(!activator) return;
 	if ( ent->spawnflags & 1 )
 	{
@@ -197,6 +201,10 @@ void SP_target_score( gentity_t *ent ) {
 		ent->count = 1;
 	}
 	ent->use = Use_Target_Score;
+
+	// don't need to send this to clients
+	ent->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(ent);
 }
 
 
@@ -206,7 +214,7 @@ void SP_target_score( gentity_t *ent ) {
 "message"	text to print
 If "private", only the activator gets the message.  If no checks, all clients get the message.
 */
-void Use_Target_Print (gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void Use_Target_Print (gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	if ( activator && activator->client && ( ent->spawnflags & 4 ) ) {
 		trap_SendServerCommand( activator-g_entities, va("servermsg %s", ent->message ));
 		return;
@@ -227,6 +235,10 @@ void Use_Target_Print (gentity_t *ent, gentity_t *other, gentity_t *activator) {
 
 void SP_target_print( gentity_t *ent ) {
 	ent->use = Use_Target_Print;
+
+	// don't need to send this to clients
+	ent->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(ent);
 }
 
 
@@ -245,7 +257,7 @@ Multiple identical looping sounds will just increase volume without any speed co
 "wait" : Seconds between auto triggerings, 0 = don't auto trigger
 "random"	wait variance, default is 0
 */
-void Use_Target_Speaker (gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void Use_Target_Speaker (gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	if (ent->spawnflags & 3) {	// looping sound toggles
 		if (ent->s.loopSound)
 			ent->s.loopSound = 0;	// turn it off
@@ -323,7 +335,7 @@ void SP_target_speaker( gentity_t *ent ) {
 /*QUAKED target_laser (0 .5 .8) (-8 -8 -8) (8 8 8) START_ON
 When triggered, fires a laser.  You can either set a target or a direction.
 */
-void target_laser_think (gentity_t *self) {
+static void target_laser_think (gentity_t *self) {
 	vec3_t	end;
 	trace_t	tr;
 	vec3_t	point;
@@ -353,20 +365,20 @@ void target_laser_think (gentity_t *self) {
 	self->nextthink = level.time + FRAMETIME;
 }
 
-void target_laser_on (gentity_t *self)
+static void target_laser_on (gentity_t *self)
 {
 	if (!self->activator)
 		self->activator = self;
 	target_laser_think (self);
 }
 
-void target_laser_off (gentity_t *self)
+static void target_laser_off (gentity_t *self)
 {
 	trap_UnlinkEntity( self );
 	self->nextthink = 0;
 }
 
-void target_laser_use (gentity_t *self, gentity_t *other, gentity_t *activator)
+static void target_laser_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	if(activator)
 		self->activator = activator;
@@ -376,7 +388,7 @@ void target_laser_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 		target_laser_on (self);
 }
 
-void target_laser_start (gentity_t *self)
+static void target_laser_start (gentity_t *self)
 {
 	gentity_t *ent;
 
@@ -417,7 +429,7 @@ void SP_target_laser (gentity_t *self)
 
 //==========================================================
 
-void target_teleporter_use( gentity_t *self, gentity_t *other, gentity_t *activator ) {
+static void target_teleporter_use( gentity_t *self, gentity_t *other, gentity_t *activator ) {
 	gentity_t	*dest;
 	vec3_t		destPoint;
 	vec3_t		tracePoint;
@@ -497,6 +509,10 @@ void SP_target_teleporter( gentity_t *self ) {
 		self->flags ^= FL_LOCKED;
 
 	self->use = target_teleporter_use;
+
+	// don't need to send this to clients
+	self->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(self);
 }
 
 //==========================================================
@@ -509,7 +525,7 @@ if RANDOM is checked, only one of the targets will be fired, not all of them
 SELF	use the entity as activator instead of it's own activator when using it's targets (use this flag for targets that are target_boolean, targer_alert, and target_warp)
 */
 
-void target_relay_use (gentity_t *self, gentity_t *other, gentity_t *activator) {
+static void target_relay_use (gentity_t *self, gentity_t *other, gentity_t *activator) {
 	if ( ( self->spawnflags & 1 ) && activator && activator->client 
 		&& activator->client->sess.sessionTeam != TEAM_RED ) {
 		return;
@@ -551,6 +567,10 @@ void target_relay_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
 
 void SP_target_relay (gentity_t *self) {
 	self->use = target_relay_use;
+
+	// don't need to send this to clients
+	self->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(self);
 }
 
 
@@ -559,7 +579,7 @@ void SP_target_relay (gentity_t *self) {
 /*QUAKED target_kill (.5 .5 .5) (-8 -8 -8) (8 8 8)
 Kills the activator.
 */
-void target_kill_use( gentity_t *self, gentity_t *other, gentity_t *activator ) {
+static void target_kill_use( gentity_t *self, gentity_t *other, gentity_t *activator ) {
 	if(activator)
 		G_Damage ( activator, NULL, NULL, NULL, NULL, 100000, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
 }
@@ -568,7 +588,7 @@ void SP_target_kill( gentity_t *self ) {
 	self->use = target_kill_use;
 
 	// don't need to send this to clients
-	self->r.svFlags &= SVF_NOCLIENT;
+	self->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(self);
 }
 
@@ -635,7 +655,7 @@ Acts as an intermediary for an action that takes multiple inputs.
 After the counter has been triggered "count" times (default 2), it will fire all of it's targets and remove itself.
 */
 
-void target_counter_use( gentity_t *self, gentity_t *other, gentity_t *activator )
+static void target_counter_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
 	if ( self->count == 0 )
 	{
@@ -667,7 +687,7 @@ void SP_target_counter (gentity_t *self)
 	self->use = target_counter_use;
 
 	// don't need to send this to clients
-	self->r.svFlags &= SVF_NOCLIENT;
+	self->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(self);
 }
 
@@ -679,7 +699,7 @@ count - number of objective (as listed in the maps' <mapname>.efo)
 NOTE: the objective with the lowest "count" will be considered the current objective
 */
 
-void target_objective_use( gentity_t *self, gentity_t *other, gentity_t *activator )
+static void target_objective_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
 	gentity_t *tent;
 
@@ -727,7 +747,7 @@ SELF   			use the entity as activator instead of it's own activator when using i
 "falsetarget"	this will be fired if the boolean is false then the targetname is recieved
 */
 
-void target_boolean_use (gentity_t *self, gentity_t *other, gentity_t *activator) {
+static void target_boolean_use (gentity_t *self, gentity_t *other, gentity_t *activator) {
 	
 	if ((!self) || (!other) || (!activator))
 	{
@@ -802,7 +822,7 @@ void SP_target_boolean (gentity_t *self) {
 	self->use = target_boolean_use;
 
 	// don't need to send this to clients
-	self->r.svFlags &= SVF_NOCLIENT;
+	self->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(self);
 }
 
@@ -814,7 +834,7 @@ MAP_GRAV		Will reset player to the current global gravity.
 "gravity"	gravity value (default = g_gravity default = 800)
 */
 
-void target_gravity_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
+static void target_gravity_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
 {
 	//CIf spawn flag 1 is set, change gravity to specific user
 	if((self->spawnflags & 1) && activator && activator->client)
@@ -846,7 +866,7 @@ void SP_target_gravity (gentity_t *self) {
 	self->use = target_gravity_use;
 
 	// don't need to send this to clients
-	self->r.svFlags &= SVF_NOCLIENT;
+	self->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(self);
 }
 
@@ -857,7 +877,7 @@ When fired every clients monitor will shake as if in an explition //TiM: expliti
 "intensity"	Strength of shake
 */
 
-void target_shake_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
+static void target_shake_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
 {
 	//trap_SendConsoleCommand( EXEC_APPEND, va("shake %f %2f HRkq1yF22o06Zng9FZXH5sle\n", self->intensity, self->wait) ); //Start Shaking
 	//Com_Printf( "Intensity: %f, Duration %i ", self->intensity, ( (int)(level.time - level.startTime) + (int)( self->wait*1000 ) ) ) ;
@@ -872,13 +892,17 @@ void SP_target_shake (gentity_t *self) {
 	G_SpawnFloat( "wait", "5", &self->wait );
 
 	self->use = target_shake_use;
+
+	// don't need to send this to clients
+	self->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(self);
 }
 
 /*QUAKED target_evosuit (.5 .5 .5) (-8 -8 -8) (8 8 8)
 Used to put an evosuit on or off for each player
 */
 
-void target_evosuit_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
+static void target_evosuit_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
 {
 
 	if(!activator || !activator->client) return;
@@ -900,7 +924,7 @@ void SP_target_evosuit (gentity_t *self) {
 	self->use = target_evosuit_use;
 
 	// don't need to send this to clients
-	self->r.svFlags &= SVF_NOCLIENT;
+	self->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(self);
 }
 
@@ -1648,7 +1672,7 @@ PRIVATE		if set, lockMsg/unlockMsg are only printed for activator
 "lockMsg"   message printed if door gets locked
 "unlockMsg" message printed if door gets unlocked
 */
-void target_doorLock_use(gentity_t *ent, gentity_t *other, gentity_t* activator) {
+static void target_doorLock_use(gentity_t *ent, gentity_t *other, gentity_t* activator) {
 	gentity_t	*target = NULL;
 	target = G_Find(NULL, FOFS(targetname2), ent->target);
 	if(!target) 
@@ -1692,7 +1716,7 @@ void SP_target_doorLock(gentity_t *ent) {
 	ent->use = target_doorLock_use;
 
 	// don't need to send this to clients
-	ent->r.svFlags &= SVF_NOCLIENT;
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 
@@ -1737,7 +1761,7 @@ typedef struct {
 
 static target_alert_Shaders_s alertShaders;
 
-void target_alert_remapShaders(int target_condition) {
+static void target_alert_remapShaders(int target_condition) {
 	float f = 0;
 	int i;
 
@@ -1779,7 +1803,7 @@ void target_alert_remapShaders(int target_condition) {
 
 }
 
-void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	if(!activator) {
 		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_alert_use called with NULL activator.\n"););
 		return;
@@ -2054,7 +2078,7 @@ void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 		G_FreeEntity(activator);
 }
 
-void target_alert_parseShaders(gentity_t *ent) {
+static void target_alert_parseShaders(gentity_t *ent) {
 	char	buffer[BIG_INFO_STRING];
 	char	*txtPtr;
 	char	*token;
@@ -2185,7 +2209,7 @@ void SP_target_alert(gentity_t *ent) {
 	ent->health = !(ent->spawnflags & 2);
 
 	// don't need to send this to clients
-	ent->r.svFlags &= SVF_NOCLIENT;
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 //RPG-X | GSIO01 | 11/05/2009 | MOD END
@@ -2215,7 +2239,7 @@ START_WARP - ship is on warp at start
 */
 void target_warp_use(gentity_t *ent, gentity_t *other, gentity_t* activator);
 
-void target_warp_reactivate(gentity_t *ent) {
+static void target_warp_reactivate(gentity_t *ent) {
 	ent->use = target_warp_use;
 	ent->nextthink = -1;
 }
@@ -2355,7 +2379,7 @@ void SP_target_warp(gentity_t *ent) {
 	ent->use = target_warp_use;
 
 	// don't need to send this to clients
-	ent->r.svFlags &= SVF_NOCLIENT;
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 
@@ -2366,7 +2390,7 @@ This entity can be used to de/activate all func_usables with "target" as targetn
 "target"	func_usable to de/activate(targetname2).
 "soundDeactivate" sound to play if going to warp but core is deactivated/ejected
 */
-void target_deactivate_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void target_deactivate_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	gentity_t *target = NULL;
 	while((target = G_Find(target, FOFS(targetname2), ent->target)) != NULL) {
 		if(!Q_stricmp(target->classname, "func_usable")) {
@@ -2384,7 +2408,7 @@ void SP_target_deactivate(gentity_t *ent) {
 	ent->use = target_deactivate_use;
 
 	// don't need to send this to clients
-	ent->r.svFlags &= SVF_NOCLIENT;
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 
@@ -2395,13 +2419,13 @@ Can be toggled by an usable if the usable has NO_ACTIVATOR spawnflag.
 
 "serverNum"	server to connect to (rpg_server<serverNum> cvar)
 */
-void target_serverchange_think(gentity_t *ent) {
+static void target_serverchange_think(gentity_t *ent) {
 	if(!ent->touched || !ent->touched->client) return;
 	trap_SendServerCommand(ent->touched->client->ps.clientNum, va("cg_connect \"%s\"\n", ent->targetname2));
 	ent->nextthink = -1;
 }
 
-void target_serverchange_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void target_serverchange_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	char *server;
 
 	if(!activator || !activator->client) {
@@ -2455,6 +2479,9 @@ void SP_target_serverchange(gentity_t *ent) {
 		ent->s.time2 = 1;
 
 	ent->use = target_serverchange_use;
+
+	// don't need to send this to clients
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 
@@ -2464,7 +2491,7 @@ This will change the map if rpg_allowSPLevelChange is set to 1.
 "target" map to load (for example: borg2)
 "wait" time to wait before levelchange (whole numbers only, -1 for intermediate levelchange, 0 for default = 5)
 */
-void target_levelchange_think(gentity_t *ent) {
+static void target_levelchange_think(gentity_t *ent) {
 	if(ent->count > 0) {
 		ent->count--;
 		trap_SendServerCommand(-1, va("servercprint \"Mapchange in %i ...\"", ent->count)); 
@@ -2476,7 +2503,7 @@ void target_levelchange_think(gentity_t *ent) {
 	ent->nextthink = level.time + 1000;
 }
 
-void target_levelchange_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void target_levelchange_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	if(rpg_allowSPLevelChange.integer) {
 		ent->think = target_levelchange_think;
 		ent->nextthink = level.time + 1000;
@@ -2499,6 +2526,9 @@ void SP_target_levelchange(gentity_t *ent) {
 		ent->count = (int)ent->wait;
 
 	ent->use = target_levelchange_use;
+
+	ent->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(ent);
 }
 
 /*QUAKED target_holodeck (1 0 0) (-8 -8 -8) (8 8 8)
@@ -2510,7 +2540,7 @@ void SP_target_holodeck(gentity_t *ent) {
 	return;
 
 	// don't need to send this to clients
-	ent->r.svFlags &= SVF_NOCLIENT;
+	ent->r.svFlags |= SVF_NOCLIENT;
 	trap_LinkEntity(ent);
 }
 
@@ -2522,7 +2552,7 @@ It will save you some vfx-usables.
 This Entity only works on RPGXEF
 
 */
-void target_shaderremap_think(gentity_t *ent) {
+static void target_shaderremap_think(gentity_t *ent) {
 	float f = 0;
 	if(!ent->spawnflags) {
 		f = level.time * 0.001;
@@ -2538,7 +2568,7 @@ void target_shaderremap_think(gentity_t *ent) {
 	trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
 }
 
-void target_shaderremap_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void target_shaderremap_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	ent->think = target_shaderremap_think;
 	ent->nextthink = level.time + 50; /* level.time + one frame */
 }
@@ -2557,6 +2587,8 @@ void SP_target_shaderremap(gentity_t *ent) {
 	}
 
 	ent->use = target_shaderremap_use;
+	ent->r.svFlags |= SVF_NOCLIENT;
+	trap_LinkEntity(ent);
 }
 //RPG-X | Harry Young | 15/10/2011 | MOD END
 
@@ -2622,7 +2654,7 @@ static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]
 	return cur2;
 }
 
-void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+static void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	//with the use-function we're going to init aborts in a fairly simple manner: Fire warning notes...
 	trap_SendServerCommand( -1, va("servermsg \"Self Destruct sequence aborted.\""));
 	G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/voice/selfdestruct/abort.mp3"));
@@ -2633,7 +2665,7 @@ void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activa
 	return;
 }
 
-void target_selfdestruct_think(gentity_t *ent) {
+static void target_selfdestruct_think(gentity_t *ent) {
 	gentity_t*	client;	
 	double		ETAmin, ETAsec, temp;
 	int			i = 0;
