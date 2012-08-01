@@ -26,7 +26,7 @@ void Use_Target_Give( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 		if ( (unsigned int)(ent->s.time) & (1 << i) )
 		{
 			ps->stats[STAT_WEAPONS] ^= ( 1 << i );
-			
+
 			if ( ps->stats[STAT_WEAPONS] & ( 1 << i ) )
 				ps->ammo[i] = 1;
 			else
@@ -61,7 +61,7 @@ void SP_target_give( gentity_t *ent )
 		token = COM_Parse( &textPtr );
 		if ( !token[0] )
 			break;
-		
+
 		//Com_Printf( S_COLOR_RED "Token: %s\n", token );
 
 		if ( !Q_stricmpn( token, "|", 1 ) )
@@ -104,9 +104,9 @@ void Use_target_remove_powerups( gentity_t *ent, gentity_t *other, gentity_t *ac
 	}
 
 	/*if ( activator->client->ps.powerups[PW_REDFLAG] ) {
-		Team_ReturnFlag(TEAM_RED);
+	Team_ReturnFlag(TEAM_RED);
 	} else if ( activator->client->ps.powerups[PW_BORG_ADAPT] ) {
-		Team_ReturnFlag(TEAM_BLUE);
+	Team_ReturnFlag(TEAM_BLUE);
 	}*/
 
 	memset( activator->client->ps.powerups, 0, sizeof( activator->client->ps.powerups ) );
@@ -126,7 +126,7 @@ SELF   use the entity as activator instead of it's own activator when using it's
 "random" delay variance, total delay = delay +/- random seconds
 */
 void Think_Target_Delay( gentity_t *ent ) {
-	#ifdef G_LUA
+#ifdef G_LUA
 	if(ent->luaTrigger)
 	{
 		if(ent->activator)
@@ -138,7 +138,7 @@ void Think_Target_Delay( gentity_t *ent ) {
 			LuaHook_G_EntityTrigger(ent->luaTrigger, ent->s.number, ENTITYNUM_WORLD);
 		}
 	}
-	#endif
+#endif
 	if(ent->spawnflags & 1)
 		G_UseTargets(ent, ent);
 	else
@@ -157,7 +157,7 @@ void SP_target_delay( gentity_t *ent ) {
 		if(!ent->wait)
 			ent->wait = 1;
 	}
-        ent->count = (int)ent->wait;
+	ent->count = (int)ent->wait;
 	ent->use = Use_Target_Delay;
 
 	// don't need to send this to clients
@@ -512,11 +512,11 @@ SELF	use the entity as activator instead of it's own activator when using it's t
 void target_relay_use (gentity_t *self, gentity_t *other, gentity_t *activator) {
 	if ( ( self->spawnflags & 1 ) && activator && activator->client 
 		&& activator->client->sess.sessionTeam != TEAM_RED ) {
-		return;
+			return;
 	}
 	if ( ( self->spawnflags & 2 ) && activator && activator->client 
 		&& activator->client->sess.sessionTeam != TEAM_BLUE ) {
-		return;
+			return;
 	}
 
 	if(!activator) return;
@@ -528,17 +528,17 @@ void target_relay_use (gentity_t *self, gentity_t *other, gentity_t *activator) 
 		if ( ent && ent->use ) {
 			if(self->spawnflags & 8) {
 				ent->use(ent, self, self);
-				#ifdef G_LUA
+#ifdef G_LUA
 				if(ent->luaUse)
 					LuaHook_G_EntityUse(self->luaUse, self->s.number, other->s.number, activator->s.number);
-				#endif
+#endif
 			}
 			else {
 				ent->use( ent, self, activator );
-				#ifdef G_LUA
+#ifdef G_LUA
 				if(ent->luaUse)
 					LuaHook_G_EntityUse(self->luaUse, self->s.number, other->s.number, self->s.number);
-				#endif
+#endif
 			}
 		}
 		return;
@@ -595,19 +595,19 @@ static void target_location_linkup(gentity_t *ent)
 	trap_SetConfigstring( CS_LOCATIONS, "unknown" );
 
 	for (i = 0, ent = g_entities, n = 1;
-			i < level.num_entities;
-			i++, ent++) {
-		if (ent->classname && !Q_stricmp(ent->classname, "target_location")) {
-			// lets overload some variables!
-			ent->health = n; // use for location marking
-			trap_SetConfigstring( CS_LOCATIONS + n, ent->message );
-			n++;
-			ent->nextTrain = level.locationHead;
-			level.locationHead = ent;
-		}
+		i < level.num_entities;
+		i++, ent++) {
+			if (ent->classname && !Q_stricmp(ent->classname, "target_location")) {
+				// lets overload some variables!
+				ent->health = n; // use for location marking
+				trap_SetConfigstring( CS_LOCATIONS + n, ent->message );
+				n++;
+				ent->nextTrain = level.locationHead;
+				level.locationHead = ent;
+			}
 	}
 
-	
+
 
 	// All linked together now
 }
@@ -623,7 +623,7 @@ in site, closest in distance
 void SP_target_location( gentity_t *self ){
 	self->think = target_location_linkup;
 	self->nextthink = level.time + 200;  // Let them all spawn first
-	
+
 	//G_Printf( S_COLOR_RED "Location loaded! %s\n", self->message );
 
 	G_SetOrigin( self, self->s.origin );
@@ -641,14 +641,14 @@ void target_counter_use( gentity_t *self, gentity_t *other, gentity_t *activator
 	{
 		return;
 	}
-	
+
 	self->count--;
 
 	if ( self->count )
 	{
 		return;
 	}
-	
+
 	if(activator)
 		self->activator = activator;
 	else 
@@ -728,7 +728,7 @@ SELF   			use the entity as activator instead of it's own activator when using i
 */
 
 void target_boolean_use (gentity_t *self, gentity_t *other, gentity_t *activator) {
-	
+
 	if ((!self) || (!other) || (!activator))
 	{
 		return;
@@ -798,7 +798,7 @@ void SP_target_boolean (gentity_t *self) {
 	} else if (!self->booleanstate) {
 		self->booleanstate = qfalse;
 	}
-	
+
 	self->use = target_boolean_use;
 
 	// don't need to send this to clients
@@ -861,12 +861,12 @@ void target_shake_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 {
 	//trap_SendConsoleCommand( EXEC_APPEND, va("shake %f %2f HRkq1yF22o06Zng9FZXH5sle\n", self->intensity, self->wait) ); //Start Shaking
 	//Com_Printf( "Intensity: %f, Duration %i ", self->intensity, ( (int)(level.time - level.startTime) + (int)( self->wait*1000 ) ) ) ;
-	
+
 	trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%f %i", self->distance/*was self->intensity*/, ( (int)(level.time - level.startTime) + (int)( self->wait*1000 ) ) ) );
 }
 
 void SP_target_shake (gentity_t *self) {
-	
+
 	//TiM: Phenix, you're a n00b. You should always put default values in. ;P
 	G_SpawnFloat( "intensity", "5", &self->distance /*was &self->intensity*/ );
 	G_SpawnFloat( "wait", "5", &self->wait );
@@ -921,7 +921,7 @@ static void target_turbolift_unlock ( gentity_t *ent )
 	//last phase - unlock turbolift doors
 	{
 		gentity_t *door=NULL;
-	
+
 		while ( ( door = G_Find( door, FOFS( targetname ), ent->target )) != NULL  )
 		{
 			if ( !Q_stricmp( door->classname, "func_door" ) )
@@ -946,7 +946,7 @@ static void target_turbolift_unlock ( gentity_t *ent )
 	//reset lifts
 	if ( otherLift )
 		otherLift->count = 0;
-	
+
 	ent->s.time2 = 0;
 	if(otherLift)
 		otherLift->s.time2 = 0;
@@ -988,34 +988,34 @@ static void target_turbolift_endMove ( gentity_t *ent )
 			{	
 				if(!rpg_calcLiftTravelDuration.integer) {
 					lights->use( lights, lights, ent );
-					#ifdef G_LUA
+#ifdef G_LUA
 					if(lights->luaUse)
 						LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-					#endif
+#endif
 				}
 				else {
 					if(ent->s.eventParm < 0 && lights->targetname2) {
 						if(!Q_stricmp(lights->targetname2, va("%s_dn", ent->target))) {
 							lights->use(lights, lights, ent);
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse)
 								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-							#endif
+#endif
 						}
 					} else if(ent->s.eventParm > 0 && lights->targetname2) {
 						if(!Q_stricmp(lights->targetname2, va("%s_up", ent->target))) {
 							lights->use(lights, lights, ent);
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse)
 								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-							#endif
+#endif
 						}
 					} else {
 						lights->use(lights, lights, ent);
-						#ifdef G_LUA
+#ifdef G_LUA
 						if(lights->luaUse)
 							LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-						#endif
+#endif
 					}
 				}
 			}
@@ -1028,34 +1028,34 @@ static void target_turbolift_endMove ( gentity_t *ent )
 			{
 				if(!rpg_calcLiftTravelDuration.integer) {
 					lights->use( lights, lights, ent );
-					#ifdef G_LUA
+#ifdef G_LUA
 					if(lights->luaUse)
 						LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-					#endif
+#endif
 				}
 				else {
 					if(ent->s.eventParm < 0 && lights->targetname2) {
 						if(!Q_stricmp(lights->targetname2, va("%s_dn", otherLift->target))) {
 							lights->use(lights, lights, ent);
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse)
 								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-							#endif
+#endif
 						}
 					} else if(ent->s.eventParm && lights->targetname2) {
 						if(!Q_stricmp(lights->targetname2, va("%s_up", otherLift->target))) {
 							lights->use(lights, lights, ent);
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse)
 								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-							#endif
+#endif
 						}
 					} else {
 						lights->use(lights, lights, ent);
-						#ifdef G_LUA
+#ifdef G_LUA
 						if(lights->luaUse)
 							LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-						#endif
+#endif
 					}
 				}
 			}
@@ -1258,34 +1258,34 @@ static void target_turbolift_startMove ( gentity_t *ent )
 			{
 				if(!rpg_calcLiftTravelDuration.integer) {
 					lights->use( lights, lights, ent );
-					#ifdef G_LUA
+#ifdef G_LUA
 					if(lights->luaUse)
 						LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-					#endif
+#endif
 				}
 				else {
 					if ( time2 < 0 && lights->targetname2 ) {
 						if(!Q_stricmp(lights->targetname2, va("%s_dn", ent->target))) {
 							lights->use(lights, lights, ent );
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse)
 								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-							#endif
+#endif
 						}
 					} else if ( time2 > 0 && lights->targetname2 ) {
 						if(!Q_stricmp(lights->targetname2, va("%s_up", ent->target))) {
 							lights->use(lights, lights, ent );
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse)
 								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-							#endif
+#endif
 						}
 					} else {
 						lights->use( lights, lights, ent);
-						#ifdef G_LUA
+#ifdef G_LUA
 						if(lights->luaUse)
 							LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-						#endif
+#endif
 					}
 				}
 			}
@@ -1298,34 +1298,34 @@ static void target_turbolift_startMove ( gentity_t *ent )
 			{
 				if(!rpg_calcLiftTravelDuration.integer) {
 					lights->use( lights, lights, ent );
-					#ifdef G_LUA
+#ifdef G_LUA
 					if(lights->luaUse)
 						LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-					#endif
+#endif
 				}
 				else {
 					if(time2 < 0 && lights->targetname2) {
 						if(!Q_stricmp(lights->targetname2, va("%s_dn", otherLift->target))) {
 							lights->use(lights, lights, ent);
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse);
-								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-							#endif
+							LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
+#endif
 						}
 					} else if(time2 > 0 && lights->targetname2) {
 						if(!Q_stricmp(lights->targetname2, va("%s_up", otherLift->target))) {
 							lights->use(lights, lights, ent);
-							#ifdef G_LUA
+#ifdef G_LUA
 							if(lights->luaUse)
 								LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);			
-							#endif
+#endif
 						}
 					} else {
 						lights->use(lights, lights, ent);
-						#ifdef G_LUA
+#ifdef G_LUA
 						if(lights->luaUse)
 							LuaHook_G_EntityUse(lights->luaUse, lights-g_entities, ent-g_entities, ent-g_entities);
-						#endif
+#endif
 					}
 				}
 			}
@@ -1349,7 +1349,7 @@ static void target_turbolift_startMove ( gentity_t *ent )
 	if(rpg_calcLiftTravelDuration.integer) {
 		/*time = ent->health - otherLift->health;
 		if(time < 0)
-			time *= -1;*/
+		time *= -1;*/
 		ent->s.eventParm = time2;
 		time *= rpg_liftDurationModifier.value;
 		time *= 1000;
@@ -1425,7 +1425,7 @@ void target_turbolift_start ( gentity_t *self )
 	//lock the doors on both lifts
 	{
 		gentity_t *door=NULL;
-	
+
 		while ( ( door = G_Find( door, FOFS( targetname ), self->target )) != NULL  )
 		{
 			if ( !Q_stricmp( door->classname, "func_door" ) )
@@ -1562,7 +1562,7 @@ void SP_target_turbolift ( gentity_t *self )
 	self->r.contents = CONTENTS_TRIGGER;		// replaces the -1 from trap_SetBrushModel
 	self->r.svFlags = SVF_NOCLIENT;
 	self->s.eType = ET_TURBOLIFT;				//TiM - Client-side sound FX
-		
+
 	trap_LinkEntity( self );
 
 	VectorCopy( self->r.mins, self->s.angles2 );
@@ -1614,7 +1614,7 @@ void SP_target_turbolift ( gentity_t *self )
 			Q_strncpyz( deckName, deckNamePtr, sizeof( deckName ) );
 
 			trap_GetConfigstring( CS_TURBOLIFT_DATA, infoString, sizeof( infoString ) );
-			
+
 			if ( !infoString[0] )
 			{
 				Com_sprintf( infoString, sizeof( infoString ), "d%i\\%i\\n%i\\%s\\", level.numDecks, self->health, level.numDecks, deckName );
@@ -1742,39 +1742,39 @@ void target_alert_remapShaders(int target_condition) {
 	int i;
 
 	switch(target_condition) {
-		case 1: // yellow
-			for(i = 0; i < alertShaders.numShaders; i++) {
-				f = level.time * 0.001;
-				if(!alertShaders.greenShaders[i] || !alertShaders.yellowShaders[i]) break;
-				AddRemap(alertShaders.greenShaders[i], alertShaders.yellowShaders[i], f);
-			}
-			trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
-			break;
-		case 2: // red
-			for(i = 0; i < alertShaders.numShaders; i++) {
-				f = level.time * 0.001;
-				if(!alertShaders.greenShaders[i] || !alertShaders.redShaders[i]) break;
-				AddRemap(alertShaders.greenShaders[i], alertShaders.redShaders[i], f);
-			}
-			trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
-			break;
-		case 3: // blue
-			for(i = 0; i < alertShaders.numShaders; i++) {
-				f = level.time * 0.001;
-				if(!alertShaders.greenShaders[i] || !alertShaders.blueShaders[i]) break;
-				AddRemap(alertShaders.greenShaders[i], alertShaders.blueShaders[i], f);
-			}
-			trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
-			break;
-		case 0: // green
-		default:
-			for(i = 0; i < alertShaders.numShaders; i++) {
-				f = level.time * 0.001;
-				if(!alertShaders.greenShaders[i]) break;
-				AddRemap(alertShaders.greenShaders[i], alertShaders.greenShaders[i], f);
-			}
-			trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
-			break;
+	case 1: // yellow
+		for(i = 0; i < alertShaders.numShaders; i++) {
+			f = level.time * 0.001;
+			if(!alertShaders.greenShaders[i] || !alertShaders.yellowShaders[i]) break;
+			AddRemap(alertShaders.greenShaders[i], alertShaders.yellowShaders[i], f);
+		}
+		trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
+		break;
+	case 2: // red
+		for(i = 0; i < alertShaders.numShaders; i++) {
+			f = level.time * 0.001;
+			if(!alertShaders.greenShaders[i] || !alertShaders.redShaders[i]) break;
+			AddRemap(alertShaders.greenShaders[i], alertShaders.redShaders[i], f);
+		}
+		trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
+		break;
+	case 3: // blue
+		for(i = 0; i < alertShaders.numShaders; i++) {
+			f = level.time * 0.001;
+			if(!alertShaders.greenShaders[i] || !alertShaders.blueShaders[i]) break;
+			AddRemap(alertShaders.greenShaders[i], alertShaders.blueShaders[i], f);
+		}
+		trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
+		break;
+	case 0: // green
+	default:
+		for(i = 0; i < alertShaders.numShaders; i++) {
+			f = level.time * 0.001;
+			if(!alertShaders.greenShaders[i]) break;
+			AddRemap(alertShaders.greenShaders[i], alertShaders.greenShaders[i], f);
+		}
+		trap_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig());
+		break;
 	}
 
 }
@@ -1793,45 +1793,45 @@ void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 			}
 		} else {
 			switch(ent->damage) {
-				case 1: // yellow
-					if(ent->health) {
-						ent->target = ent->yellowsound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->yellowsound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->falsetarget;
+			case 1: // yellow
+				if(ent->health) {
+					ent->target = ent->yellowsound;
 					G_UseTargets(ent, ent);
-					break;
-				case 2: // red
-					if(ent->health) {
-						ent->target = ent->redsound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->redsound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->paintarget;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->yellowsound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->falsetarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 2: // red
+				if(ent->health) {
+					ent->target = ent->redsound;
 					G_UseTargets(ent, ent);
-					break;
-				case 3: // blue
-					if(ent->health) {
-						ent->target = ent->bluesound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					} 
-					/*if(!ent->spawnflags) {
-						ent->target = ent->bluesound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->targetname2;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->redsound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->paintarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 3: // blue
+				if(ent->health) {
+					ent->target = ent->bluesound;
 					G_UseTargets(ent, ent);
-					break;
+					ent->health = !ent->health;
+				} 
+				/*if(!ent->spawnflags) {
+				ent->target = ent->bluesound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->targetname2;
+				G_UseTargets(ent, ent);
+				break;
 			}
 			if(!ent->spawnflags) {
 				ent->target = ent->greensound;
@@ -1859,45 +1859,45 @@ void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 			}
 		} else {
 			switch(ent->damage) {
-				case 0: // green
-					if(ent->health) {
-						ent->target = ent->greensound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->greensound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->truetarget;
+			case 0: // green
+				if(ent->health) {
+					ent->target = ent->greensound;
 					G_UseTargets(ent, ent);
-					break;
-				case 2: // red
-					if(ent->health) {
-						ent->target = ent->redsound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->redsound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->paintarget;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->greensound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->truetarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 2: // red
+				if(ent->health) {
+					ent->target = ent->redsound;
 					G_UseTargets(ent, ent);
-					break;
-				case 3: // blue
-					if(ent->health) {
-						ent->target = ent->bluesound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->bluesound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->targetname2;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->redsound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->paintarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 3: // blue
+				if(ent->health) {
+					ent->target = ent->bluesound;
 					G_UseTargets(ent, ent);
-					break;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->bluesound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->targetname2;
+				G_UseTargets(ent, ent);
+				break;
 			}
 			if(!ent->spawnflags) {
 				ent->target = ent->yellowsound;
@@ -1925,45 +1925,45 @@ void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 			}
 		} else {
 			switch(ent->damage) {
-				case 0: // green
-					if(ent->health) {
-						ent->target = ent->greensound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->greensound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->truetarget;
+			case 0: // green
+				if(ent->health) {
+					ent->target = ent->greensound;
 					G_UseTargets(ent, ent);
-					break;
-				case 1: // ryellow
-					if(ent->health) {
-						ent->target = ent->yellowsound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->yellowsound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->falsetarget;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->greensound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->truetarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 1: // ryellow
+				if(ent->health) {
+					ent->target = ent->yellowsound;
 					G_UseTargets(ent, ent);
-					break;
-				case 3: // blue
-					if(ent->health) {
-						ent->target = ent->bluesound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					}
-					/*if(!ent->spawnflags) {
-						ent->target = ent->bluesound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->targetname2;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->yellowsound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->falsetarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 3: // blue
+				if(ent->health) {
+					ent->target = ent->bluesound;
 					G_UseTargets(ent, ent);
-					break;
+					ent->health = !ent->health;
+				}
+				/*if(!ent->spawnflags) {
+				ent->target = ent->bluesound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->targetname2;
+				G_UseTargets(ent, ent);
+				break;
 			}
 			if(!ent->spawnflags) {
 				ent->target = ent->redsound;
@@ -1991,45 +1991,45 @@ void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 			}
 		} else {
 			switch(ent->damage) {
-				case 0: // green
-					if(ent->health) {
-						ent->target = ent->greensound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					} 
-					/*if(!ent->spawnflags) {
-						ent->target = ent->greensound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->truetarget;
+			case 0: // green
+				if(ent->health) {
+					ent->target = ent->greensound;
 					G_UseTargets(ent, ent);
-					break;
-				case 1: // yellow
-					if(ent->health) {
-						ent->target = ent->yellowsound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					} 
-					/*if(!ent->spawnflags) {
-						ent->target = ent->yellowsound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->falsetarget;
+					ent->health = !ent->health;
+				} 
+				/*if(!ent->spawnflags) {
+				ent->target = ent->greensound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->truetarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 1: // yellow
+				if(ent->health) {
+					ent->target = ent->yellowsound;
 					G_UseTargets(ent, ent);
-					break;
-				case 2: // red
-					if(ent->health) {
-						ent->target = ent->redsound;
-						G_UseTargets(ent, ent);
-						ent->health = !ent->health;
-					} 
-					/*if(!ent->spawnflags) {
-						ent->target = ent->redsound;
-						G_UseTargets(ent, ent);
-					}*/
-					ent->target = ent->paintarget;
+					ent->health = !ent->health;
+				} 
+				/*if(!ent->spawnflags) {
+				ent->target = ent->yellowsound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->falsetarget;
+				G_UseTargets(ent, ent);
+				break;
+			case 2: // red
+				if(ent->health) {
+					ent->target = ent->redsound;
 					G_UseTargets(ent, ent);
-					break;
+					ent->health = !ent->health;
+				} 
+				/*if(!ent->spawnflags) {
+				ent->target = ent->redsound;
+				G_UseTargets(ent, ent);
+				}*/
+				ent->target = ent->paintarget;
+				G_UseTargets(ent, ent);
+				break;
 			}
 			if(!ent->spawnflags) {
 				ent->target = ent->bluesound;
@@ -2170,7 +2170,7 @@ void SP_target_alert(gentity_t *ent) {
 	if(!ent->swapname || !ent->truename || !ent->falsename || !ent->bluename ||
 		!ent->truetarget || !ent->falsetarget || !ent->paintarget || !ent->targetname2) {
 			DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] One or more needed keys for target_alert at %s where not set.\n", vtos(ent->s.origin)););
-		return;
+			return;
 	}
 
 	if(!ent->wait)
@@ -2248,16 +2248,16 @@ void target_warp_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 				if(!target) continue;
 				if(ent->spawnflags & 4) {
 					target->use(target, ent, ent);
-					#ifdef G_LUA
+#ifdef G_LUA
 					if(target->luaUse)
 						LuaHook_G_EntityUse(target->luaUse, target-g_entities, ent-g_entities, ent-g_entities);
-					#endif
+#endif
 				} else {
 					target->use(target, ent, activator);
-					#ifdef G_LUA
+#ifdef G_LUA
 					if(target->luaUse)
 						LuaHook_G_EntityUse(target->luaUse, target-g_entities, ent-g_entities, activator-g_entities);
-					#endif
+#endif
 				}
 			} else if(!Q_stricmp(g_entities[i].classname, "func_train") && !Q_stricmp(g_entities[i].swapname, ent->bluename)) {
 				target = &g_entities[i];
@@ -2342,7 +2342,7 @@ void SP_target_warp(gentity_t *ent) {
 	ent->bluename = G_NewString(temp);
 	G_SpawnString("soundDeactivate", "100", &temp);
 	ent->soundPos1 = G_SoundIndex(temp);
-	
+
 	//set corestate
 	ent->sound1to2 = (ent->spawnflags & 1);
 
@@ -2416,25 +2416,25 @@ void target_serverchange_use(gentity_t *ent, gentity_t *other, gentity_t *activa
 
 	if(rpg_serverchange.integer && ent->s.time2) {
 		switch(ent->count) {
-			default:
-			case 1:
-				server = rpg_server1.string;
-				break;
-			case 2:
-				server = rpg_server2.string;
-				break;
-			case 3:
-				server = rpg_server3.string;
-				break;
-			case 4:
-				server = rpg_server4.string;
-				break;
-			case 5:
-				server = rpg_server5.string;
-				break;
-			case 6:
-				server = rpg_server6.string;
-				break;
+		default:
+		case 1:
+			server = rpg_server1.string;
+			break;
+		case 2:
+			server = rpg_server2.string;
+			break;
+		case 3:
+			server = rpg_server3.string;
+			break;
+		case 4:
+			server = rpg_server4.string;
+			break;
+		case 5:
+			server = rpg_server5.string;
+			break;
+		case 6:
+			server = rpg_server6.string;
+			break;
 		}
 		ent->think = target_serverchange_think;
 		ent->nextthink = level.time + 3000;
@@ -2502,7 +2502,7 @@ void SP_target_levelchange(gentity_t *ent) {
 }
 
 /*QUAKED target_holodeck (1 0 0) (-8 -8 -8) (8 8 8)
-	
+
 */
 
 void SP_target_holodeck(gentity_t *ent) {
@@ -2583,21 +2583,19 @@ static int target_selfdestruct_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]
 	gentity_t *safePlayers[MAX_GENTITIES];
 	qboolean add = qtrue;
 
-	if(selfdestructSafeZones == NULL || selfdestructSafeZones->length == 0) {
-		return 0;
-	}
-
-	// go through all safe zones and compose a list of sade players
-	iter = list_iterator(selfdestructSafeZones, FRONT);
-	for(sz = (safeZone_t *)list_next(iter); sz != NULL; sz = (safeZone_t *)list_next(iter)) {
-		if(!sz->active) {
-			continue;
-		}
-		num = trap_EntitiesInBox(sz->mins, sz->maxs, entlist, MAX_GENTITIES);
-		for(n = 0; n < num; n++) {
-			if(entlist[n] < g_maxclients.integer && g_entities[entlist[n]].client) {
-				safePlayers[cur] = &g_entities[entlist[n]];
-				cur++;
+	if(selfdestructSafeZones != NULL && selfdestructSafeZones->length > 0) {
+		// go through all safe zones and compose a list of sade players
+		iter = list_iterator(selfdestructSafeZones, FRONT);
+		for(sz = (safeZone_t *)list_next(iter); sz != NULL; sz = (safeZone_t *)list_next(iter)) {
+			if(!sz->active) {
+				continue;
+			}
+			num = trap_EntitiesInBox(sz->mins, sz->maxs, entlist, MAX_GENTITIES);
+			for(n = 0; n < num; n++) {
+				if(entlist[n] < g_maxclients.integer && g_entities[entlist[n]].client) {
+					safePlayers[cur] = &g_entities[entlist[n]];
+					cur++;
+				}
 			}
 		}
 	}
@@ -2640,7 +2638,7 @@ void target_selfdestruct_think(gentity_t *ent) {
 
 	//now we have 3 destinct stages the entity can think about.
 	//it starts with ent->wait being set to the new remaining time
-	
+
 	if (ent->wait > 60000 ) {
 		temp = ent->wait - ent->count;
 	} else {
@@ -2914,9 +2912,9 @@ void SP_target_safezone(gentity_t *ent) {
 	sz->name = (char *)malloc(strlen(ent->targetname)+1);
 	strcpy(sz->name, ent->targetname);
 	sz->active = (qboolean)(ent->spawnflags & 1);
-	
+
 	list_add(selfdestructSafeZones, sz, sizeof(safeZone_s));
-	
+
 	G_FreeEntity(ent);
 }
 

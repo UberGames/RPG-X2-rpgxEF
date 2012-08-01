@@ -610,7 +610,7 @@ typedef enum {
 	WP_7, // WP_TR116				//	128	// 3/13/00 kef -- added										// 1/1/06 TiM: used to be WP_7
 
 	WP_8, // WP_GRENADE_LAUNCHER	//	256	// 3/10/00 kef -- used to be...heh...WP_8	// TiM: Hahaha I get it! hehe ;P
-	WP_9, // WP_9		//	512	// 3/13/00 kef -- added
+	WP_9, // WP_QUANTUM_BURST		//	512	// 3/13/00 kef -- added
 	WP_10, // WP_DISRUPTOR			//	1024	// 3/13/00 kef -- used to be WP_ROCKET_LAUNCHER			// 1/1/06 TiM: used to be WP_10 
 
 	WP_11, // WP_MEDKIT				//	2048	// 10/12/00 jtd -- added for MP patch/gold - merges single player projectile and taser		// 1/1/06 TiM: used to be WP_11
