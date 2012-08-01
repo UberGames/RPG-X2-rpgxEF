@@ -7,7 +7,7 @@
 *	Removes entity entirely blow chunks.
 *	If it is repairable it's not removed but made invisible.
 */
-static void breakable_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) 
+void breakable_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) 
 {
 	vec3_t		size, org, dir;
 	gentity_t	*te = NULL;
@@ -187,6 +187,74 @@ void InitBBrush ( gentity_t *ent )
 	//VectorCopy( ent->pos1, eState->pos.trBase );
 }
 
+//RPG-X | GSIO01 | 09/05/2009 SOE
+/**
+*	Gets called if someone is inside a breakables trigger.
+*	Breables only have trigges if they are repairable
+*	This function sets the touched gentity_t pointer to the tirgger
+*	so it is possible to check if the player is inside the trigger
+*	and there fore can repair the breakable.
+*
+*	\author Ubergames - GSIO01
+*	\date 09/05/2009
+*/
+void Touch_breakable_trigger(gentity_t *ent, gentity_t *other, trace_t *trace) {
+	other->touched = ent;
+}
+
+/**
+*	Spawns a trigger for a breakable.
+*	Only gets called if the breakable is repairable.
+*/
+void breakable_spawn_trigger(gentity_t *ent) {
+	vec3_t maxs, mins;
+	gentity_t *other;
+	int best, i;
+	entityShared_t *eShared;
+
+	VectorCopy(ent->r.absmin, mins);
+	VectorCopy(ent->r.absmax, maxs);
+
+	for(other = ent->teamchain; other; other=other->teamchain) {
+		eShared = &other->r;
+		AddPointToBounds(eShared->absmin, mins, maxs);
+		AddPointToBounds(eShared->absmax, mins, maxs);
+	}
+
+	best = 0;
+
+	for(i = 1; i < 3; i++) {
+		if(maxs[i] - mins[i] < maxs[best] - mins[best])
+			best = i;
+	}
+
+	maxs[best] += 48;
+	mins[best] -= 48;
+
+	other = G_Spawn();
+
+	if(!other) {
+		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] Unable to spawn trigger for func_breakable at %s!\n", vtos(ent->s.origin)););
+		G_FreeEntity(ent);
+		return;
+	}
+
+	eShared = &other->r;
+
+	VectorCopy(maxs, eShared->maxs);
+	VectorCopy(mins, eShared->mins);
+
+	eShared->contents = CONTENTS_TRIGGER;
+	other->touch = Touch_breakable_trigger;
+	other->count = best;
+	other->touched = ent;
+	other->target = ent->target;
+	ent->touched = other;
+
+	trap_LinkEntity(other);
+}
+
+//RPG-X | GSIO01 | 09/05/2009 EOE
 
 /*QUAKED func_breakable (0 .8 .5) ? x x x x INVINCIBLE x x x REPAIRABLE
 INVINCIBLE - can only be broken by being used
@@ -369,7 +437,7 @@ void SP_misc_model_breakable( gentity_t *ent )
 void ammo_use( gentity_t *self, gentity_t *other, gentity_t *activator);
 
 //!give a player ammo for a weapon 
-static int Add_Ammo2 (gentity_t *ent, int weapon, int count)
+int Add_Ammo2 (gentity_t *ent, int weapon, int count)
 {
 	playerState_t *ps = &ent->client->ps;
 
@@ -384,7 +452,7 @@ static int Add_Ammo2 (gentity_t *ent, int weapon, int count)
 }
 
 //!Shuts down a ammo station
-static void ammo_shutdown( gentity_t *self )
+void ammo_shutdown( gentity_t *self )
 {
 	if (!(self->s.eFlags & EF_ANIM_ONCE))
 	{
@@ -396,7 +464,7 @@ static void ammo_shutdown( gentity_t *self )
 }
 
 //!Fades out a ammo station
-static void ammo_fade_out( gentity_t *ent )
+void ammo_fade_out( gentity_t *ent )
 {
 	G_Sound( ent, G_SoundIndex( "sound/items/respawn1.wav" ) );
 	ent->s.eFlags |= EF_ITEMPLACEHOLDER;
@@ -406,7 +474,7 @@ static void ammo_fade_out( gentity_t *ent )
 }
 
 //! Think function for the ammo station
-static void ammo_think( gentity_t *ent )
+void ammo_think( gentity_t *ent )
 {
 	int dif = 0;
 	int	i;
@@ -525,6 +593,16 @@ void ammo_use( gentity_t *self, gentity_t *other, gentity_t *activator)
 	}	
 }
 
+/**
+*	Finishs off the spawning of an ammo station.
+*/
+void ammo_station_finish_spawning ( gentity_t *self )
+{
+	self->s.eFlags &= ~EF_ITEMPLACEHOLDER;
+	self->think = 0; /*NULL*/
+	self->nextthink = -1;
+	self->use = ammo_use;
+}
 //------------------------------------------------------------
 /*QUAKED misc_ammo_station (1 0 0) (-16 -16 -16) (16 16 16) 
 
@@ -594,7 +672,7 @@ Repairs a func_breakable.
 *	Repairs it's target entity (stored in ent->lastEnemy)
 *	if it is damaged.
 */
-static void target_repair_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+void target_repair_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	gentity_t *target;
 
 	target = ent->lastEnemy;
@@ -628,7 +706,7 @@ static void target_repair_use(gentity_t *ent, gentity_t *other, gentity_t *activ
 /**
 *	Link function finishes off spawning of the entity.
 */
-static void target_repair_link(gentity_t *ent) {
+void target_repair_link(gentity_t *ent) {
 	gentity_t *target;
 
 	ent->nextthink = -1;
