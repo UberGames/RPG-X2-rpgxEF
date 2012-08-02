@@ -2561,7 +2561,8 @@ void SP_target_shaderremap(gentity_t *ent) {
 //RPG-X | Harry Young | 15/10/2011 | MOD END
 
 //RPG-X | Harry Young | 25/07/2012 | MOD START
-/*QUAKED target_selfdestruct (1 0 0) (-8 -8 -8) (8 8 8)This entity manages the self destruct.
+/*QUAKED target_selfdestruct (1 0 0) (-8 -8 -8) (8 8 8)
+This entity manages the self destruct.
 For now this should only be used via the selfdestruct console command, however it might be usable from within the radiant at a later date.
 
 Keys:
@@ -2917,4 +2918,254 @@ void SP_target_safezone(gentity_t *ent) {
 
 	G_FreeEntity(ent);
 }
+
+/*QUAKED target_shiphealth (1 0 0) (-8 -8 -8) (8 8 8)
+This Entity manages a ships healt. Ship Health is reduced via administrative/delegable console command "/shipdamage [damage]"
+Repairing is based on a % per minute basis for both shields and hull.
+The entity features interconnectivity with other systems such as warpdrive or turbolift with a random yet incresing chance to turn them off whenever hulldamage occurs. This includes Shields.
+Further more the entity will automatically toggle red alert should it be any other and will activate shields if alert is set to any but green.
+If hull health hit's 0 it will kill any client outside an active savezone.
+
+Keys:
+health: Total Hull strength
+oldHealth: total shield strenght
+angle: Hull repair in % per minute
+speed: Shield repair in % per minute (only active if shield's aren't fried)
+
+greensound: Things to fire every time damage occurs (like FX)
+falsetarget: swapname for target_warp
+bluename: swapname for target_turbolift
+bluesound: swapname for ui_transporter
+falsename: redname for target_alert
+*/
+static int target_shiphealth_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]) {
+	int i, n, num, cur = 0, cur2 = 0;
+	list_iter_p iter;
+	safeZone_t* sz;
+	int entlist[MAX_GENTITIES];
+	gentity_t *safePlayers[MAX_GENTITIES];
+	qboolean add = qtrue;
+
+	if(selfdestructSafeZones != NULL && selfdestructSafeZones->length > 0) {
+		// go through all safe zones and compose a list of sade players
+		iter = list_iterator(selfdestructSafeZones, FRONT);
+		for(sz = (safeZone_t *)list_next(iter); sz != NULL; sz = (safeZone_t *)list_next(iter)) {
+			if(!sz->active) {
+				continue;
+			}
+			num = trap_EntitiesInBox(sz->mins, sz->maxs, entlist, MAX_GENTITIES);
+			for(n = 0; n < num; n++) {
+				if(entlist[n] < g_maxclients.integer && g_entities[entlist[n]].client) {
+					safePlayers[cur] = &g_entities[entlist[n]];
+					cur++;
+				}
+			}
+		}
+	}
+
+	// now use that information to determines all unsafe players
+	for(i = 0; i < MAX_CLIENTS; i++) {
+		for(n = 0; n < cur; n++) {
+			if(&g_entities[i] == safePlayers[n]) {
+				add = qfalse;
+				break;
+			}
+		}
+		if(add) {
+			if(&g_entities[i].client) {
+				ents[cur2] = &g_entities[i];
+				cur2++;
+			}
+		}
+	}
+
+	free(iter);
+	return cur2;
+}
+
+void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+	int			NSS, NHS, SD, HD, i, num;
+	float		BT;
+	gentity_t*	alertEnt, warpEnt, turboEnt, transEnt, client;
+	
+	if(ent->splashDamage == 1){ //shields are active so we're just bleeding trough on the hull
+		BT = ((1 - (ent->count / ent->health)) / 10);
+		SD = (ent->damage - ceil(ent->damage * BT));
+
+		if(SD > ent->n00bCount){ //we're draining the shields...
+			HD = (ent->damage - ent->n00bCount);
+			NHS = (ent->count - HD);
+			ent->n00bCount = 0;
+		} else { //shields will survive so let's just bleed trough
+			HD = floor(ent->damage * BT);
+			NHS = (ent->count - HD);
+			NSS = (ent->n00bCount - SD);
+			ent->n00bCount = NSS;
+		}
+	} else { //shields are off, guess where the blow goes...
+		NHS = (ent->count - ent->damage);
+	}
+	
+	ent->count = NHS;
+
+	//enough math, let's trigger things
+
+	//activate shields if inactive
+	if(ent->splashDamage == 0)
+		ent->splashDamage = 1;
+
+	//go to red alert if we are on green
+	if(ent->falsename){
+		alertEnt = G_Find(NULL, FOFS(falsename), ent->falsename);
+		if(alertEnt->damage == 0){
+			ent->target = ent->falsename;
+			G_UseTargets(ent, ent);
+		}
+	}
+
+	//time to fire the FX
+	ent->target = ent->greensound;
+	G_UseTargets(ent, ent);
+
+	//disable UI_Transporter if need be.
+	if(ent->bluesound){
+		transEnt = G_Find(NULL, FOFS(swapname), ent->bluesound);
+		if (transEnt->flags & FL_LOCKED){
+			return;
+		} else {
+			if(((ent->count / ent->health) * crandom()) < 0.3){
+				ent->target = ent->bluesound;
+				G_UseTargets(ent, ent);
+			}
+		}
+	}
+
+	//disable target_turbolift if need be.
+	if(ent->bluename){
+		turboEnt = G_Find(NULL, FOFS(swapname), ent->bluename);
+		if (turboEnt->flags & FL_LOCKED){
+			return;
+		} else {
+			if(((ent->count / ent->health) * crandom()) < 0.3){
+				ent->target = ent->bluename;
+				G_UseTargets(ent, ent);
+			}
+		}
+	}
+
+	//disable target_warp if need be.
+	if(ent->falsetarget){
+		warpEnt = G_Find(NULL, FOFS(swapname), ent->falsetarget);
+		if (warpEnt->n00bCount == 0){
+			return;
+		} else {
+			if(((ent->count / ent->health) * crandom()) < 0.3){
+				ent->target = ent->falsetarget;
+				G_UseTargets(ent, ent);
+			}
+		}
+	}
+
+	if(ent->count <= 0){
+		gentity_t *ents[MAX_GENTITIES];
+
+
+		num = target_shiphealth_get_unsafe_players(ents);
+
+		//Loop trough all clients on the server.
+		for(i = 0; i < num; i++) {
+			client = ents[i];
+			G_Damage (client, ent, ent, 0, 0, 999999, 0, MOD_TRIGGER_HURT); //maybe a new message ala "[Charname] did not abandon ship."
+		}
+		//let's hear it
+		G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
+		//let's be shakey for a sec... I hope lol ^^
+		trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%i %i", 9999, ( 1000 + ( level.time - level.startTime ) ) ) );
+	}
+}	
+
+void target_shiphealth_think(gentity_t *ent) {
+	//this will do the healing each minute
+	int			NSS, NHS;
+	gentity_t*	alertEnt;
+
+	//We have interconnectivity with target_alert here in that at condition green we regenerate twice as fast
+	//so let's find the entity
+	if(ent->falsename)
+		alertEnt = G_Find(NULL, FOFS(falsename), ent->falsename);
+	else
+		alertEnt = G_Find(NULL, FOFS(classname), "target_alert");
+
+	if(!alertEnt){ //failsave in case we don't have a target_alert present
+		alertEnt = G_Spawn();
+		alertEnt->damage = 0;
+	}
+
+	// Hull Repair
+	if(ent->count < ent->health){
+		if(alertEnt->damage == 0) //condition green
+			NHS = (ent->count + (ent->health * ent->angle / 100));
+		else
+			NHS = (ent->count + (ent->health * ent->angle / 200));
+
+		if(NHS > ent->health)
+			ent->count = ent->health;
+		else
+			ent->count = NHS;
+	}
+
+	// Shield Repair
+	if(ent->moverstate != -1){ //skip if shields are toast
+		if(ent->n00bCount < ent->oldHealth){
+			if(alertEnt->damage == 0) //condition green
+				NSS = (ent->n00bCount + (ent->oldHealth * ent->speed / 100);
+			else
+				NSS = (ent->n00bCount + (ent->oldHealth * ent->speed / 200);
+
+			if(NSS > ent->oldHealth)
+				ent->n00bCount = ent->oldHealth;
+			else
+				ent->n00bCount = NSS;
+		}
+	}
+
+	//shield reenstatement
+	if(ent->moverstate == -1){ //else we don't need to run this
+		if((ent->count / ent->health) > 0.5){
+			if(alertEnt->damage == 0) //what symbol is and AND? cause I'd like to failsave 1 if we don't have alerts...
+				ent->moverstate = 0;
+			else
+				ent->moverstate = 1;
+		} else {
+			if((ent->count / ent->health * crandom()) > 1){
+				if(alertEnt->damage == 0)
+					ent->moverstate = 0;
+				else
+					ent->moverstate = 1;
+			}
+		}
+	}
+	ent->nextthink = level.time + 60000;
+}
+
+
+void SP_target_shiphealth(gentity_t *ent) {
+
+	//we need to put the total health in for the current
+	ent->count = ent->health;
+	ent->n00bCount = ent->oldHealth;
+
+	//now for the shieldindicator I need to know if we have an alertEnt available
+	if(G_Find(NULL, FOFS(classname), "target_alert"))
+		ent->moverstate = 0;
+	else
+		ent->moverstate = 1;
+
+	ent->think = target_shiphealth_think;
+	ent->use = target_shiphealth_use;
+	ent->nextthink = level.time + 60000;
+
+	trap_LinkEntity(ent);
+}
+
 

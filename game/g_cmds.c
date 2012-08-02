@@ -6284,7 +6284,6 @@ static void Cmd_alert_f(gentity_t *ent) {
 =================
 Cmd_selfdestruct_f
 Harry Young | 25/07/2012
-UNTESTED
 =================
 */
 static void Cmd_selfdestruct_f(gentity_t *ent) {
