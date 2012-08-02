@@ -6414,6 +6414,84 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 
 /*
 =================
+Cmd_shipdamage_f
+Harry Young | 02/08/2012
+=================
+*/
+static void Cmd_shipdamage_f(gentity_t *ent) {
+	gentity_t	*healthEnt;
+	char		arg[16];
+
+	#ifndef SQL
+	if ( !IsAdmin( ent ) ) {
+		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as an admin.\n\" ") );
+		return;
+	}
+	#else
+	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, /*need to fill this*/-1 ) ) {
+		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
+		return;
+	}
+	#endif
+
+	trap_Argv(1, arg, sizeof(arg));
+	if(atoi(arg) == 0){
+		G_PrintfClient(ent,	"Usage: shipdamage [damage] where damage is oviously the total amount dealt. It will be rendered to shields and hull respectively by the entity. Must be positive. You can not heal with this command.\n");
+		return;
+	}
+
+	healthEnt = G_Find(NULL, FOFS(classname), "target_shiphealth");
+	if(atoi(arg) > 0){
+		healthEnt->damage = atoi(arg);
+	} else {
+		G_PrintfClient(ent,	"^1ERROR: Damage must be a positive value. You can not heal with this command.");
+		return;
+	}
+	healthEnt->use(healthEnt, NULL, NULL);
+	return;
+}
+
+/*
+=================
+Cmd_shiphealth_f
+Harry Young | 02/08/2012
+=================
+*/
+static void Cmd_shiphealth_f(gentity_t *ent) {
+	gentity_t	*healthEnt;
+	int			THS, CHS, TSS, CSS, SI, RHS, RSS;
+
+	healthEnt = G_Find(NULL, FOFS(classname), "target_shiphealth");
+	THS = healthEnt->health;
+	CHS = healthEnt->count;
+	TSS = healthEnt->splashRadius;
+	CSS = healthEnt->n00bCount;
+	SI = healthEnt->splashDamage;
+
+	RHS = floor((CHS / THS * 100));
+	RSS = floor((CSS / TSS * 100));
+	
+	if(CHS == 0){
+		trap_SendServerCommand( ent-g_entities, va("print \"^4The Ship is destroyed, what do you want?\n\"", RHS, CHS, THS) );
+	} else {
+		if(SI == 1){
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Shields are online\n\"", RHS, CHS, THS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Shield Capactiy at %i Percent (%i of %i Points)\n\"", RSS, CSS, TSS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %i Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
+		} else if(SI == 0){
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Shields are offline\n\"", RHS, CHS, THS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Shield Capactiy at %i Percent (%i of %i Points)\n\"", RSS, CSS, TSS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %i Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
+		} else {
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Shields are inoperable\n\"", RHS, CHS, THS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %i Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
+		}
+	}
+	return;
+}
+
+/*
+=================
 Cmd_admin_centerprint_f
 GSIO01 | 12/05/2009
 =================
@@ -7902,6 +7980,10 @@ void ClientCommand( int clientNum )
 		Cmd_alert_f(ent);
 	else if (Q_stricmp(cmd, "selfdestruct") == 0)
 		Cmd_selfdestruct_f(ent);
+	else if (Q_stricmp(cmd, "shipdamage") == 0)
+		Cmd_shipdamage_f(ent);
+	else if (Q_stricmp(cmd, "shiphealth") == 0)
+		Cmd_shiphealth_f(ent);
 	else if (Q_stricmp(cmd, "msg2") == 0)
 		Cmd_admin_centerprint_f(ent);
 	else if (Q_stricmp(cmd, "forcevote") == 0)

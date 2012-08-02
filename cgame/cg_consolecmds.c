@@ -968,5 +968,7 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand("camtestend");
 
 	trap_AddCommand("selfdestruct");
+	trap_AddCommand("shipdamage");
+	trap_AddCommand("shiphealth");
 }
 

@@ -2928,7 +2928,7 @@ If hull health hit's 0 it will kill any client outside an active savezone.
 
 Keys:
 health: Total Hull strength
-oldHealth: total shield strenght
+splashRadius: total shield strenght
 angle: Hull repair in % per minute
 speed: Shield repair in % per minute (only active if shield's aren't fried)
 
@@ -2986,7 +2986,7 @@ static int target_shiphealth_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]) 
 void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	int			NSS, NHS, SD, HD, i, num;
 	float		BT;
-	gentity_t*	alertEnt, warpEnt, turboEnt, transEnt, client;
+	gentity_t	*alertEnt, *warpEnt, *turboEnt, *transEnt, *client;
 	
 	if(ent->splashDamage == 1){ //shields are active so we're just bleeding trough on the hull
 		BT = ((1 - (ent->count / ent->health)) / 10);
@@ -3066,6 +3066,13 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 		}
 	}
 
+	//disable shield-subsystem if need be.
+	if(((ent->count / ent->health) * crandom()) < 0.3){
+		ent->n00bCount = 0;
+		ent->splashDamage = -1;
+	}
+
+	//and of course...
 	if(ent->count <= 0){
 		gentity_t *ents[MAX_GENTITIES];
 
@@ -3115,33 +3122,33 @@ void target_shiphealth_think(gentity_t *ent) {
 	}
 
 	// Shield Repair
-	if(ent->moverstate != -1){ //skip if shields are toast
-		if(ent->n00bCount < ent->oldHealth){
+	if(ent->splashDamage != -1){ //skip if shields are toast
+		if(ent->n00bCount < ent->splashRadius){
 			if(alertEnt->damage == 0) //condition green
-				NSS = (ent->n00bCount + (ent->oldHealth * ent->speed / 100);
+				NSS = (ent->n00bCount + (ent->splashRadius * ent->speed / 100));
 			else
-				NSS = (ent->n00bCount + (ent->oldHealth * ent->speed / 200);
+				NSS = (ent->n00bCount + (ent->splashRadius * ent->speed / 200));
 
-			if(NSS > ent->oldHealth)
-				ent->n00bCount = ent->oldHealth;
+			if(NSS > ent->splashRadius)
+				ent->n00bCount = ent->splashRadius;
 			else
 				ent->n00bCount = NSS;
 		}
 	}
 
 	//shield reenstatement
-	if(ent->moverstate == -1){ //else we don't need to run this
+	if(ent->splashDamage == -1){ //else we don't need to run this
 		if((ent->count / ent->health) > 0.5){
 			if(alertEnt->damage == 0) //what symbol is and AND? cause I'd like to failsave 1 if we don't have alerts...
-				ent->moverstate = 0;
+				ent->splashDamage = 0;
 			else
-				ent->moverstate = 1;
+				ent->splashDamage = 1;
 		} else {
 			if((ent->count / ent->health * crandom()) > 1){
 				if(alertEnt->damage == 0)
-					ent->moverstate = 0;
+					ent->splashDamage = 0;
 				else
-					ent->moverstate = 1;
+					ent->splashDamage = 1;
 			}
 		}
 	}
@@ -3153,13 +3160,13 @@ void SP_target_shiphealth(gentity_t *ent) {
 
 	//we need to put the total health in for the current
 	ent->count = ent->health;
-	ent->n00bCount = ent->oldHealth;
+	ent->n00bCount = ent->splashRadius;
 
 	//now for the shieldindicator I need to know if we have an alertEnt available
 	if(G_Find(NULL, FOFS(classname), "target_alert"))
-		ent->moverstate = 0;
+		ent->splashDamage = 0;
 	else
-		ent->moverstate = 1;
+		ent->splashDamage = 1;
 
 	ent->think = target_shiphealth_think;
 	ent->use = target_shiphealth_use;
