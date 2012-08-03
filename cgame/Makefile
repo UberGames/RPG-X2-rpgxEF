@@ -1,12 +1,26 @@
 default: so
 so: build_so
 
-# compiler to use for building shared objects
-CC = gcc
-
 # determine arch and platform
 ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
+
+# compiler to use for building shared objects
+CC = gcc
+
+# cross compiling
+ifeq ($(TARGET), win32)
+  PLATFORM=mingw32
+  ARCH=x86
+  CC=i686-w64-mingw32-gcc
+  CFLAGS+=-m32
+endif
+ifeq ($(TARGET), win64)
+  PLATFORM=mingw32
+  ARCH=x86_64
+  CC=x86_64-w64-mingw32-gcc
+  CFLAGS+=-m64
+endif
 
 # cflags for the compiler
 ifeq ($(PLATFORM), mingw32)

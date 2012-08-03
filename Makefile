@@ -6,10 +6,19 @@ RPGXDIRYOUNG="/d/games/eliteforce/build-engine/RPG-X2"
 ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
 
+# cross compiling
+ifeq ($(TARGET), win32)
+ARCH=x86
+PLATFORM=mingw32
+endif
+ifeq ($(TARGET), win64)
+ARCH=x86
+PLATFORM=mingw32
+endif
+
 # set extension
 ifeq ($(PLATFORM), mingw32)
 EXT=dll
-ARCH=x86
 else
 EXT=so
 endif
@@ -44,3 +53,10 @@ installyoung:
 	mv game/qagame$(ARCH).$(EXT) $(RPGXDIRYOUNG)
 	mv cgame/cgame$(ARCH).$(EXT) $(RPGXDIRYOUNG)
 	mv ui/ui$(ARCH).$(EXT) $(RPGXDIRYOUNG)
+
+pack:
+	cp game/qagame$(ARCH).$(EXT) .
+	cp cgame/cgame$(ARCH).$(EXT) .
+	cp ui/ui$(ARCH).$(EXT) .
+	tar -czvpf release_$(PLATFORM)_$(ARCH).tar.gz qagame$(ARCH).$(EXT) cgame$(ARCH).$(EXT) ui$(ARCH).$(EXT)
+
