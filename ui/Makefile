@@ -1,5 +1,6 @@
 default: build_so
 
+
 # determine arch and platform
 ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
