@@ -17,7 +17,7 @@ ifeq ($(TARGET), win32)
 endif
 ifeq ($(TARGET), win64)
   PLATFORM=mingw32
-  ARCH=x86_64
+  ARCH=x64
   CC=x86_64-w64-mingw32-gcc
   CFLAGS+=-m64
 endif
