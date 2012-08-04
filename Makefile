@@ -7,13 +7,18 @@ ARCH=$(shell uname -m | sed -e s/i.86/i386/)
 PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
 
 # cross compiling
+ifneq ($(PLATFORM), mingw32)
 ifeq ($(TARGET), win32)
 ARCH=x86
 PLATFORM=mingw32
 endif
 ifeq ($(TARGET), win64)
-ARCH=x86
+ARCH=x64
 PLATFORM=mingw32
+endif
+else 
+#we are compiling on windows
+ARCH=x86
 endif
 
 # set extension

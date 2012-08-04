@@ -9,6 +9,7 @@ PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]')
 CC = gcc
 
 # cross compiling
+ifneq ($(PLATFORM), mingw32)
 ifeq ($(TARGET), win32)
   PLATFORM=mingw32
   ARCH=x86
@@ -20,6 +21,10 @@ ifeq ($(TARGET), win64)
   ARCH=x64
   CC=x86_64-w64-mingw32-gcc
   CFLAGS+=-m64
+endif
+else
+#we are compiling on windows
+ARCH=x86
 endif
 
 # cflags for the compiler
