@@ -2704,8 +2704,7 @@ void target_selfdestruct_think(gentity_t *ent) {
 		}
 
 	} else if (ent->wait == 0) { //bang time ^^
-		//if we have a target fire that, else kill everyone that is not marked as escaped.
-		if (!ent->target || !ent->target[0]) {
+		//I've reconsidered. Selfdestruct will fire It's death mode no matter what. Targets are for VFX-Stuff.
 			int num;
 			gentity_t *ents[MAX_GENTITIES];
 
@@ -2727,9 +2726,8 @@ void target_selfdestruct_think(gentity_t *ent) {
 			ent->wait = -1;
 			ent->nextthink = level.time + 1000;
 			return;
-		} else {
+		if(ent->target)
 			G_UseTargets(ent, ent);
-		}  
 	} else if (ent->wait < 0) {
 
 		//we have aborted and the note should be out or ended and everyone should be dead so let's reset
@@ -2935,7 +2933,7 @@ angle: Hull repair in % per minute
 speed: Shield repair in % per minute (only active if shield's aren't fried)
 
 greensound: Things to fire every time damage occurs (like FX)
-falsetarget: swapname for target_warp
+falsetarget: truename/swapCoreState for target_warp
 bluename: swapname for target_turbolift
 bluesound: swapname for ui_transporter
 falsename: redname for target_alert
@@ -3034,10 +3032,8 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	//disable UI_Transporter if need be.
 	if(ent->bluesound){
 		transEnt = G_Find(NULL, FOFS(swapname), ent->bluesound);
-		if (transEnt->flags & FL_LOCKED){
-			return;
-		} else {
-			if(((ent->count / ent->health) * crandom()) < 0.3){
+		if (!(transEnt->flags & FL_LOCKED)){
+			if(((ent->count / ent->health) * random()) < 0.3){
 				ent->target = ent->bluesound;
 				G_UseTargets(ent, ent);
 			}
@@ -3047,10 +3043,8 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	//disable target_turbolift if need be.
 	if(ent->bluename){
 		turboEnt = G_Find(NULL, FOFS(swapname), ent->bluename);
-		if (turboEnt->flags & FL_LOCKED){
-			return;
-		} else {
-			if(((ent->count / ent->health) * crandom()) < 0.3){
+		if (!(turboEnt->flags & FL_LOCKED)){
+			if(((ent->count / ent->health) * random()) < 0.3){
 				ent->target = ent->bluename;
 				G_UseTargets(ent, ent);
 			}
@@ -3059,11 +3053,9 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 
 	//disable target_warp if need be.
 	if(ent->falsetarget){
-		warpEnt = G_Find(NULL, FOFS(swapname), ent->falsetarget);
-		if (warpEnt->n00bCount == 0){
-			return;
-		} else {
-			if(((ent->count / ent->health) * crandom()) < 0.3){
+		warpEnt = G_Find(NULL, FOFS(truename), ent->falsetarget);
+		if ((warpEnt->sound1to2) && (warpEnt->sound2to1 == 0)){
+			if(((ent->count / ent->health) * random()) < 0.3){
 				ent->target = ent->falsetarget;
 				G_UseTargets(ent, ent);
 			}
@@ -3071,7 +3063,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	}
 
 	//disable shield-subsystem if need be.
-	if(((ent->count / ent->health) * crandom()) < 0.3){
+	if(((ent->count / ent->health) * random()) < 0.3){
 		ent->n00bCount = 0;
 		ent->splashDamage = -1;
 	}
@@ -3092,7 +3084,16 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 		G_AddEvent(ent, EV_GLOBAL_SOUND, G_SoundIndex("sound/weapons/explosions/explode2.wav"));
 		//let's be shakey for a sec... I hope lol ^^
 		trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%i %i", 9999, ( 1000 + ( level.time - level.startTime ) ) ) );
+		ent->count = 0;
 	}
+
+	//let's reset or lift the repair-timer
+	if(ent->count == 0)
+		ent->nextthink = -1;
+	else
+		ent->nextthink = level.time + 60000;
+
+	return;
 }	
 
 void target_shiphealth_think(gentity_t *ent) {
@@ -3157,6 +3158,8 @@ void target_shiphealth_think(gentity_t *ent) {
 		}
 	}
 	ent->nextthink = level.time + 60000;
+
+	return;
 }
 
 

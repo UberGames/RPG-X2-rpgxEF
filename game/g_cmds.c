@@ -6426,13 +6426,18 @@ static void Cmd_shipdamage_f(gentity_t *ent) {
 	}
 	#endif
 
+	healthEnt = G_Find(NULL, FOFS(classname), "target_shiphealth");
+	if(!healthEnt){
+		trap_SendServerCommand( ent-g_entities, "print \"^4This map does not support the shiphealth system.\n\"" );
+		return;
+	}
+	
 	trap_Argv(1, arg, sizeof(arg));
 	if(atoi(arg) == 0){
-		G_PrintfClient(ent,	"Usage: shipdamage [damage] where damage is oviously the total amount dealt. It will be rendered to shields and hull respectively by the entity. Must be positive. You can not heal with this command.\n");
+		G_PrintfClient(ent,	"Usage: shipdamage [damage] where damage is the total amount dealt. It will be rendered to shields and hull respectively by the entity. Must be positive. You can not heal with this command.\n");
 		return;
 	}
 
-	healthEnt = G_Find(NULL, FOFS(classname), "target_shiphealth");
 	if(atoi(arg) > 0){
 		healthEnt->damage = atoi(arg);
 	} else {
@@ -6460,8 +6465,13 @@ static void Cmd_shiphealth_f(gentity_t *ent) {
 	CSS = healthEnt->n00bCount;
 	SI = healthEnt->splashDamage;
 
-	RHS = floor((CHS / THS * 100));
-	RSS = floor((CSS / TSS * 100));
+	RHS = floor((CHS / THS) * 100);
+	RSS = floor((CSS / TSS) * 100);
+
+	if(!healthEnt){
+		trap_SendServerCommand( ent-g_entities, "print \"^4This map does not support the shiphealth system.\n\"" );
+		return;
+	}
 	
 	if(CHS == 0){
 		trap_SendServerCommand( ent-g_entities, "print \"^4The Ship is destroyed, what do you want?\n\"" );
