@@ -2564,6 +2564,7 @@ void SP_target_shaderremap(gentity_t *ent) {
 /*QUAKED target_selfdestruct (1 0 0) (-8 -8 -8) (8 8 8)
 This entity manages the self destruct.
 For now this should only be used via the selfdestruct console command, however it might be usable from within the radiant at a later date.
+Should this thing hit 0 the killing part for everyone outside a target_savezone will be done automatically.
 
 Keys:
 wait: total Countdown-Time in secs
@@ -2571,7 +2572,7 @@ count: warning intervall up to 60 secs in secs
 n00bCount: warning intervall within 60 secs in secs
 health: warning intervall within 10 secs in secs
 flags: are audio warnings 1 or 0?
-target: Things to fire once the countdown hits 0
+target: Things like fx to fire once the countdown hits 0
 
 damage: leveltime of countdowns end
 spawnflags: 1 tells ent to free once aborted
@@ -2986,8 +2987,8 @@ static int target_shiphealth_get_unsafe_players(gentity_t *ents[MAX_GENTITIES]) 
 }
 
 void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-	int			NSS, NHS, SD, HD, i, num;
-	float		BT;
+	int			i, num;
+	double		NSS, NHS, SD, HD, BT;
 	gentity_t	*alertEnt, *warpEnt, *turboEnt, *transEnt, *client;
 	
 	if(ent->splashDamage == 1){ //shields are active so we're just bleeding trough on the hull
@@ -3149,7 +3150,7 @@ void target_shiphealth_think(gentity_t *ent) {
 			else
 				ent->splashDamage = 1;
 		} else {
-			if((ent->count / ent->health * crandom()) > 1){
+			if((ent->count / ent->health * random()) > 1){
 				if(alertEnt->damage == 0)
 					ent->splashDamage = 0;
 				else

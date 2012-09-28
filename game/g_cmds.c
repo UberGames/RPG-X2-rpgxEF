@@ -6342,6 +6342,7 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 				G_PrintfClient(ent, "^1intervall-10 must not be 0."); 
 			G_PrintfClient(ent, "^1Removing entity.");
 			G_FreeEntity(destructEnt);
+			return;
 		}
 	} else if (!Q_stricmp(arg, "remaining")) {
 		//Is there sth running alrerady?
@@ -6456,7 +6457,8 @@ Harry Young | 02/08/2012
 */
 static void Cmd_shiphealth_f(gentity_t *ent) {
 	gentity_t	*healthEnt;
-	int			THS, CHS, TSS, CSS, SI, RHS, RSS;
+	int			THS, CHS, TSS, CSS, SI;
+	double		RHS, RSS;
 
 	healthEnt = G_Find(NULL, FOFS(classname), "target_shiphealth");
 	THS = healthEnt->health;
@@ -6478,15 +6480,15 @@ static void Cmd_shiphealth_f(gentity_t *ent) {
 	} else {
 		if(SI == 1){
 			trap_SendServerCommand( ent-g_entities, "print \"^4Shields are online\n\"" );
-			trap_SendServerCommand( ent-g_entities, va("print \"^4Shield Capactiy at %i Percent (%i of %i Points)\n\"", RSS, CSS, TSS) );
-			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %i Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Shield Capactiy at %.0f Percent (%i of %i Points)\n\"", RSS, CSS, TSS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %.0f Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
 		} else if(SI == 0){
 			trap_SendServerCommand( ent-g_entities, "print \"^4Shields are offline\n\"" );
-			trap_SendServerCommand( ent-g_entities, va("print \"^4Shield Capactiy at %i Percent (%i of %i Points)\n\"", RSS, CSS, TSS) );
-			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %i Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Shield Capactiy at %.0f Percent (%i of %i Points)\n\"", RSS, CSS, TSS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %.0f Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
 		} else {
 			trap_SendServerCommand( ent-g_entities, "print \"^4Shields are inoperable\n\"" );
-			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %i Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
+			trap_SendServerCommand( ent-g_entities, va("print \"^4Structual Integrity at %.0f Percent (%i of %i Points)\n\"", RHS, CHS, THS) );
 		}
 	}
 	return;
