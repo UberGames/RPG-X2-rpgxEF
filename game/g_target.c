@@ -2992,7 +2992,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	gentity_t	*alertEnt, *warpEnt, *turboEnt, *transEnt, *client;
 	
 	if(ent->splashDamage == 1){ //shields are active so we're just bleeding trough on the hull
-		BT = ((1 - (ent->count / ent->health)) / 10);
+		BT = ((1 - (ent->count * pow(ent->health, -1))) / 10);
 		SD = (ent->damage - ceil(ent->damage * BT));
 
 		if(SD > ent->n00bCount){ //we're draining the shields...
@@ -3034,7 +3034,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	if(ent->bluesound){
 		transEnt = G_Find(NULL, FOFS(swapname), ent->bluesound);
 		if (!(transEnt->flags & FL_LOCKED)){
-			if(((ent->count / ent->health) * random()) < 0.3){
+			if((ent->count * pow(ent->health, -1)) < flrandom(0.1 , 0.4)){
 				ent->target = ent->bluesound;
 				G_UseTargets(ent, ent);
 			}
@@ -3045,7 +3045,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	if(ent->bluename){
 		turboEnt = G_Find(NULL, FOFS(swapname), ent->bluename);
 		if (!(turboEnt->flags & FL_LOCKED)){
-			if(((ent->count / ent->health) * random()) < 0.3){
+			if((ent->count * pow(ent->health, -1)) < flrandom(0.1 , 0.4)){
 				ent->target = ent->bluename;
 				G_UseTargets(ent, ent);
 			}
@@ -3056,7 +3056,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	if(ent->falsetarget){
 		warpEnt = G_Find(NULL, FOFS(truename), ent->falsetarget);
 		if ((warpEnt->sound1to2) && (warpEnt->sound2to1 == 0)){
-			if(((ent->count / ent->health) * random()) < 0.3){
+			if((ent->count * pow(ent->health, -1)) < flrandom(0.1 , 0.4)){
 				ent->target = ent->falsetarget;
 				G_UseTargets(ent, ent);
 			}
@@ -3064,7 +3064,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	}
 
 	//disable shield-subsystem if need be.
-	if(((ent->count / ent->health) * random()) < 0.3){
+	if((ent->count * pow(ent->health, -1)) < flrandom(0.1 , 0.4)){
 		ent->n00bCount = 0;
 		ent->splashDamage = -1;
 	}
@@ -3144,14 +3144,14 @@ void target_shiphealth_think(gentity_t *ent) {
 
 	//shield reenstatement
 	if(ent->splashDamage == -1){ //else we don't need to run this
-		if((ent->count / ent->health) > 0.5){
-			if(alertEnt->damage == 0) //what symbol is and AND? cause I'd like to failsave 1 if we don't have alerts...
+		if((ent->count * pow(ent->health, -1)) > 0.5){
+			if(alertEnt->damage == 0 && alertEnt->classname == "target_alert") 
 				ent->splashDamage = 0;
 			else
 				ent->splashDamage = 1;
 		} else {
-			if((ent->count / ent->health * random()) > 1){
-				if(alertEnt->damage == 0)
+			if((ent->count * pow(ent->health, -1) * flrandom(0, 1)) > 0.75){
+				if(alertEnt->damage == 0 && alertEnt->classname == "target_alert")
 					ent->splashDamage = 0;
 				else
 					ent->splashDamage = 1;
