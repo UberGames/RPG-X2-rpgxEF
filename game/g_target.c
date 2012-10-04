@@ -2480,7 +2480,8 @@ void target_levelchange_use(gentity_t *ent, gentity_t *other, gentity_t *activat
 	if(rpg_allowSPLevelChange.integer) {
 		ent->think = target_levelchange_think;
 		ent->nextthink = level.time + 1000;
-		trap_SendServerCommand(-1, va("servercprint \"Mapchange in %i ...\"", ent->count)); 
+		if(ent->count > 0)//This is anoying if there's no delay so let's do this only if there is
+			trap_SendServerCommand(-1, va("servercprint \"Mapchange in %i ...\"", ent->count)); 
 	}
 }
 
@@ -2705,7 +2706,7 @@ void target_selfdestruct_think(gentity_t *ent) {
 		}
 
 	} else if (ent->wait == 0) { //bang time ^^
-		//I've reconsidered. Selfdestruct will fire It's death mode no matter what. Targets are for VFX-Stuff.
+		//I've reconsidered. Selfdestruct will fire it's death mode no matter what. Targets are for FX-Stuff.
 			int num;
 			gentity_t *ents[MAX_GENTITIES];
 
