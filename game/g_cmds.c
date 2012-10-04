@@ -6473,7 +6473,7 @@ static void Cmd_shiphealth_f(gentity_t *ent) {
 	CSS = healthEnt->n00bCount;
 	SI = healthEnt->splashDamage;
 
-	RHS = floor((CHS * pow(THS, -1)) * 100);
+	RHS = ((CHS * pow(THS, -1)) * 100);
 	if(RHS <= 100)
 		HCI = 2;//Hull Color Indicators
 	if(RHS <= 50)
@@ -6481,7 +6481,7 @@ static void Cmd_shiphealth_f(gentity_t *ent) {
 	if(RHS <= 25)
 		HCI = 1;
 
-	RSS = floor((CSS * pow(TSS, -1)) * 100);
+	RSS = ((CSS * pow(TSS, -1)) * 100);
 	if(RSS <= 100)
 		SCI = 2;//Shield Color Indicators
 	if(RSS <= 50)
@@ -6492,21 +6492,24 @@ static void Cmd_shiphealth_f(gentity_t *ent) {
 	if(CHS == 0){
 		trap_SendServerCommand( ent-g_entities, "print \"\n^1 The Ship is destroyed.\n\n\"" );
 	} else {
-		if(SI == 1){
-			trap_SendServerCommand( ent-g_entities, "print \"\n^3 Tactical Master Systems Display\n\"" );
-			trap_SendServerCommand( ent-g_entities, "print \"^2 Shields are online\n\"" );
-			trap_SendServerCommand( ent-g_entities, va("print \"^%i Shield Capactiy at %.1f Percent (%i of %i Points)\n\"", SCI, RSS, CSS, TSS) );
-			trap_SendServerCommand( ent-g_entities, va("print \"^%i Structual Integrity at %.1f Percent (%i of %i Points)\n\n\"", HCI, RHS, CHS, THS) );
-		} else if(SI == 0){
-			trap_SendServerCommand( ent-g_entities, "print \"\n^3 Tactical Master Systems Display\n\"" );
-			trap_SendServerCommand( ent-g_entities, "print \"^3 Shields are offline\n\"" );
-			trap_SendServerCommand( ent-g_entities, va("print \"^%i Shield Capactiy at %.1f Percent (%i of %i Points)\n\"", SCI, RSS, CSS, TSS) );
-			trap_SendServerCommand( ent-g_entities, va("print \"^%i Structual Integrity at %.1f Percent (%i of %i Points)\n\n\"", HCI, RHS, CHS, THS) );
-		} else {
-			trap_SendServerCommand( ent-g_entities, "print \"\n^3 Tactical Master Systems Display\n\"" );
-			trap_SendServerCommand( ent-g_entities, "print \"^1 Shields are inoperable\n\"" );
-			trap_SendServerCommand( ent-g_entities, va("print \"^%i Structual Integrity at %.1f Percent (%i of %i Points)\n\n\"", HCI, RHS, CHS, THS) );
+		trap_SendServerCommand( ent-g_entities, "print \"\n^3 Tactical Master Systems Display\n\"" );
+		switch(SI){
+			case -2:
+				trap_SendServerCommand( ent-g_entities, "print \"^1 Shields are offline\n\"" );
+				break;
+			case -1:
+				trap_SendServerCommand( ent-g_entities, "print \"^1 Shields are inoperable\n\"" );
+				break;
+			case 0:
+				trap_SendServerCommand( ent-g_entities, "print \"^3 Shields are standing by\n\"" );
+				break;
+			case 1:
+				trap_SendServerCommand( ent-g_entities, "print \"^2 Shields are online\n\"" );
+				break;
 		}
+		if(CSS>0)
+			trap_SendServerCommand( ent-g_entities, va("print \"^%i Shield Capactiy at %.0f Percent (%i of %i Points)\n\"", SCI, RSS, CSS, TSS) );
+		trap_SendServerCommand( ent-g_entities, va("print \"^%i Structual Integrity at %.0f Percent (%i of %i Points)\n\n\"", HCI, RHS, CHS, THS) );
 	}
 	return;
 }

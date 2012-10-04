@@ -2999,6 +2999,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 			HD = (ent->damage - ent->n00bCount);
 			NHS = (ent->count - HD);
 			ent->n00bCount = 0;
+			ent->splashDamage = -2;
 		} else { //shields will survive so let's just bleed trough
 			HD = floor(ent->damage * BT);
 			NHS = (ent->count - HD);
@@ -3013,7 +3014,7 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 
 	//enough math, let's trigger things
 
-	//activate shields if inactive
+	//activate shields if on standby
 	if(ent->splashDamage == 0)
 		ent->splashDamage = 1;
 
@@ -3130,10 +3131,13 @@ void target_shiphealth_think(gentity_t *ent) {
 	// Shield Repair
 	if(ent->splashDamage != -1){ //skip if shields are toast
 		if(ent->n00bCount < ent->splashRadius){
-			if(alertEnt->damage == 0) //condition green
+			if(alertEnt->damage == 0){ //condition green
 				NSS = (ent->n00bCount + (ent->splashRadius * ent->speed / 100));
-			else
+				ent->splashDamage = 0;
+			}else{
 				NSS = (ent->n00bCount + (ent->splashRadius * ent->speed / 200));
+				ent->splashDamage = 1;
+			}
 
 			if(NSS > ent->splashRadius)
 				ent->n00bCount = ent->splashRadius;
