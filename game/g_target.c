@@ -1780,6 +1780,9 @@ void target_alert_remapShaders(int target_condition) {
 }
 
 void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+
+	gentity_t *healthEnt;
+
 	if(!activator) {
 		DEVELOPER(G_Printf(S_COLOR_YELLOW "[Entity-Error] target_alert_use called with NULL activator.\n"););
 		return;
@@ -2047,6 +2050,19 @@ void target_alert_use(gentity_t *ent, gentity_t *other, gentity_t *activator) {
 			ent->target = ent->targetname2;
 			G_UseTargets(ent, ent);
 			ent->damage = 3;
+		}
+	}
+
+	//Refresh health ent if it has interconnectivity with target_alert
+	healthEnt = G_Find(NULL, FOFS(classname), "target_shiphealth");
+	if(healthEnt){
+		if(!Q_stricmp(healthEnt->falsename, ent->falsename)){
+			if(healthEnt->splashDamage == 0 || healthEnt->splashDamage == 1){
+				if(ent->damage == 0)
+					healthEnt->splashDamage = 0;
+				else
+					healthEnt->splashDamage = 1;
+			}
 		}
 	}
 	// Free activator if no classname <-- alert command
@@ -3015,17 +3031,16 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 
 	//enough math, let's trigger things
 
-	//activate shields if on standby
-	if(ent->splashDamage == 0)
-		ent->splashDamage = 1;
-
-	//go to red alert if we are on green
+	//go to red alert if we are on green, this will also activate the shields
 	if(ent->falsename){
 		alertEnt = G_Find(NULL, FOFS(falsename), ent->falsename);
-		if(alertEnt->damage == 0){
+		if(alertEnt->damage != 2){
 			ent->target = ent->falsename;
 			G_UseTargets(ent, ent);
 		}
+	}else{
+		if(ent->splashDamage == 0)
+			ent->splashDamage = 1;
 	}
 
 	//time to fire the FX
@@ -3150,13 +3165,13 @@ void target_shiphealth_think(gentity_t *ent) {
 	//shield reenstatement
 	if(ent->splashDamage == -1){ //else we don't need to run this
 		if((ent->count * pow(ent->health, -1)) > 0.5){
-			if(alertEnt->damage == 0 && alertEnt->classname == "target_alert") 
+			if(alertEnt->damage == 0 && !Q_stricmp(alertEnt->classname, "target_alert")) 
 				ent->splashDamage = 0;
 			else
 				ent->splashDamage = 1;
 		} else {
 			if((ent->count * pow(ent->health, -1) * flrandom(0, 1)) > 0.75){
-				if(alertEnt->damage == 0 && alertEnt->classname == "target_alert")
+				if(alertEnt->damage == 0 && !Q_stricmp(alertEnt->classname, "target_alert"))
 					ent->splashDamage = 0;
 				else
 					ent->splashDamage = 1;

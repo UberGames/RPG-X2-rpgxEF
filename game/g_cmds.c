@@ -6394,7 +6394,7 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		G_PrintfClient(ent,		"intervall-60: intervall of audio warnings within T-60 seconds in seconds. Must not be 0.");
 		G_PrintfClient(ent,		"intervall-10: intervall of audio warnings within T-10 seconds in seconds. Must not be 0.");
 		G_PrintfClient(ent,		"audio: set this 0 if you do want a muted countdown, else set this 1.");
-		G_PrintfClient(ent,		"target: Optional Argument. This will be fired once the countdown hits 0. If not set the entity will play some effects and kill all clients that are not within a target_escapevehicle.");
+		G_PrintfClient(ent,		"target: Optional Argument for Effects to fire once the countdown hist 0. The entity will automatically shake everyones screen and kill all clienst outside an active target_savezone.");
 		G_PrintfClient(ent,		"^2Hint: Make sure your duration and intervalls are synced up. There is a failsave for the countdown to hit it's mark however there is nothing to make sure that you don't get your warnings at unexpected times...");
 		G_PrintfClient(ent,		"^2Try this for example: selfdestruct start 131 10 10 1 1");
 		G_PrintfClient(ent,		"\n^3Usage: selfdestruct remaining");
