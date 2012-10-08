@@ -3007,31 +3007,35 @@ void target_shiphealth_use(gentity_t *ent, gentity_t *other, gentity_t *activato
 	int			i, num;
 	double		NSS, NHS, SD, HD, BT;
 	gentity_t	*alertEnt, *warpEnt, *turboEnt, *transEnt, *client;
-	
-	if(ent->splashDamage == 1){ //shields are active so we're just bleeding trough on the hull
-		BT = ((1 - (ent->count * pow(ent->health, -1))) / 10);
-		SD = (ent->damage - ceil(ent->damage * BT));
 
-		if(SD > ent->n00bCount){ //we're draining the shields...
-			HD = (ent->damage - ent->n00bCount);
-			NHS = (ent->count - HD);
-			ent->n00bCount = 0;
-			ent->splashDamage = -2;
-		} else { //shields will survive so let's just bleed trough
-			HD = floor(ent->damage * BT);
-			NHS = (ent->count - HD);
-			NSS = (ent->n00bCount - SD);
-			ent->n00bCount = NSS;
+	if(ent->damage <= 0){ //failsave
+		return;
+	}else{
+		if(ent->splashDamage == 1){ //shields are active so we're just bleeding trough on the hull
+			BT = ((1 - (ent->count * pow(ent->health, -1))) / 10);
+			SD = (ent->damage - ceil(ent->damage * BT));
+
+			if(SD > ent->n00bCount){ //we're draining the shields...
+				HD = (ent->damage - ent->n00bCount);
+				NHS = (ent->count - HD);
+				ent->n00bCount = 0;
+				ent->splashDamage = -2;
+			} else { //shields will survive so let's just bleed trough
+				HD = floor(ent->damage * BT);
+				NHS = (ent->count - HD);
+				NSS = (ent->n00bCount - SD);
+				ent->n00bCount = NSS;
+			}
+		} else { //shields are off, guess where the blow goes...
+			NHS = (ent->count - ent->damage);
 		}
-	} else { //shields are off, guess where the blow goes...
-		NHS = (ent->count - ent->damage);
+	ent->count = NHS;
+	ent->damage = 0;
 	}
 	
-	ent->count = NHS;
-
 	//enough math, let's trigger things
 
-	//go to red alert if we are on green, this will also activate the shields
+	//go to red alert if we are not, this will also activate the shields
 	if(ent->falsename){
 		alertEnt = G_Find(NULL, FOFS(falsename), ent->falsename);
 		if(alertEnt->damage != 2){
