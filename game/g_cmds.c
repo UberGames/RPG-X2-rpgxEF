@@ -6440,7 +6440,12 @@ static void Cmd_shipdamage_f(gentity_t *ent) {
 	}
 
 	if(atoi(arg) > 0){
-		healthEnt->damage = atoi(arg);
+		if(healthEnt->count > 0){
+			healthEnt->damage = atoi(arg);
+		}else{
+			G_PrintfClient(ent,	"^1ERROR: The ship is destroyed.");
+			return;
+		}
 	} else {
 		G_PrintfClient(ent,	"^1ERROR: Damage must be a positive value. You can not heal with this command.");
 		return;
