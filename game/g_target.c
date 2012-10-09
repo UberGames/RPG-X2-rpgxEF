@@ -2654,6 +2654,7 @@ void target_selfdestruct_use(gentity_t *ent, gentity_t *other, gentity_t *activa
 
 void target_selfdestruct_think(gentity_t *ent) {
 	gentity_t*	client;	
+	gentity_t   *healthEnt;	
 	double		ETAmin, ETAsec, temp = 0.0f;
 	int			i = 0;
 
@@ -2723,6 +2724,11 @@ void target_selfdestruct_think(gentity_t *ent) {
 
 	} else if (ent->wait == 0) { //bang time ^^
 		//I've reconsidered. Selfdestruct will fire it's death mode no matter what. Targets are for FX-Stuff.
+		healthEnt = G_Find(NULL, FOFS(classname), "target_shiphealth");
+		if(healthEnt){
+			healthEnt->damage = healthEnt->health + healthEnt->splashRadius; //let's use the healthent killfunc if we have one. makes a lot of stuff easier.
+			healthEnt->use(healthEnt, NULL, NULL);
+		}else{
 			int num;
 			gentity_t *ents[MAX_GENTITIES];
 
@@ -2740,12 +2746,13 @@ void target_selfdestruct_think(gentity_t *ent) {
 			trap_SetConfigstring( CS_CAMERA_SHAKE, va( "%i %i", 9999, ( 1000 + ( level.time - level.startTime ) ) ) );
 			//let's clear the lower right corner
 			trap_SendServerCommand( -1, va("servermsg \" \""));
+		}
+		if(ent->target)
+			G_UseTargets(ent, ent);
 			//we're done here so let's finish up in a sec.	
 			ent->wait = -1;
 			ent->nextthink = level.time + 1000;
 			return;
-		if(ent->target)
-			G_UseTargets(ent, ent);
 	} else if (ent->wait < 0) {
 
 		//we have aborted and the note should be out or ended and everyone should be dead so let's reset
