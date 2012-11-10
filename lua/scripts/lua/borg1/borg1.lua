@@ -6,7 +6,7 @@ function InitGame(levelTime, randomSeed, restart)
 		game.Print("--workaround-setup ...");
 			ent = entity.Spawn();
 			ent:SetClassname("target_levelchange");
-			ent:SatTargetname("map_restart");
+			ent:SetTargetname("map_restart");
 			ent:SetTarget("borg1");
 			entity.CallSpawn(ent);
 		game.Print("--trigger-setup ...");
@@ -15,7 +15,9 @@ function InitGame(levelTime, randomSeed, restart)
 			game.Print("Please don't use map_restart, use map or devmap instead.");
 			ent = entity.Find("map_restart")
 			entity.Use(ent)
-		end
+		end    
+	game.Print("-Reimplementing splashDamage, SplashRadius and material to existing misc_model_breakables...");
+		entity.MMBRefit();
 		
 	game.Print("-Removing unused entities...");
 		entity.Remove(entity.Find("borg_munro"));
@@ -328,12 +330,12 @@ function InitGame(levelTime, randomSeed, restart)
 	game.Print("-I-Mod Room FFs and other stuff...");
 		ent = entity.FindBModel(125);
 		ent:SetClassname("func_forcefield");
-		ent:SatTargetname("imod_ff");
+		ent:SetTargetname("imod_ff");
 		entity.CallSpawn(ent);
 		
 		ent = entity.FindBModel(126);
 		ent:SetClassname("func_forcefield");
-		ent:SatTargetname("imod_ff");
+		ent:SetTargetname("imod_ff");
 		entity.CallSpawn(ent);
 		
 		ent = entity.FindBModel(152);
@@ -362,8 +364,8 @@ function InitGame(levelTime, randomSeed, restart)
 	game.Print("-The Last FF...");
 		ent = entity.FindBModel(151);
 		ent:SetClassname("func_usable");
-		ent:SetSpawnflags(8");
-		ent:SetWait(1");    
+		ent:SetSpawnflags(8);
+		ent:SetWait(1);
 		ent:SetTarget("forcefield4");
 		ent:SetLuaUse("borgsound");
 		entity.CallSpawn(ent);
@@ -383,23 +385,23 @@ function InitGame(levelTime, randomSeed, restart)
 		
 		ent = entity.Spawn();
 		ent:SetClassname("target_counter");
-		ent:SatTargetname("transfercount");
+		ent:SetTargetname("transfercount");
 		ent:SetTarget("transfer");
-		ent:SetCount(1");
+		ent:SetCount(1);
 		mover.SetPosition(ent, 0, 0, 0);
 		entity.CallSpawn(ent);
 		
 		ent = entity.Spawn();
 		ent:SetClassname("target_levelchange");
-		ent:SatTargetname("transfer");
+		ent:SetTargetname("transfer");
 		ent:SetTarget("borg2");
-		ent:SetWait(-1");
+		ent:SetWait(-1);
 		mover.SetPosition(ent, 0, 0, 0);
 		entity.CallSpawn(ent);
 		
 		ent = entity.Spawn();
 		ent:SetClassname("target_relay");
-		ent:SatTargetname("transfer");
+		ent:SetTargetname("transfer");
 		ent:SetTarget("forcefield4");
 		mover.SetPosition(ent, 0, 0, 0);
 		entity.CallSpawn(ent);
@@ -407,47 +409,47 @@ function InitGame(levelTime, randomSeed, restart)
 	game.Print("-Lift A fix...");
 		ent = entity.FindBModel(147);
 		ent:SetClassname("func_usable");
-		ent:SetSpawnflags(8");
-		ent:SetWait(1");    
+		ent:SetSpawnflags(8);
+		ent:SetWait(1);
 		ent:SetTarget("plat1");
 		ent:SetLuaUse("borgsound");
 		entity.CallSpawn(ent);
 		  
 		ent = entity.FindBModel(148);
 		ent:SetClassname("func_usable");
-		ent:SetSpawnflags(8");
-		ent:SetWait(1");    
+		ent:SetSpawnflags(8);
+		ent:SetWait(1);
 		ent:SetTarget("plat1");
 		ent:SetLuaUse("borgsound");
 		entity.CallSpawn(ent); 
 		
 		ent = entity.FindBModel(91);
-		ent:SetWait(-1");
+		ent:SetWait(-1);
 		ent:SetKeyValue("angle", "-2");  
-		ent:SetCount(24");        
+		ent:SetCount(24);
 		entity.CallSpawn(ent); 
 		
 	game.Print("-Lift B fix...");
 		ent = entity.FindBModel(149);
 		ent:SetClassname("func_usable");
-		ent:SetSpawnflags(8");
-		ent:SetWait(1");    
+		ent:SetSpawnflags(8);
+		ent:SetWait(1);
 		ent:SetTarget("plat2");
 		ent:SetLuaUse("borgsound");
 		entity.CallSpawn(ent);
 		  
 		ent = entity.FindBModel(150);
 		ent:SetClassname("func_usable");
-		ent:SetSpawnflags(8");
-		ent:SetWait(1");    
+		ent:SetSpawnflags(8);
+		ent:SetWait(1);
 		ent:SetTarget("plat2");
 		ent:SetLuaUse("borgsound");
 		entity.CallSpawn(ent);
 		    
 		ent = entity.FindBModel(89);
-		ent:SetWait(-1");
+		ent:SetWait(-1);
 		ent:SetKeyValue("angle", "-2");   
-		ent:SetCount(24");    
+		ent:SetCount(24);
 		entity.CallSpawn(ent); 
 		
 	game.Print("-Setting up spawnpoints...");
@@ -487,8 +489,8 @@ function InitGame(levelTime, randomSeed, restart)
 		game.Print("--func_breakable...");
 			ent = entity.FindBModel(39);
 			ent:SetKeyValue("material", "2");
-			ent:SetKeyValue("splashDamage", "75");
-			ent:SetKeyValue("splashRadius", "75");
+			ent:SetSplashDamage(75);
+			ent:SetSplashRadius(75);
 			entity.CallSpawn(ent);
 			
 			ent = entity.FindBModel(38);
@@ -497,8 +499,8 @@ function InitGame(levelTime, randomSeed, restart)
 			
 			ent = entity.FindBModel(123);
 			ent:SetKeyValue("material", "2");
-			ent:SetKeyValue("splashDamage", "75");
-			ent:SetKeyValue("splashRadius", "75");
+			ent:SetSplashDamage(75);
+			ent:SetSplashRadius(75);
 			entity.CallSpawn(ent);
 			
 			ent = entity.FindBModel(124);
@@ -507,8 +509,8 @@ function InitGame(levelTime, randomSeed, restart)
 			
 			ent = entity.FindBModel(138);
 			ent:SetKeyValue("material", "2");
-			ent:SetKeyValue("splashDamage", "75");
-			ent:SetKeyValue("splashRadius", "75");
+			ent:SetSplashDamage(75);
+			ent:SetSplashRadius(75);
 			entity.CallSpawn(ent);
 			
 			ent = entity.FindBModel(22);
@@ -517,14 +519,14 @@ function InitGame(levelTime, randomSeed, restart)
 			
 			ent = entity.FindBModel(82);
 			ent:SetKeyValue("material", "1");
-			ent:SetKeyValue("splashDamage", "75");
-			ent:SetKeyValue("splashRadius", "75");
+			ent:SetSplashDamage(75);
+			ent:SetSplashRadius(75);
 			entity.CallSpawn(ent);
 			
 			ent = entity.FindBModel(28);
 			ent:SetKeyValue("material", "2");
-			ent:SetKeyValue("splashDamage", "75");
-			ent:SetKeyValue("splashRadius", "75");
+			ent:SetSplashDamage(75);
+			ent:SetSplashRadius(75);
 			entity.CallSpawn(ent);
 			
 			ent = entity.FindBModel(27);
@@ -533,15 +535,15 @@ function InitGame(levelTime, randomSeed, restart)
 			
 			ent = entity.FindBModel(26);
 			ent:SetKeyValue("material", "2");
-			ent:SetKeyValue("splashDamage", "75");
-			ent:SetKeyValue("splashRadius", "75");
+			ent:SetSplashDamage(75);
+			ent:SetSplashRadius(75);
 			entity.CallSpawn(ent);
 			
 			ent = entity.FindBModel(137);
 			ent:SetKeyValue("team", "2")
 			entity.CallSpawn(ent)
 			
-		game.Print("--misc_model_breakable...");
+		--[[game.Print("--misc_model_breakable...");
 			game.Print("---checking for local or dedicated...");
 				if not entity.FindNumber(334) == nil then
 				ent = entity.FindNumber(334);
@@ -1093,7 +1095,7 @@ function InitGame(levelTime, randomSeed, restart)
 				ent:SetSplashDamage(75);
 				ent:SetSplashRadius(75);;
 				entity.CallSpawn(ent);
-				end
+				end  ]]--
 game.Print("...Done"); 	
 end     
 
@@ -1114,12 +1116,13 @@ function finalroomdrop(ent, other, activator)
 	entity.CallSpawn(ent); 
 end
 
-function midwaydrop(ent, other, activator) 
-	ent:SetLuaReached("luaReached", "midwaydrop2");
+function midwaydrop(ent, other, activator)
+	ent = entity.FindBModel(41);
+	ent:SetLuaReached("midwaydrop2");
 	mover.ToPosition(ent, 175, 96, 1088, 288)
 end
 
-function midwaydrop2(ent) 
+function midwaydrop2(ent)
 	mover.Halt(ent);
 	ent:SetLuaReached("midwaydropH");
 	ent:SetLuaReachedAngular("midwaydropHA");
@@ -1127,12 +1130,12 @@ function midwaydrop2(ent)
 	mover.ToPosition(ent, 175, 32, 1088, 90)
 end
 
-function midwaydropH(ent) 
+function midwaydropH(ent)
 	mover.Halt(ent);      
 	ent:SetLuaReached("null");
 end
 
-function midwaydropHA(ent) 
+function midwaydropHA(ent)
 	mover.HaltAngles(ent);      
 	ent:SetLuaReachedAngular("null");
 end

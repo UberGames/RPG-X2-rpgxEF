@@ -14,7 +14,10 @@ function InitGame(levelTime, randomSeed, restart)
 			game.Print("Please don't use map_restart, use map or devmap instead.");
 			ent = entity.Find("map_restart")
 			entity.Use(ent)
-		end
+		end       
+	game.Print("-Reimplementing splashDamage, SplashRadius and material to existing misc_model_breakables...");
+		entity.MMBRefit();
+		
 	game.Print("-Updating and fixing Forcefields and Plasmafilters...");
 		game.Print("--Forcefield Section 1");
 			ent = entity.Spawn();
