@@ -1172,18 +1172,6 @@ static void Cmd_Class_f( gentity_t *ent ) {
 	clientInitialStatus[ent->s.number].initialized = qfalse;
 	if ( SetClass( ent, s, NULL, qtrue ) )
 	{
-		//if still in warmup, don't debounce class changes
-		if ( g_doWarmup.integer )
-		{
-			if ( level.warmupTime != 0 )
-			{
-				if ( level.warmupTime < 0 || level.time - level.startTime <= level.warmupTime )
-				{
-					return;
-				}
-			}
-		}
-		//if warmuptime is over, don't change classes again for a bit
 		ent->client->classChangeDebounceTime = level.time + (g_classChangeDebounceTime.integer*1000);
 
 		trap_SendServerCommand( ent-g_entities, va ( "pc %s", s ) );
@@ -2293,24 +2281,7 @@ void Cmd_ForceClass_f( gentity_t *ent ) {
 
 	//if this is a manual change, not an assimilation, uninitialize the clInitStatus data
 	clientInitialStatus[target->s.number].initialized = qfalse;
-	if ( SetClass( target, s, NULL, qfalse ) )
-	{
-		//if still in warmup, don't debounce class changes
-		if ( g_doWarmup.integer )
-		{
-			if ( level.warmupTime != 0 )
-			{
-				if ( level.warmupTime < 0 || level.time - level.startTime <= level.warmupTime )
-				{
-					return;
-				}
-			}
-		}
-		//if warmuptime is over, don't change classes again for a bit
-		//RPG-X: RedTechie - Can change class anytime we wish
-		//target->client->classChangeDebounceTime = level.time + (g_classChangeDebounceTime.integer*1000);
-	}
-	else {
+	if ( !SetClass( target, s, NULL, qfalse ) ) {
 		trap_SendServerCommand( ent-g_entities, "print \"ERROR: Was unable to change class\n\" " );
 		return;
 	}
@@ -7918,66 +7889,6 @@ static void Cmd_SqlUserMod_f(gentity_t *ent) {
 		case 0:
 			trap_SendServerCommand(clientNum, "print \"An SQL Error occured, check server log for more information.\n\"");
 			break;
-	}
-}
-#endif
-
-#ifdef OLDSQL
-/*
-=================
-Cmd_SqlSetup_f
-=================
-*/
-static void Cmd_SqlSetup_f(gentity_t *ent) {
-	int res;
-	int clientNum;
-
-	if(!sql_use.integer || !ent || !ent->client) return;
-
-	if(!IsAdmin(ent)) {
-		return;
-	}
-
-	clientNum = ent->client->ps.clientNum;
-
-	res = trap_SQL_CreateTables(sql_dbName.string);
-
-	switch(res) {
-		case 1:
-			trap_SendServerCommand(clientNum, "print \"Seems to have worked, check server log.\n\"");
-			break;
-		case 0:
-			trap_SendServerCommand(clientNum, "print \"An SQL Error occured, see server log for more information.\n\"");
-			break;
-	}
-}
-
-/*
-=================
-Cmd_SqlUserDel_f
-=================
-*/
-static void Cmd_SqlUserDel_f(gentity_t *ent) {
-	char uName[MAX_TOKEN_CHARS];
-	int res;
-	int clientNum;
-
-	if(!sql_use.integer || !ent || !ent->client) return;
-
-	if(!IsAdmin(ent)) return;
-
-	if(trap_Argc() < 1) return;
-
-	clientNum = ent->client->ps.clientNum;
-
-	trap_Argv(1, uName, sizeof(uName));
-
-	res = trap_SQL_UserDel(sql_dbName.string, uName);
-
-	if(res) {
-		trap_SendServerCommand(clientNum, "print \"Seems to have worked.\n\"");
-	} else {
-		trap_SendServerCommand(clientNum, "print \"An SQL Error occured.\n\"");
 	}
 }
 #endif

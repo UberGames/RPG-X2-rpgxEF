@@ -39,10 +39,6 @@ g_classData_t	g_classData[MAX_CLASSES];
 
 vmCvar_t	g_gametype;
 vmCvar_t	g_dmflags;
-vmCvar_t	g_fraglimit;
-vmCvar_t	g_timelimit;
-vmCvar_t	g_timelimitWinningTeam;
-vmCvar_t	g_capturelimit;
 vmCvar_t	g_friendlyFire;
 vmCvar_t	g_password;
 vmCvar_t	g_needpass;
@@ -63,8 +59,6 @@ vmCvar_t	g_weaponRespawn;
 vmCvar_t	g_adaptRespawn;
 vmCvar_t	g_motd;
 vmCvar_t	g_synchronousClients;
-vmCvar_t	g_warmup;
-vmCvar_t	g_doWarmup;
 vmCvar_t	g_restarted;
 vmCvar_t	g_log;
 vmCvar_t	g_logSync;
@@ -312,14 +306,8 @@ vmCvar_t	rpg_server6;
 //! Allow target_levelchange to change the current level?
 vmCvar_t	rpg_allowSPLevelChange;
 
-/* TODO some might be removed */
-vmCvar_t	sql_dbName;		//!< Name of the SQL Database
+/* SQL Database */
 vmCvar_t	sql_use;		//!< Use SQL? 1 = mysql, 2 = sqlite
-vmCvar_t	sql_server;		//!< SQL server to connect to (only mysql)
-vmCvar_t	sql_user;		//!< SQL user for sql_server (only mysql)
-vmCvar_t	sql_password;	//!< SQL password for sql_server (only mysql)
-vmCvar_t	sql_port;		//!< SQL port to use to connect to sql_server (only mysql)
-vmCvar_t	sql_hash;		//!< Specifies whether passwords should be hashed and what hash to use (only mysql)
 
 // developer tools
 vmCvar_t	dev_showTriggers;
@@ -332,6 +320,8 @@ vmCvar_t        lua_allowedModules;
 #endif
 
 vmCvar_t	g_developer;
+
+vmCvar_t	rpg_spEasterEggs;
 
 
 static cvarTable_t		gameCvarTable[] = {
@@ -352,10 +342,6 @@ static cvarTable_t		gameCvarTable[] = {
 
 	// change anytime vars
 	{ &g_dmflags, "dmflags", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
-	{ &g_fraglimit, "fraglimit", "20", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
-	{ &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
-	{ &g_timelimitWinningTeam, "timelimitWinningTeam", "", CVAR_NORESTART, 0, qtrue },
-	{ &g_capturelimit, "capturelimit", "8", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
 
 	{ &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
 
@@ -365,8 +351,6 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_teamForceBalance, "g_teamForceBalance", "1", CVAR_ARCHIVE, 0, qfalse },
 
 	{ &g_intermissionTime, "g_intermissionTime", "20", CVAR_ARCHIVE, 0, qtrue },
-	{ &g_warmup, "g_warmup", "20", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse },
-	{ &g_doWarmup, "g_doWarmup", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse },
 	{ &g_log, "g_log", "", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 
@@ -552,21 +536,14 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &rpg_server5, "rpg_server5", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &rpg_server6, "rpg_server6", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &rpg_allowSPLevelChange, "rpg_allowSPLevelChange", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse },
+
+	{ &rpg_spEasterEggs, "rpg_spEasterEggs", "0", CVAR_ARCHIVE, 0, qfalse },
 	
-	{ &dev_showTriggers, "dev_showTriggers", "0", CVAR_ARCHIVE, 0, qfalse }
+	{ &dev_showTriggers, "dev_showTriggers", "0", CVAR_ARCHIVE, 0, qfalse },
 	
-	/* TODO some might be removed */
-	,
-	{ &sql_dbName, "sql_dbName", "rpgx", CVAR_ARCHIVE, 0, qfalse },
 	{ &sql_use, "sql_use", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &sql_password, "sql_password", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &sql_port, "sql_port", "3306", CVAR_ARCHIVE, 0, qfalse },
-	{ &sql_server, "sql_server", "", CVAR_ARCHIVE, 0, qfalse },
-	{ &sql_user, "sql_user", "rpgx", CVAR_ARCHIVE, 0, qfalse },
-	{ &sql_hash, "sql_hash", "0", CVAR_ARCHIVE, 0, qfalse }
 
 #ifdef G_LUA
-	,
 	{ &g_debugLua, "g_debugLua", "0", 0, 0, qfalse },
 	{ &lua_allowedModules, "lua_allowedModules", "", 0, 0, qfalse },
 	{ &lua_modules, "lua_modules", "", 0, 0, qfalse },
@@ -1671,8 +1648,6 @@ void G_RegisterCvars( void ) {
 		G_Printf( "g_gametype %i is out of range, defaulting to 0\n", g_gametype.integer );
 		trap_Cvar_Set( "g_gametype", "0" );
 	}
-
-	level.warmupModificationCount = g_warmup.modificationCount;
 }
 
 /*
@@ -2771,7 +2746,7 @@ void CheckTournement( void ) {
 		if ( level.warmupTime == 0 || level.warmupTime != 0) {//RPG-X: RedTechie - No warmup Fail safe
 			return;
 		}
-	} else if ( g_gametype.integer != GT_SINGLE_PLAYER /*&& g_doWarmup.integer*/ ) { //RPG-X: RedTechie - No warmup!		
+	} else if ( g_gametype.integer != GT_SINGLE_PLAYER  ) {	
 		if ( level.warmupTime == 0) {
 			return;
 		}
