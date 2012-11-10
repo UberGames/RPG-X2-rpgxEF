@@ -342,7 +342,7 @@ function InitGame(levelTime, randomSeed, restart)
 			ent = entity.FindBModel(27);
 			ent:SetKeyValue("team", "2")
 			entity.CallSpawn(ent)
-		game.Print("--misc_model_breakable...");
+		--[[game.Print("--misc_model_breakable...");
 			game.Print("---checking for local or dedicated..."); 
 				if not entity.FindNumber(514) == nil then
 				ent = entity.FindNumber(514);
@@ -459,7 +459,7 @@ function InitGame(levelTime, randomSeed, restart)
 				ent:SetKeyValue("splashDamage", "75");
 				ent:SetKeyValue("splashRadius", "75");
 				entity.CallSpawn(ent);
-				end
+				end ]]--
 game.Print("...Done"); 	
 end   
 

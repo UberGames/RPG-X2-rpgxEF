@@ -294,7 +294,7 @@ function InitGame(levelTime, randomSeed, restart)
 		mover.SetPosition(ent, 488, -184, 16);
 		mover.SetAngles(ent, 0, 90, 0);
 		entity.CallSpawn(ent);
-	game.Print("-Breakable-Mod...");
+	--[[game.Print("-Breakable-Mod...");
 		game.Print("--misc_model_breakable...");
 			game.Print("---checking for local or dedicated...");
 				if not entity.FindNumber(236) == nil then
@@ -532,7 +532,7 @@ function InitGame(levelTime, randomSeed, restart)
 				ent:SetKeyValue("splashDamage", "75");
 				ent:SetKeyValue("splashRadius", "75");
 				entity.CallSpawn(ent);
-				end
+				end  ]]--
 game.Print("...Done"); 	
 end 
 
