@@ -94,22 +94,25 @@ vmCvar_t	rpg_rangetricorder;				//!< Maximum range the Tricorder can scan.
 vmCvar_t	rpg_rangehypo;					//!< Maximum range of the Hypospray.
 vmCvar_t	rpg_norpgclasses;
 vmCvar_t	rpg_forceclasscolor;			//!< Specifies whether class colors specified in the *.class file are enforced.
-vmCvar_t	rpg_nosecurity;
-vmCvar_t	rpg_nomarine;
-vmCvar_t	rpg_nomedical;
-vmCvar_t	rpg_noscience;
-vmCvar_t	rpg_nocommand;
-vmCvar_t	rpg_noengineer;
-vmCvar_t	rpg_noalien;
-vmCvar_t	rpg_nomaker;
-vmCvar_t	rpg_non00b;
-vmCvar_t	rpg_nocloak;					//!< Can be used to disable the admin cloaking device.
-vmCvar_t	rpg_noflight;					//!< Can be used to disable the admin flight mode.
-vmCvar_t	rpg_phaserdmg;					//!< Specifies whether the phaser damges players.
-vmCvar_t	rpg_rifledmg;					//!< Specifies whether the phaser rifle damages players.
-vmCvar_t	rpg_stasisdmg;					//!< Specifies whether the disruptor damages rifles.
-vmCvar_t	rpg_imoddmg;					
-vmCvar_t	rpg_noweapons;					//!< Can be used to disable all weapons.
+
+/*
+ * Ristrictions: nocloak = 1, noflight = 2
+ * Default value: 0
+ */
+vmCvar_t	rpg_restrictions;
+
+/*
+ * Which weapons do damage?
+ * Phaser			= 1
+ * Crifle			= 2
+ * TR116			= 4
+ * Grenade Laucher	= 8
+ * Quantum Burst	= 16
+ * Disruptor		= 32
+ * Default value: 63
+ */
+vmCvar_t	rpg_dmgFlags;
+vmCvar_t	rpg_noweapons;						//!< Can be used to disable all weapons.
 vmCvar_t	rpg_welcomemessage;					//!< Welcome message displayed when a player joins the server.
 vmCvar_t	rpg_timedmessagetime;				//!< Delay between timed mesagges
 vmCvar_t	rpg_forcekillradius;				//!< Specifies whether the forcekillradius command is avaible.
@@ -394,21 +397,8 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &rpg_rangehypo, "rpg_rangeHypo", "32", CVAR_ARCHIVE, 0, qfalse},
 	{ &rpg_norpgclasses, "rpg_noRPGClasses", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
 	{ &rpg_forceclasscolor, "rpg_forceClassColor", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_nosecurity, "rpg_noSecurity", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_nomarine, "rpg_noMarine", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_nomedical, "rpg_noMedical", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_noscience, "rpg_noScience", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_nocommand, "rpg_noCommand", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_noengineer, "rpg_noEngineer", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_noalien, "rpg_noAlien", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_non00b, "rpg_non00b", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_nomaker, "rpg_noMaker", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_nocloak, "rpg_noCloak", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_noflight, "rpg_noFlight", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_phaserdmg, "rpg_phaserDmg", "1", CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_rifledmg, "rpg_rifleDmg", "1", CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_stasisdmg, "rpg_stasisDmg", "1", CVAR_ARCHIVE, 0, qfalse},
-	{ &rpg_imoddmg, "rpg_imodDmg", "1", CVAR_ARCHIVE, 0, qfalse},
+	{ &rpg_restrictions, "rpg_restrictions", "0", CVAR_ARCHIVE, 0, qfalse},
+	{ &rpg_dmgFlags, "rpg_dmgFlags", "63", CVAR_ARCHIVE, 0, qfalse},
 	{ &rpg_noweapons, "rpg_noWeapons", "0", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse},
 	{ &rpg_welcomemessage, "rpg_welcomeMessage", "Welcome to the RPG-X Mod", CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse  },
 	{ &rpg_timedmessagetime, "rpg_timedMessageTime", "5", CVAR_ARCHIVE, 0, qfalse  }, //TiM : LATCH Not necessary here.
