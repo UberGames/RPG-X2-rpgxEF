@@ -58,12 +58,7 @@ static int Entity_MMBRefit(lua_State * L)
 			MMB->splashRadius = 9999;
 			MMB->s.powerups = 1;//metal
 			MMB->spawnflags = 2;
-			MMB->health = 1;
 			G_CallSpawn(MMB);
-		}else if( !Q_stricmp( MMB->model, "models/mapobjects/dn/sleep_chamber.md3" )){ //no description needed ^^
-			MMB->splashDamage = 75;
-			MMB->splashRadius = 75;
-			MMB->s.powerups = 3;//metal
 		}else continue;//we are not looking for this kind of MMB
 	}
 
