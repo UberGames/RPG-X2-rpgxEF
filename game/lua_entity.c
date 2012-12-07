@@ -40,24 +40,32 @@ static int Entity_MMBRefit(lua_State * L)
 		if( !Q_stricmp( MMB->model, "models/mapobjects/borg/blite.md3" )){ //alcove light
 			MMB->splashDamage = 75;
 			MMB->splashRadius = 75;
-			MMB->s.powerups = 3;//glass and metal, may reduce this to glass only toh
+			MMB->s.powerups = 3;//glass and metal, may reduce this to glass only 
+			MMB->spawnflags = 258;
+			G_CallSpawn(MMB);
 		}else if( !Q_stricmp( MMB->model, "models/mapobjects/borg/circuit_1.md3" )){ //those things that look like a handle
 			MMB->splashDamage = 75;
 			MMB->splashRadius = 75;
-			MMB->s.powerups = 1;//metal
+			MMB->s.powerups = 1;//
+			MMB->spawnflags = 263;
+			G_CallSpawn(MMB);
 		}else if( !Q_stricmp( MMB->model, "models/mapobjects/borg/circuit_2.md3" )){ //the isosceles triangle looking box
 			MMB->splashDamage = 75;
 			MMB->splashRadius = 75;
-			MMB->s.powerups = 1;//metal
+			MMB->s.powerups = 1;//
+			MMB->spawnflags = 263;
+			G_CallSpawn(MMB);
 		}else if( !Q_stricmp( MMB->model, "models/mapobjects/borg/circuit_3.md3" )){ //the other triangle looking box
 			MMB->splashDamage = 75;
 			MMB->splashRadius = 75;
 			MMB->s.powerups = 1;//metal
+			MMB->spawnflags = 263;
+			G_CallSpawn(MMB);
 		}else if( !Q_stricmp( MMB->model, "models/mapobjects/borg/vynclumn.md3" )){ //no description needed ^^
 			MMB->splashDamage = 9999;
 			MMB->splashRadius = 9999;
 			MMB->s.powerups = 1;//metal
-			MMB->spawnflags = 2;
+			MMB->spawnflags = 263;
 			G_CallSpawn(MMB);
 		}else continue;//we are not looking for this kind of MMB
 	}
@@ -126,6 +134,34 @@ static int Entity_Find(lua_State * L)
 	gentity_t      *t = NULL;
 
 	t = G_Find(t, FOFS(targetname), (char *)luaL_checkstring(L, 1));
+	if(!t)
+		lua_pushnil(L);
+	else
+		Lua_PushEntity(L, t);
+
+	return 1;
+}
+
+// entity.FindMMB(vector origin)
+// Returns the misc_model_breakable entity that has a matching MMB->s.origin.
+// Requires vector as input.
+// You can get the s.origin ingame as an admin/developer by pointing at the MMB ingame and using the /getorigin-command.
+static int Entity_FindMMB(lua_State * L)
+{
+	gentity_t		*t = NULL, *MMB = NULL;
+	vec_t			*vec, *origin;
+	
+	vec = Lua_GetVector(L, 2);
+
+	while((MMB = G_Find(MMB, FOFS(classname), "misc_model_breakable")) != NULL){
+		origin = MMB->s.origin;
+		if(vec[0] == origin[0] && vec[1] == origin[1] && vec[2] == origin[2]){
+			t = MMB;
+			break;
+		}else{
+			continue;
+		}
+	}
 	if(!t)
 		lua_pushnil(L);
 	else
@@ -469,6 +505,9 @@ static int Entity_DelayedCallSpawn(lua_State *L) {
 	if(!lent || !lent->e)
 		return 1;
 
+	if(!Q_stricmp(lent->e->classname, "target_selfdestruct"))
+		return 1; //we will not selfdestruct this way
+
 	delay = luaL_checkint(L, 2);
 
 	if(!delay)
@@ -493,6 +532,9 @@ static int Entity_CallSpawn(lua_State *L) {
 
 	if(lent)
 		e = lent->e;
+
+	if(!Q_stricmp(lent->e->classname, "target_selfdestruct"))
+		return 1; //we will not selfdestruct this way
 
 	if(e) {
 		LUA_DEBUG("Entity_CallSpawn - G_CallSpawn");
@@ -2813,6 +2855,7 @@ static int Entity_SetTeammaster(lua_State *L) {
 static const luaL_Reg Entity_ctor[] = {
 	{"Spawn",					Entity_Spawn},
 	{"Find",					Entity_Find},
+	{"FindMMB",					Entity_FindMMB},
 	{"FindNumber",				Entity_FindNumber},
 	{"FindBModel",				Entity_FindBModel},
 	{"GetTarget",				Entity_GetTarget},

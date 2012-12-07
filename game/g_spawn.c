@@ -118,7 +118,6 @@ typedef struct {
 	void	(*spawn)(gentity_t *ent);
 } spawn_t;
 
-void SP_info_player_start (gentity_t *ent);
 void SP_info_player_deathmatch (gentity_t *ent);
 void SP_info_player_intermission (gentity_t *ent);
 void SP_info_firstplace(gentity_t *ent);
@@ -159,11 +158,9 @@ void SP_target_speaker (gentity_t *ent);
 void SP_target_print (gentity_t *ent);
 void SP_target_laser (gentity_t *self);
 void SP_target_character (gentity_t *ent);
-void SP_target_score( gentity_t *ent );
 void SP_target_teleporter( gentity_t *ent );
 void SP_target_relay (gentity_t *ent);
 void SP_target_kill (gentity_t *ent);
-void SP_target_position (gentity_t *ent);
 void SP_target_location (gentity_t *ent);
 void SP_target_push (gentity_t *ent);
 void SP_target_counter (gentity_t *self);
@@ -191,7 +188,6 @@ void SP_info_notnull (gentity_t *self);
 void SP_info_camp (gentity_t *self);
 void SP_path_corner (gentity_t *self);
 
-void SP_misc_teleporter_dest (gentity_t *self);
 void SP_misc_model(gentity_t *ent);
 void SP_misc_model_breakable(gentity_t *ent);
 void SP_misc_portal_camera(gentity_t *ent);
@@ -204,12 +200,6 @@ void SP_shooter_rocket( gentity_t *ent );
 void SP_shooter_plasma( gentity_t *ent );
 void SP_shooter_grenade( gentity_t *ent );
 void SP_shooter_torpedo( gentity_t *ent );
-
-void SP_team_CTF_redplayer( gentity_t *ent );
-void SP_team_CTF_blueplayer( gentity_t *ent );
-
-void SP_team_CTF_redspawn( gentity_t *ent );
-void SP_team_CTF_bluespawn( gentity_t *ent );
 
 // extra Trek stuff
 void SP_fx_spark ( gentity_t *ent );
@@ -251,6 +241,7 @@ void SP_path_point(gentity_t *ent);
 
 // ui entities
 void SP_ui_transporter(gentity_t *ent);
+void SP_ui_msd(gentity_t *ent);
 void SP_ui_holodeck(gentity_t *ent);
 
 // cinematic entities
@@ -260,57 +251,57 @@ void SP_cinematic_camera(gentity_t *ent);
 spawn_t	spawns[] = {
 	// info entities don't do anything at all, but provide positional
 	// information for things controlled by other processes
-	{"info_player_start", SP_info_player_start},
+	{"info_player_start", SP_info_player_deathmatch},
 
-	{"NPC_BioHulk", SP_info_player_start},
-	{"NPC_starfleet", SP_info_player_start},
-	{"NPC_starfleet_random", SP_info_player_start},
-	{"NPC_Tuvok", SP_info_player_start},
-	{"NPC_Kim", SP_info_player_start},
-	{"NPC_Doctor", SP_info_player_start},
-	{"NPC_Paris", SP_info_player_start},
-	{"NPC_Torres", SP_info_player_start},
-	{"NPC_Janeway", SP_info_player_start},
-	{"NPC_Seven", SP_info_player_start},
-	{"NPC_Chakotay", SP_info_player_start},
-	{"NPC_Neelix", SP_info_player_start},
-	{"NPC_Vorik", SP_info_player_start},
-	{"NPC_Foster", SP_info_player_start},
-	{"NPC_Munro", SP_info_player_start},
-	{"NPC_MunroScav", SP_info_player_start},
-	{"NPC_Telsia", SP_info_player_start},
-	{"NPC_Biessman", SP_info_player_start},
-	{"NPC_Chang", SP_info_player_start},
-	{"NPC_Chell", SP_info_player_start},
-	{"NPC_Jurot", SP_info_player_start},
-	{"NPC_borg", SP_info_player_start},
-	{"NPC_klingon", SP_info_player_start},
-	{"NPC_Malon", SP_info_player_start},
-	{"NPC_Hirogen", SP_info_player_start},
-	{"NPC_Hirogen_Alpha", SP_info_player_start},
-	{"NPC_Imperial", SP_info_player_start},
-	{"NPC_Imperial_Blue", SP_info_player_start},
-	{"NPC_Imperial_Gold", SP_info_player_start},
-	{"NPC_Imperial_Raider", SP_info_player_start},
-	{"NPC_Stasis", SP_info_player_start},
-	{"NPC_Species8472", SP_info_player_start},
-	{"NPC_Reaver", SP_info_player_start},
-	{"NPC_ReaverGuard", SP_info_player_start},
-	{"NPC_Avatar", SP_info_player_start},
-	{"NPC_Vohrsoth", SP_info_player_start},
-	{"NPC_Desperado", SP_info_player_start},
-	{"NPC_Paladin", SP_info_player_start},
-	{"NPC_ChaoticaGuard", SP_info_player_start},
-	{"NPC_Chaotica", SP_info_player_start},
-	{"NPC_CaptainProton", SP_info_player_start},
-	{"NPC_SatansRobot", SP_info_player_start},
-	{"NPC_Buster", SP_info_player_start},
-	{"NPC_Goodheart", SP_info_player_start},
+	{"NPC_BioHulk", SP_info_player_deathmatch},
+	{"NPC_starfleet", SP_info_player_deathmatch},
+	{"NPC_starfleet_random", SP_info_player_deathmatch},
+	{"NPC_Tuvok", SP_info_player_deathmatch},
+	{"NPC_Kim", SP_info_player_deathmatch},
+	{"NPC_Doctor", SP_info_player_deathmatch},
+	{"NPC_Paris", SP_info_player_deathmatch},
+	{"NPC_Torres", SP_info_player_deathmatch},
+	{"NPC_Janeway", SP_info_player_deathmatch},
+	{"NPC_Seven", SP_info_player_deathmatch},
+	{"NPC_Chakotay", SP_info_player_deathmatch},
+	{"NPC_Neelix", SP_info_player_deathmatch},
+	{"NPC_Vorik", SP_info_player_deathmatch},
+	{"NPC_Foster", SP_info_player_deathmatch},
+	{"NPC_Munro", SP_info_player_deathmatch},
+	{"NPC_MunroScav", SP_info_player_deathmatch},
+	{"NPC_Telsia", SP_info_player_deathmatch},
+	{"NPC_Biessman", SP_info_player_deathmatch},
+	{"NPC_Chang", SP_info_player_deathmatch},
+	{"NPC_Chell", SP_info_player_deathmatch},
+	{"NPC_Jurot", SP_info_player_deathmatch},
+	{"NPC_borg", SP_info_player_deathmatch},
+	{"NPC_klingon", SP_info_player_deathmatch},
+	{"NPC_Malon", SP_info_player_deathmatch},
+	{"NPC_Hirogen", SP_info_player_deathmatch},
+	{"NPC_Hirogen_Alpha", SP_info_player_deathmatch},
+	{"NPC_Imperial", SP_info_player_deathmatch},
+	{"NPC_Imperial_Blue", SP_info_player_deathmatch},
+	{"NPC_Imperial_Gold", SP_info_player_deathmatch},
+	{"NPC_Imperial_Raider", SP_info_player_deathmatch},
+	{"NPC_Stasis", SP_info_player_deathmatch},
+	{"NPC_Species8472", SP_info_player_deathmatch},
+	{"NPC_Reaver", SP_info_player_deathmatch},
+	{"NPC_ReaverGuard", SP_info_player_deathmatch},
+	{"NPC_Avatar", SP_info_player_deathmatch},
+	{"NPC_Vohrsoth", SP_info_player_deathmatch},
+	{"NPC_Desperado", SP_info_player_deathmatch},
+	{"NPC_Paladin", SP_info_player_deathmatch},
+	{"NPC_ChaoticaGuard", SP_info_player_deathmatch},
+	{"NPC_Chaotica", SP_info_player_deathmatch},
+	{"NPC_CaptainProton", SP_info_player_deathmatch},
+	{"NPC_SatansRobot", SP_info_player_deathmatch},
+	{"NPC_Buster", SP_info_player_deathmatch},
+	{"NPC_Goodheart", SP_info_player_deathmatch},
 
 	{"info_player_deathmatch",		SP_info_player_deathmatch},
 	{"info_player_intermission",	SP_info_player_intermission},
 	{"info_null",					SP_info_null},
-	{"info_notnull",				SP_info_notnull},		// use target_position instead
+	{"info_notnull",				SP_info_notnull},		
 	{"info_camp",					SP_info_camp},
 
 	{"func_plat",					SP_func_plat},
@@ -353,11 +344,10 @@ spawn_t	spawns[] = {
 	{"target_speaker",				SP_target_speaker},
 	{"target_print",				SP_target_print},
 	{"target_laser",				SP_target_laser},
-	{"target_score",				SP_target_score},
 	{"target_teleporter",			SP_target_teleporter},
 	{"target_relay",				SP_target_relay},
 	{"target_kill",					SP_target_kill},
-	{"target_position",				SP_target_position},
+	{"target_position",				SP_info_notnull},
 	{"target_location",				SP_target_location},
 	{"target_push",					SP_target_push},
 	{"target_counter",				SP_target_counter},
@@ -382,7 +372,7 @@ spawn_t	spawns[] = {
 	{"light",						SP_light},
 	{"path_corner",					SP_path_corner},
 
-	{"misc_teleporter_dest",		SP_misc_teleporter_dest},
+	{"misc_teleporter_dest",		SP_info_notnull},
 	{"misc_model",					SP_misc_model},
 	{"misc_model_breakable",		SP_misc_model_breakable},
 	{"misc_portal_surface",			SP_misc_portal_surface},
@@ -396,11 +386,11 @@ spawn_t	spawns[] = {
 	{"shooter_plasma",				SP_shooter_plasma},
 	{"shooter_torpedo",				SP_shooter_torpedo},
 
-	{"team_CTF_redplayer",			SP_team_CTF_redplayer},
-	{"team_CTF_blueplayer",			SP_team_CTF_blueplayer},
+	{"team_CTF_redplayer",			SP_info_player_deathmatch},
+	{"team_CTF_blueplayer",			SP_info_player_deathmatch},
 
-	{"team_CTF_redspawn",			SP_team_CTF_redspawn},
-	{"team_CTF_bluespawn",			SP_team_CTF_bluespawn},
+	{"team_CTF_redspawn",			SP_info_player_deathmatch},
+	{"team_CTF_bluespawn",			SP_info_player_deathmatch},
 
 	// extra Trek stuff
 	{"fx_spark",					SP_fx_spark},
@@ -435,6 +425,7 @@ spawn_t	spawns[] = {
 
 	// ui entities
 	{"ui_transporter",				SP_ui_transporter},
+	{"ui_msd",						SP_ui_msd},
 	{"ui_holodeck",					SP_ui_holodeck},
 	
 	{"ref_tag",						SP_info_notnull},
@@ -772,16 +763,39 @@ qboolean G_ParseSpawnVars( void ) {
 
 
 /*QUAKED worldspawn (0 0 0) ?
-
+-----DESCRIPTION-----
 Every map should have exactly one worldspawn.
-"music"		path to WAV or MP3 files (e.g. "music\intro.mp3 music\loopfile.mp3")
-"gravity"	800 is default gravity
-"message"	Text to print during connection process
+It holds some general information on the map.
 
-fraglimit - overrides server's limit
-capturelimit - overrides server's capturelimit (use with team AddScores)
-timelimit - overrides server's timelimit
-timelimitWinningTeam - "red" or "blue" - this team will win when the timelimit runs out
+-----SPAWNFLAGS-----
+none
+
+-----KEYS-----
+"music" - path to WAV or MP3 files (e.g. "music\intro.mp3 music\loopfile.mp3")
+"gravity" - 800 is default gravity
+"message" - Text to print during connection process
+
+Keys irrelevant for RPG-X
+"fraglimit" - overrides server's limit
+"capturelimit" - overrides server's capturelimit (use with team AddScores)
+"timelimit" - overrides server's timelimit
+"timelimitWinningTeam" - "red" or "blue" - this team will win when the timelimit runs out
+
+q3map2:
+"_blocksize" block size for unconditional BSP subdivisions
+"_celshader" use the specified cel shader for the world
+"_lightmapscale" set the lightmapscale for the world
+"_ignoreleaks" when set, no leak test is performed
+"_foghull" must be set to a sky shader when _fog is used
+"_fog" if set, the whole map is fogged using the given shader name
+"gridsize" resolution of the light grid
+"_ambient" amount of ambient light
+"_minvertexlight" amount of minimum vertex light
+"_mingridlight" amount of minimum grid light
+"_minlight" amount of minimum light
+"_keepLights" if set, light entities are not stripped from the BSP file when compiling
+"_style42rgbgen" |rgbGen|-like shader definition string for light style 42 (works the same way for all style numbers)
+"_style42alphagen" |alphaGen|-like shader definition string for light style 42 (works the same way for all style numbers)
 */
 void SP_worldspawn( void ) {
 	char	*s;

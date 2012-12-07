@@ -4,7 +4,17 @@
 extern void InitMover( gentity_t *ent );
 
 /*QUAKED cinematic_camera (0 0.5 0) (-4 -4 -4) (4 4 4)
+-----DESCRIPTION-----
 Camera for cinematic. Normally spawn by Lua script.
+
+-----SPAWNFLAGS-----
+none
+
+-----KEYS-----
+none
+
+-----LUA-----
+To be written later.
 */
 void SP_cinematic_camera(gentity_t *ent) {
 	trap_LinkEntity(ent);
@@ -22,7 +32,7 @@ void Cinematic_ActivateCameraMode(gentity_t *ent, gentity_t *target) {
 	client->cam = target;
 	VectorCopy(client->ps.viewangles, client->origViewAngles);
 	VectorCopy(ent->r.currentOrigin, client->origOrigin);
-	SetClientViewAngle(ent, target->s.angles);
+	G_Client_SetViewAngle(ent, target->s.angles);
 	G_SetOrigin(ent, target->r.currentOrigin);
 	VectorCopy(target->r.currentOrigin, ent->client->ps.origin);
 	trap_LinkEntity(ent);
@@ -36,7 +46,7 @@ void Cinematic_DeactivateCameraMode(gentity_t *ent) {
 
 	ent->flags ^= FL_CCAM;
 	G_SetOrigin(ent, client->origOrigin);
-	SetClientViewAngle(ent, client->origViewAngles);
+	G_Client_SetViewAngle(ent, client->origViewAngles);
 	trap_LinkEntity(ent);
 }
 

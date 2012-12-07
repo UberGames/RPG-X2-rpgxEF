@@ -514,21 +514,21 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		G_ShutdownGame( arg0 );
 		return 0;
 	case GAME_CLIENT_CONNECT:
-		return (size_t)ClientConnect( arg0, (qboolean)arg1, (qboolean)arg2 );
+		return (size_t)G_Client_Connect( arg0, (qboolean)arg1, (qboolean)arg2 );
 	case GAME_CLIENT_THINK:
 		ClientThink( arg0 );
 		return 0;
 	case GAME_CLIENT_USERINFO_CHANGED:
-		ClientUserinfoChanged( arg0 ); //TiM - this means a user just tried to change it
+		G_Client_UserinfoChanged( arg0 ); //TiM - this means a user just tried to change it
 		return 0;
 	case GAME_CLIENT_DISCONNECT:
-		ClientDisconnect( arg0 );
+		G_Client_Disconnect( arg0 );
 		return 0;
 	case GAME_CLIENT_BEGIN:
-		ClientBegin( arg0, qtrue, qfalse, qtrue );
+		G_Client_Begin( arg0, qtrue, qfalse, qtrue );
 		return 0;
 	case GAME_CLIENT_COMMAND:
-		ClientCommand( arg0 );
+		G_Client_Command( arg0 );
 		return 0;
 	case GAME_RUN_FRAME:
 		G_RunFrame( arg0 );
@@ -906,10 +906,11 @@ void SP_target_location (gentity_t *ent);
 static void G_LoadTimedMessages(void) {
 	fileHandle_t	f;
 	char*			buffer;
-	char*			ptr;
-	char*			message;
+	char*			textPtr;
+	char*			token;
 	int				len;
-	int				i, n;
+	int				i;
+	timedMessage_t	*msg;
 
 	len = trap_FS_FOpenFile("timedmessages.cfg", &f, FS_READ);
 	if(!len) return;
@@ -930,26 +931,49 @@ static void G_LoadTimedMessages(void) {
 	}
 
 	trap_FS_Read(buffer, len, f);
-	ptr = buffer;
+
+	textPtr = buffer;
+	COM_BeginParseSession();
+	token = COM_Parse(&textPtr);
+	if(token[0] != '{') {
+		G_Printf("G_LoadTimedMessages -  timedmessages.cfg not beginning with '{'\n");
+		trap_FS_FCloseFile(f);
+		free(buffer);
+		return;
+	}
+
 	for(i = 0; i < 10; i++) {
-		for(n = 0; ptr[n] != ';' && ptr[n] != 0; n++);
-		if(ptr[n] == 0) break;
-		message = (char *)malloc(sizeof(char)*(n+1));
-		if(!message) {
-			G_Printf(S_COLOR_RED "ERROR: Was unable to allocate %i byte.\n", (n+1) * sizeof(char) );
-			trap_FS_FCloseFile(f);
-			free(buffer);
-			if(level.timedMessages != NULL) {
-				destroy_list(level.timedMessages);
-			}
-			return;
+		token = COM_Parse(&textPtr);
+
+		if(!token[0]) {
+			break;
 		}
 
-		memset(message, 0, sizeof(message));
-		strncpy(message, ptr, n);
-		list_add(level.timedMessages, message, strlen(message));
+		if(!strcmp(token, "message")) {
+			if(COM_ParseString(&textPtr, &token)) {
+				G_Printf("G_LoadTimedMessages -  invalid value '%s'\n", token);
+				SkipRestOfLine(&textPtr);
+				continue;
+			}
 
-		ptr += strlen(message)+1;
+			msg = (timedMessage_t *)malloc(sizeof(timedMessage_s));
+			if(msg == NULL) {
+				G_Printf("G_LoadTimedMessages -  was unable to allocate timed message storage\n");
+				continue;
+			}
+
+			msg->message = strdup(token);
+			G_Printf("------------------------------------------------>'%s'\n", token);
+			list_add(level.timedMessages, msg, sizeof(timedMessage_s));
+		} else {
+			G_Printf("G_LoadTimedMessages -  invalid token '%s'\n", token);
+			SkipRestOfLine(&textPtr);
+			continue;
+		}
+
+		if(token[0] == '}') {
+			break;
+		}
 	}
 
 	trap_FS_FCloseFile(f);
@@ -1665,8 +1689,6 @@ static void G_UpdateCvars( void )
 }
 
 extern int altAmmoUsage[];
-extern team_t	borgTeam;
-extern team_t	initialBorgTeam;
 static void G_InitModRules( void )
 {
 	numKilled = 0;
@@ -1827,7 +1849,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		&level.clients[0].ps, sizeof( level.clients[0] ) );
 
 	// reserve some spots for dead player bodies
-	InitBodyQue();
+	G_Client_InitBodyQue();
 
 	ClearRegisteredItems();
 
@@ -1854,9 +1876,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	// general initialization
 	G_FindTeams();
-
-	// make sure we have flags for CTF, etc
-	G_CheckTeamItems();
 
 	SaveRegisteredItems();
 
@@ -2084,13 +2103,13 @@ static void AdjustTournamentScores( void ) {
 	clientNum = level.sortedClients[0];
 	if ( level.clients[ clientNum ].pers.connected == CON_CONNECTED ) {
 		level.clients[ clientNum ].sess.wins++;
-		ClientUserinfoChanged( clientNum );
+		G_Client_UserinfoChanged( clientNum );
 	}
 
 	clientNum = level.sortedClients[1];
 	if ( level.clients[ clientNum ].pers.connected == CON_CONNECTED ) {
 		level.clients[ clientNum ].sess.losses++;
-		ClientUserinfoChanged( clientNum );
+		G_Client_UserinfoChanged( clientNum );
 	}
 
 }
@@ -2165,7 +2184,7 @@ int QDECL SortRanks( const void *a, const void *b ) {
 
 /*
 ============
-CalculateRanks
+G_Client_CalculateRanks
 
 Recalculates the score ranks of all players
 This will be called on every client connect, begin, disconnect, death,
@@ -2174,7 +2193,7 @@ and team change.
 FIXME: for elimination, the last man standing must be ranked first
 ============
 */
-void CalculateRanks( qboolean fromExit ) {
+void G_Client_CalculateRanks( qboolean fromExit ) {
 	int		i;
 	int		rank;
 	int		score;
@@ -2291,7 +2310,7 @@ MAP CHANGING
 ========================
 SendScoreboardMessageToAllClients
 
-Do this at BeginIntermission time and whenever ranks are recalculated
+Do this at G_Client_BeginIntermission time and whenever ranks are recalculated
 due to enters/exits/forced team changes
 ========================
 */
@@ -2356,7 +2375,7 @@ void FindIntermissionPoint( void ) {
 	// find the intermission spot
 	ent = G_Find (NULL, FOFS(classname), "info_player_intermission");
 	if ( !ent ) {	// the map creator forgot to put in an intermission point...
-		SelectSpawnPoint ( vec3_origin, level.intermission_origin, level.intermission_angle );
+		G_Client_SelectSpawnPoint ( vec3_origin, level.intermission_origin, level.intermission_angle );
 	} else {
 		VectorCopy (ent->s.origin, level.intermission_origin);
 		VectorCopy (ent->s.angles, level.intermission_angle);
@@ -2397,10 +2416,10 @@ static void ClearFiringFlags(void)
 
 /*
 ==================
-BeginIntermission
+G_Client_BeginIntermission
 ==================
 */
-void BeginIntermission( void ) {
+void G_Client_BeginIntermission( void ) {
 	int			i;
 	gentity_t	*client;
 	qboolean	doingLevelshot;
@@ -2439,7 +2458,7 @@ void BeginIntermission( void ) {
 		if (!client->inuse)
 			continue;
 		if (client->health <= 0) {
-			respawn(client);
+			G_Client_Respawn(client);
 		}
 		MoveClientToIntermission( client );
 
@@ -2722,7 +2741,7 @@ void G_RunFrame( int levelTime ) {
 		}
 
 		if ( (es->eType == ET_MISSILE) || (es->eType == ET_ALT_MISSILE) ) {
-			G_RunMissile( ent );
+			G_Missile_Run( ent );
 			continue;
 		}
 
@@ -2732,7 +2751,7 @@ void G_RunFrame( int levelTime ) {
 		}
 
 		if ( es->eType == ET_MOVER || es->eType == ET_MOVER_STR ) { //RPG-X | GSIO01 | 13/05/2009
-			G_RunMover( ent );
+			G_Mover_Run( ent );
 			continue;
 		}
 
@@ -2758,8 +2777,8 @@ void G_RunFrame( int levelTime ) {
 	// see if it is time to end the level
 	CheckExitRules();
 
-	// update to team status?
-	CheckTeamStatus();
+	// update to client status?
+	G_Client_CheckClientStatus();
 
 	// cancel vote if timed out
 	CheckVote();

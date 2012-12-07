@@ -70,7 +70,7 @@ into a wall.
 @param v vector to round
 @param to rounded vector
 */
-void SnapVectorTowards( vec3_t v, vec3_t to ) {
+void G_Weapon_SnapVectorTowards( vec3_t v, vec3_t to ) {
 	int i;
 
 	for ( i = 0 ; i < 3 ; i++ ) {
@@ -116,7 +116,7 @@ static void WP_FireHyperspanner(gentity_t *ent, qboolean alt_fire) {
 	int			i, nearest = -1;
 	float		nearestd = 65000;
 	vec3_t		dVec, end;
-	vec3_t		mins = { -40, -40, -40 }, maxs = { 40, 40, 40 };
+	vec3_t		mins = { -40, -40, 0 }, maxs = { 40, 40, 0 };
 	char*		classnames[] = { "func_breakable", "misc_model_breakable" };
 
 	/* find all vlaid entities in range */
@@ -126,15 +126,25 @@ static void WP_FireHyperspanner(gentity_t *ent, qboolean alt_fire) {
 		trace_t tr;
 		for(i = 0; i < count; i++) {
 			// TODO: fix problems with small distance
-			VectorSubtract(ent->r.currentOrigin, validEnts[i]->s.origin, dVec);
-			VectorMA(validEnts[i]->s.origin, 1024, dVec, end);
+			if(validEnts[i]->spawnflags & 512) {
+				VectorSubtract(ent->r.currentOrigin, validEnts[i]->s.angles2, dVec);
+				VectorMA(validEnts[i]->s.angles2, 1024, dVec, end);
+				trap_Trace(&tr, validEnts[i]->s.angles2, mins, maxs, end, validEnts[i]->s.number, MASK_SHOT);
+			} else {
+				VectorSubtract(ent->r.currentOrigin, validEnts[i]->s.origin, dVec);
+				VectorMA(validEnts[i]->s.origin, 1024, dVec, end);
+				trap_Trace(&tr, validEnts[i]->s.origin, mins, maxs, end, validEnts[i]->s.number, MASK_SHOT);
+			}
 			//G_Printf("Checking entity: %d\n", i);
-			trap_Trace(&tr, validEnts[i]->s.origin, mins, maxs, end, validEnts[i]->s.number, MASK_SHOT);
 			if(tr.entityNum != ent->s.number) {
 				continue;
 			}
 			//G_Printf("Nothing is blocking view ...\n");
-			VectorSubtract(ent->r.currentOrigin, validEnts[i]->s.origin, dVec);
+			if(validEnts[i]->spawnflags & 512) {
+				VectorSubtract(ent->r.currentOrigin, validEnts[i]->s.angles2, dVec);
+			} else {
+				VectorSubtract(ent->r.currentOrigin, validEnts[i]->s.origin, dVec);
+			}
 			if(VectorLength(dVec) < nearestd) {
 				nearest = validEnts[i]->s.number;
 				nearestd = VectorLength(dVec);
@@ -1100,7 +1110,7 @@ static qboolean SearchTarget(gentity_t *ent, vec3_t start, vec3_t end)
 	trap_Trace (&tr, start, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 
-	if (traceEnt->takedamage && traceEnt->client && !OnSameTeam(traceEnt, &g_entities[ent->r.ownerNum])) 
+	if (traceEnt->takedamage && traceEnt->client) 
 	{
 		ent->target_ent = traceEnt;
 		VectorSubtract(ent->target_ent->r.currentOrigin, ent->r.currentOrigin, fwd);
@@ -1308,7 +1318,7 @@ static void WP_FireQuantumBurst( gentity_t *ent, qboolean alt_fire )
  * @param target the target entity
  * @param attacker the attacker entity
  */
-qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
+qboolean G_Weapon_LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
 	if( !target->takedamage ) {
 		return qfalse;
 	}
@@ -1326,10 +1336,6 @@ qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker ) {
 	}
 
 	if( target->client->ps.stats[STAT_HEALTH] <= 0 ) {
-		return qfalse;
-	}
-
-	if ( OnSameTeam( target, attacker ) ) {
 		return qfalse;
 	}
 
@@ -1388,7 +1394,7 @@ static void CorrectForwardVector(gentity_t *ent, vec3_t fwd, vec3_t muzzlePoint,
 
 /*
 ===============
-CalcMuzzlePoint
+G_Weapon_CalcMuzzlePoint
 
 set muzzle location relative to pivoting eye
 ===============
@@ -1487,7 +1493,7 @@ static float WP_ShotAltSize[WP_NUM_WEAPONS] =
  * @param muzzlePoint the muzzle point
  * @param projsize projsize
  */
-void CalcMuzzlePoint ( gentity_t *ent, vec3_t fwd, vec3_t rt, vec3_t vup, vec3_t muzzlePoint, float projsize) 
+void G_Weapon_CalcMuzzlePoint ( gentity_t *ent, vec3_t fwd, vec3_t rt, vec3_t vup, vec3_t muzzlePoint, float projsize) 
 {
 	int weapontype;
 
@@ -1660,9 +1666,10 @@ static void WP_SprayVoyagerHypo( gentity_t *ent, qboolean alt_fire )
 
 	tr_ent = &g_entities[tr.entityNum];
 	/* RPG-X: RedTechie - Medics can revive dead people */
-	if( (tr_ent && tr_ent->client) && (tr_ent->health == 1) && (tr_ent->client->ps.pm_type == PM_DEAD)){ 		tr_entPs = &tr_ent->client->ps;
+	if( (tr_ent && tr_ent->client) && (tr_ent->health == 1) && (tr_ent->client->ps.pm_type == PM_DEAD)){ 		
+		tr_entPs = &tr_ent->client->ps;
 		if(rpg_medicsrevive.integer == 1){
-			ClientSpawn(tr_ent, 1, qtrue);
+			G_Client_Spawn(tr_ent, 1, qtrue);
 
 			/* TiM : Hard coded emote.  Makes the player play a 'get up' animation :) */
 			/* G_MoveBox( tr_ent ); */
@@ -1681,30 +1688,16 @@ static void WP_SprayVoyagerHypo( gentity_t *ent, qboolean alt_fire )
 			/*tr_entPs->stats[STAT_HOLDABLE_ITEM] = HI_NONE;*/
 		}
 	/* RPG-X: RedTechie - Regular functions still work */
-	}else if ( tr_ent && tr_ent->client && tr_ent->health > 0 )
-	{
+	} else if ( tr_ent && tr_ent->client && tr_ent->health > 0 ) {
 		tr_entPs = &tr_ent->client->ps;
-		if ( rpg_rpg.integer > 0 && g_gametype.integer < GT_TEAM )
-		{
+		if(alt_fire && rpg_hypoMelee.integer) { /* alt fire and hypo melee enabled */
+			tr_ent->health = 0;
+			G_Client_Die( tr_ent, ent, ent, 100, MOD_KNOCKOUT );
+			G_LogWeaponFire( ent->s.number, WP_12 );
+		} else { /* else just heal */
 			if ( tr_ent->health < tr_entPs->stats[STAT_MAX_HEALTH] )
 			{
-				tr_ent->health = tr_entPs->stats[STAT_MAX_HEALTH]; /*+20*/
-			}
-		}
-		else
-		{
-			if ( !OnSameTeam(tr_ent, ent) || g_gametype.integer < GT_TEAM )
-			{
-				tr_ent->health = 0;
-				player_die( tr_ent, ent, ent, 100, MOD_KNOCKOUT );
-				G_LogWeaponFire( ent->s.number, WP_12 );
-			}
-			else if ( OnSameTeam(tr_ent, ent) )
-			{
-				if ( tr_ent->health < tr_entPs->stats[STAT_MAX_HEALTH] )
-				{
-					tr_ent->health = tr_ent->health + 20;
-				}
+				tr_ent->health = tr_entPs->stats[STAT_MAX_HEALTH];
 			}
 		}
 	}
@@ -1749,7 +1742,7 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire )
 	{
 		projsize = WP_ShotSize[ent->s.weapon];
 	}
-	CalcMuzzlePoint ( ent, forward, right, up, muzzle, projsize);
+	G_Weapon_CalcMuzzlePoint ( ent, forward, right, up, muzzle, projsize);
 
 	/* fire the specific weapon */
 	switch( ent->s.weapon )

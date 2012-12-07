@@ -539,7 +539,7 @@ static void Cmd_LevelShot_f( gentity_t *ent ) {
 	level.intermissiontime = -1;
 	// Special 'level shot' setting -- Terrible ABUSE!!!  HORRIBLE NASTY HOBBITTESSSES
 
-	BeginIntermission();
+	G_Client_BeginIntermission();
 	trap_SendServerCommand( ent-g_entities, "clientLevelShot" );
 }
 
@@ -608,10 +608,10 @@ static void Cmd_Kill_f( gentity_t *ent )
 		ps->stats[STAT_WEAPONS] = ( 1 << WP_0 );
 		ps->stats[STAT_HOLDABLE_ITEM] = HI_NONE;
 		ps->stats[STAT_HEALTH] = ent->health = 1;
-		player_die (ent, ent, ent, 1, meansOfDeath ); //MOD_SUICIDE
+		G_Client_Die (ent, ent, ent, 1, meansOfDeath ); //MOD_SUICIDE
 	}else{
 		ps->stats[STAT_HEALTH] = ent->health = 0;
-		player_die (ent, ent, ent, 100000, meansOfDeath ); //MOD_SUICIDE
+		G_Client_Die (ent, ent, ent, 100000, meansOfDeath ); //MOD_SUICIDE
 	}
 
 	if ( rpg_kicksuiciders.integer > 0 )
@@ -733,7 +733,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 			// pick the team with the least number of players
 			if ( isBot )
 			{
-				team = PickTeam( clientNum );
+				team = G_Client_PickTeam( clientNum );
 			}
 			else
 			{
@@ -746,8 +746,8 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 		{
 			int		counts[TEAM_NUM_TEAMS];
 
-			counts[TEAM_BLUE] = TeamCount( clNum, TEAM_BLUE );
-			counts[TEAM_RED] = TeamCount( clNum, TEAM_RED );
+			counts[TEAM_BLUE] = G_Client_TeamCount( clNum, TEAM_BLUE );
+			counts[TEAM_RED] = G_Client_TeamCount( clNum, TEAM_RED );
 
 			// We allow a spread of two
 			if ( team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] > 1 )
@@ -800,7 +800,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 		// Kill him (makes sure he loses flags, etc)
 		ent->flags &= ~FL_GODMODE;
 		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
-		player_die (ent, NULL, NULL, 100000, MOD_RESPAWN);
+		G_Client_Die (ent, NULL, NULL, 100000, MOD_RESPAWN);
 
 	}
 	// they go to the end of the line for tournements
@@ -815,9 +815,9 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	BroadcastTeamChange( client, oldTeam );
 
 	// get and distribute relevent paramters
-	ClientUserinfoChanged( clientNum );
+	G_Client_UserinfoChanged( clientNum );
 
-	ClientBegin( clientNum, qfalse, qfalse, qfalse );
+	G_Client_Begin( clientNum, qfalse, qfalse, qfalse );
 
 	return qtrue;
 }
@@ -953,7 +953,7 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName, qboolean SaveToCvar 
 	else
 	{//not changing teams or couldn't change teams
 		// get and distribute relevent paramters
-		ClientUserinfoChanged( clientNum );
+		G_Client_UserinfoChanged( clientNum );
 
 		//if in the game already, kill and respawn him, else just wait to join
 		if ( sess->sessionTeam == TEAM_SPECTATOR )
@@ -965,7 +965,7 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName, qboolean SaveToCvar 
 			//RPG-X: RedTechie - No respawn for n00bs set all info and frap that a n00b needs HERE this eliminates respawns for n00bs
 			if(g_classData[pclass].isn00b/*pclass == PC_N00B*/){
 
-				ClientSpawn(ent, 1, qfalse);
+				G_Client_Spawn(ent, 1, qfalse);
 				ps->stats[STAT_WEAPONS] = ( 1 << WP_0 );
 				ps->stats[STAT_HOLDABLE_ITEM] = HI_NONE;
 
@@ -990,8 +990,8 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName, qboolean SaveToCvar 
 				ent->flags &= ~FL_GODMODE;
 				ps->stats[STAT_HEALTH] = ent->health = 0;
 
-				player_die (ent, NULL, NULL, 100000, MOD_RESPAWN);
-				ClientBegin( clientNum, qfalse, qfalse, qfalse );
+				G_Client_Die (ent, NULL, NULL, 100000, MOD_RESPAWN);
+				G_Client_Begin( clientNum, qfalse, qfalse, qfalse );
 			}
 		}
 	}
@@ -1022,8 +1022,6 @@ void StopFollowing( gentity_t *ent ) {
 	//don't be dead
 	ps->stats[STAT_HEALTH] = ps->stats[STAT_MAX_HEALTH];
 }
-
-extern team_t	borgTeam;
 
 /*
 =================
@@ -1088,6 +1086,26 @@ static void Cmd_Team_f( gentity_t *ent ) {
 	ent->client->switchTeamTime = level.time + 2000;
 }
 
+/*
+====================
+Cmd_Ready_f
+====================
+*/
+/**
+*	This function is called from the ui_sp_postgame.c as a result of clicking on the
+*	"next" button in non GT_TOURNAMENT games.  This replaces the old system of waiting
+*	for the user to click an ATTACK or USE button to signal ready
+*	(see ClientIntermissionThink())
+*
+*	when all clients have signaled ready, the game continues to the next match.
+*/
+void Cmd_Ready_f (gentity_t *ent)
+{
+	gclient_t *client;
+	client = ent->client;
+
+	client->readyToExit = qtrue;
+}
 
 /*
 =================
@@ -1471,12 +1489,10 @@ static void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chat
 	clientPersistant_t *entPers = &entClient->pers;
 	clientPersistant_t *tarPers = NULL;
 	clientSession_t *entSess = &entClient->sess;
-	clientSession_t *tarSess =NULL;
 
 	if(target && target->client) {
 		tarClient = target->client;
 		tarPers = &tarClient->pers;
-		tarSess =&tarClient->sess;
 	}
 
 	if ( g_gametype.integer < GT_TEAM && mode == SAY_TEAM ) {
@@ -1530,21 +1546,13 @@ static void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chat
 		color = COLOR_WHITE;
 		break;
 	case SAY_TELL:
-		if (target && g_gametype.integer >= GT_TEAM && tarSess &&
-			tarSess->sessionTeam == entSess->sessionTeam && tarPers &&
-			Team_GetLocationMsg(ent, location, sizeof(location)))
-			Com_sprintf (name, sizeof(name), "^7%s ^7from %s%c%c (%s): ", tarPers->netname, entPers->netname, Q_COLOR_ESCAPE, COLOR_WHITE, location );
-		else if(tarPers)
+		if(tarPers)
 			Com_sprintf (name, sizeof(name), "^7%s ^7from %s%c%c: ", tarPers->netname, entPers->netname, Q_COLOR_ESCAPE, COLOR_WHITE );
 		else return;
 		color = COLOR_MAGENTA;
 		break;
 	case SAY_TELL2:
-		if (target && g_gametype.integer >= GT_TEAM && tarSess &&
-			tarSess->sessionTeam == entSess->sessionTeam && tarPers &&
-			Team_GetLocationMsg(ent, location, sizeof(location)))
-			Com_sprintf (name, sizeof(name), "^7%s ^7from %s%c%c (%s): ", tarPers->netname, entPers->netname, Q_COLOR_ESCAPE, COLOR_WHITE, location );
-		else if(tarPers)
+		if(tarPers)
 			Com_sprintf (name, sizeof(name), "^7%s ^7from %s%c%c: ", tarPers->netname, entPers->netname, Q_COLOR_ESCAPE, COLOR_WHITE );
 		else return;
 		color = COLOR_MAGENTA;
@@ -1560,7 +1568,7 @@ static void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chat
 		color = COLOR_YELLOW;
 		break;
 	case SAY_ADMIN:
-		if (Team_GetLocationMsg(ent, location, sizeof(location)) && tarPers)
+		if (G_Client_GetLocationMsg(ent, location, sizeof(location)) && tarPers)
 			Com_sprintf (name, sizeof(name), "[%s%c%c] [%s] (%s): ", entPers->netname, Q_COLOR_ESCAPE, COLOR_WHITE, tarPers->netname, location );
 		else if(tarPers)
 			Com_sprintf (name, sizeof(name), "[%s%c%c ^7To %s^7]: ", entPers->netname, Q_COLOR_ESCAPE, COLOR_WHITE, tarPers->netname );
@@ -2274,10 +2282,10 @@ static void Cmd_ForceKill_f( gentity_t *ent ) {
 				ps->stats[STAT_WEAPONS] = ( 1 << WP_0 );
 				ps->stats[STAT_HOLDABLE_ITEM] = HI_NONE;
 				ps->stats[STAT_HEALTH] = target->health = 1;
-				player_die (target, target, target, 100000, MOD_FORCEDSUICIDE);
+				G_Client_Die (target, target, target, 100000, MOD_FORCEDSUICIDE);
 			}else{
 				ps->stats[STAT_HEALTH] = target->health = 0;
-				player_die (target, target, target, 100000, MOD_FORCEDSUICIDE);
+				G_Client_Die (target, target, target, 100000, MOD_FORCEDSUICIDE);
 			}
 		} // end iterations
 
@@ -2311,10 +2319,10 @@ static void Cmd_ForceKill_f( gentity_t *ent ) {
 			ps->stats[STAT_WEAPONS] = ( 1 << WP_0 );
 			ps->stats[STAT_HOLDABLE_ITEM] = HI_NONE;
 			ps->stats[STAT_HEALTH] = target->health = 1;
-			player_die (target, target, target, 100000, MOD_FORCEDSUICIDE);
+			G_Client_Die (target, target, target, 100000, MOD_FORCEDSUICIDE);
 		}else{
 			ps->stats[STAT_HEALTH] = target->health = 0;
-			player_die (target, target, target, 100000, MOD_FORCEDSUICIDE);
+			G_Client_Die (target, target, target, 100000, MOD_FORCEDSUICIDE);
 		}
 
 		Com_sprintf (send, sizeof(send), "%s ^7forced %s^7's death", ent->client->pers.netname, target->client->pers.netname);
@@ -2445,10 +2453,10 @@ static void Cmd_ForceKillRadius_f( gentity_t *ent)
 				oPs->stats[STAT_WEAPONS] = ( 1 << WP_0 );
 				oPs->stats[STAT_HOLDABLE_ITEM] = HI_NONE;
 				oPs->stats[STAT_HEALTH] = OtherPlayer->health = 1;
-				player_die(OtherPlayer,OtherPlayer,OtherPlayer,100000, MOD_FORCEDSUICIDE);
+				G_Client_Die(OtherPlayer,OtherPlayer,OtherPlayer,100000, MOD_FORCEDSUICIDE);
 			}else{
 				oPs->stats[STAT_HEALTH] = OtherPlayer->health = 0;
-				player_die(OtherPlayer,OtherPlayer,OtherPlayer,100000, MOD_FORCEDSUICIDE);
+				G_Client_Die(OtherPlayer,OtherPlayer,OtherPlayer,100000, MOD_FORCEDSUICIDE);
 			}
 		}
 
@@ -2465,10 +2473,10 @@ static void Cmd_ForceKillRadius_f( gentity_t *ent)
 			ePs->stats[STAT_WEAPONS] = ( 1 << WP_0 );
 			ePs->stats[STAT_HOLDABLE_ITEM] = HI_NONE;
 			ePs->stats[STAT_HEALTH] = ent->health = 1;
-			player_die(ent,ent,ent,100000, MOD_FORCEDSUICIDE);
+			G_Client_Die(ent,ent,ent,100000, MOD_FORCEDSUICIDE);
 		}else{
 			ePs->stats[STAT_HEALTH] = ent->health = 0;
-			player_die(ent,ent,ent,100000, MOD_FORCEDSUICIDE);
+			G_Client_Die(ent,ent,ent,100000, MOD_FORCEDSUICIDE);
 		}
 	}
 
@@ -3134,7 +3142,7 @@ static void Cmd_AdminLogin_f( gentity_t *ent)
 	if(!arg[0] && ent->client->LoggedAsAdmin) {
 		ent->client->LoggedAsAdmin = qfalse;
 		trap_SendServerCommand( ent-g_entities, va("print \"You are now logged out.\n\"") );
-		ClientUserinfoChanged( ent-g_entities );
+		G_Client_UserinfoChanged( ent-g_entities );
 		return;
 	}
 	else if ( !arg[0] ) { //if user added no args (ie wanted the parameters)
@@ -3152,7 +3160,7 @@ static void Cmd_AdminLogin_f( gentity_t *ent)
 			if ( IsAdmin( ent ) == qfalse ) {
 				ent->client->LoggedAsAdmin = qtrue;
 				trap_SendServerCommand( ent-g_entities, va("print \"You are logged in as an admin.\n\"") );
-				ClientUserinfoChanged( ent-g_entities );
+				G_Client_UserinfoChanged( ent-g_entities );
 				return;
 			} else {
 				trap_SendServerCommand( ent-g_entities, va("print \"You are already logged in as an admin or in the admin class.\n\"") );			
@@ -3245,7 +3253,7 @@ static void Cmd_Revive_f( gentity_t *ent)
 		{
 			if( (g_entities[i].client) && (g_entities[i].health == 1) && (g_entities[i].client->ps.pm_type == PM_DEAD))
 			{
-				ClientSpawn(&g_entities[i], 1, qtrue);
+				G_Client_Spawn(&g_entities[i], 1, qtrue);
 
 				ps = &g_entities[i].client->ps;
 
@@ -3281,7 +3289,7 @@ static void Cmd_Revive_f( gentity_t *ent)
 			//Just me
 			if( (ent && ent->client) && (ent->health <= 1) && (ent->client->ps.pm_type == PM_DEAD))
 			{
-				ClientSpawn(ent, 1, qtrue);
+				G_Client_Spawn(ent, 1, qtrue);
 
 				ps = &ent->client->ps;
 
@@ -3316,7 +3324,7 @@ static void Cmd_Revive_f( gentity_t *ent)
 
 			if( (other && other->client) && (other->health == 1) && (other->client->ps.pm_type == PM_DEAD))
 			{
-				ClientSpawn(other, 1, qtrue);
+				G_Client_Spawn(other, 1, qtrue);
 
 				ps = &other->client->ps;
 
@@ -5561,7 +5569,7 @@ static void Cmd_Respawn_f(gentity_t *ent) {
 	if(!ent->client)
 		return;
 
-	ClientSpawn(ent, 0, qfalse);
+	G_Client_Spawn(ent, 0, qfalse);
 	if(ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
 		ent->client->ps.powerups[PW_QUAD] = level.time + 4000;
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TRANSPORT_IN );
@@ -5901,85 +5909,6 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 
 /*
 =================
-Cmd_selfdestructcountdown_f
-Harry Young | 06/11/2012
-like selfdestruct but forced to think every .1 sec
-does output via quiet cp
-don't ask me what I was thinking ^^
-=================
-*/
-static void Cmd_selfdestructcountdown_f(gentity_t *ent) {
-	gentity_t	*destructEnt, *safezone=NULL;
-	char		arg[16], arg2[16], arg3[16];
-	if(!ent || !ent->client)
-		return;
-
-	//Trapping all potential args here.
-	trap_Argv(1, arg, sizeof(arg));
-	trap_Argv(2, arg2, sizeof(arg2));
-	trap_Argv(3, arg3, sizeof(arg3));
-
-#ifndef SQL
-	if ( !IsAdmin( ent ) ) {
-		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as an admin.\n\" ") );
-		return;
-	}
-#else
-	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_SMS ) ) {
-		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
-		return;
-	}
-#endif
-
-	if(trap_Argc() < 1) {
-		G_PrintfClient(ent,		"^3Usage: selfdestructcountdown duration [safezone] [target]");
-		G_PrintfClient(ent,		"^1WARNING: This makes the entity think every 0.1 seconds and forces a lot off traffic. You may want to use selfdestruct start.");
-		G_PrintfClient(ent,		"duration: total countdown-duration in seconds. Must not be 0.");
-		G_PrintfClient(ent,		"safezone: safezone to toggle unsafe at T-50ms. Only for maps with multiple ships (like rpg_runabout). Set NULL to skip.");
-		G_PrintfClient(ent,		"target: Optional Argument for Effects to fire once the countdown hist 0. The entity will automatically shake everyones screen and kill all clienst outside an active target_safezone.");
-		G_PrintfClient(ent,		"To abort call selfdestruct abort");
-		return;
-	}
-
-	// Setup command-Execution
-
-	//Is there sth running alrerady?
-	destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
-	if(destructEnt) {
-		G_PrintfClient(ent, "^1ERROR: There's already a self destruct in progress, aborting setup.");
-		return;
-	}
-
-	//There is not so let's set this up.
-	destructEnt = G_Spawn();
-	destructEnt->classname = "target_selfdestruct";
-	destructEnt->wait = atoi(arg);
-	destructEnt->bluename = G_NewString(arg2);
-	destructEnt->target = G_NewString(arg3);
-
-	destructEnt->spawnflags = 3; //tells ent to free once aborted and think extreme.
-
-	//we need to check a few things here to make sure the entity works properly. Else we free it.
-	if ( destructEnt->wait > 0 || destructEnt->count > 0 || destructEnt->n00bCount > 0 || destructEnt->health > 0 ){ 
-		G_CallSpawn(destructEnt); //Spawn-Function will also manage init, so we need to call that.
-	} else { //sth's wrong so lets tell them what is.
-		G_PrintfClient(ent, "^1ERROR: The following arguments are missing:");
-		if ( destructEnt->wait == 0 )
-			G_PrintfClient(ent, "^1-duration must not be 0."); 
-		while((safezone = G_Find(safezone, FOFS(classname), "target_safezone")) != NULL){
-			if(!destructEnt->bluename && safezone->spawnflags & 2){
-				G_PrintfClient(ent, "^1-safezone must be given for maps consisting of multiple ships/stations (like rpg_runabout). For a list of safezonesuse the safezonelist command.");
-				break;
-			}
-		}
-		G_PrintfClient(ent, "^1Removing entity.");
-		G_FreeEntity(destructEnt);
-		return;
-	}
-}
-
-/*
-=================
 Cmd_shipdamage_f
 Harry Young | 02/08/2012
 =================
@@ -6313,7 +6242,11 @@ static void Cmd_getOrigin_f(gentity_t *ent) {
 	if( i > MAX_GENTITIES - 1)
 		return;
 
-	G_PrintfClient(ent, "s.origin = %s, r.currentOrigin = %s, pos1 = %s, pos2 = %s\n\"", vtos(g_entities[i].s.origin), vtos(g_entities[i].r.currentOrigin), vtos(g_entities[i].pos1), vtos(g_entities[i].pos2));
+	G_PrintfClient(ent, "ent->s.origin        = %s", vtos(g_entities[i].s.origin));
+	G_PrintfClient(ent, "ent->r.currentOrigin = %s", vtos(g_entities[i].r.currentOrigin));
+	G_PrintfClient(ent, "ent->pos1            = %s", vtos(g_entities[i].pos1));
+	G_PrintfClient(ent, "ent->pos2            = %s", vtos(g_entities[i].pos2));
+	G_PrintfClient(ent, "ent->s.pos.trBase    = %s", vtos(g_entities[i].s.pos.trBase));
 }
 
 /*
@@ -7123,18 +7056,6 @@ static void Cmd_UiTransporterLoc_f(gentity_t *ent) {
 	gentity_t *trTrigger;
 	char arg[MAX_QPATH];
 
-#ifndef SQL
-	if ( !IsAdmin( ent ) ) {
-		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as an admin.\n\" ") );
-		return;
-	}
-#else
-	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_UITRANS ) ) {
-		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
-		return;
-	}
-#endif
-
 	if(trap_Argc() < 2) return;
 
 	trap_Argv(1, arg, sizeof(arg));
@@ -7162,10 +7083,17 @@ static void Cmd_UiTransporterLoc_f(gentity_t *ent) {
 
 	if(locTarget) {
 		if(locTarget->sound1to2) {
-			if(!IsAdmin(ent)) {
+		#ifndef SQL
+			if ( !IsAdmin( ent ) ) {
 				G_PrintfClient(ent, "Destination is a restricted location.\n");
 				return;
 			}
+		#else
+			if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_BEAM) ) {
+				G_PrintfClient(ent, "Destination is a restricted location.\n");
+				return;
+			}
+		#endif
 		}
 		trTrigger->target_ent = locTarget;
 		trTrigger->count = 0;
@@ -7194,18 +7122,6 @@ static void Cmd_UiTransporterExt_f(gentity_t *ent) {
 	int entNum, srvNum, delay;
 	gentity_t *trTrigger;
 	char arg[MAX_QPATH];
-
-#ifndef SQL
-	if ( !IsAdmin( ent ) ) {
-		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as an admin.\n\" ") );
-		return;
-	}
-#else
-	if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_UITRANS ) ) {
-		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You are not logged in as a user with the appropiate rights.\n\" ") );
-		return;
-	}
-#endif
 
 	if(!rpg_serverchange.integer) {
 		trap_SendServerCommand(ent-g_entities, "print \"Serverchange is disabled.\n\"");	
@@ -7444,16 +7360,17 @@ static void Cmd_Camtest_f(gentity_t *ent) {
 }
 
 void Cmd_CamtestEnd_f(gentity_t *ent) {
-	Cinematic_DeactivateCameraMode(ent);
+	//Cinematic_DeactivateCameraMode(ent);
+	G_LuaNumThreads();
 }
 // END CCAM
 
 /*
 =================
-ClientCommand
+G_Client_Command
 =================
 */
-void ClientCommand( int clientNum ) 
+void G_Client_Command( int clientNum ) 
 {
 	gentity_t *ent;
 	char	cmd[MAX_TOKEN_CHARS];
@@ -7648,8 +7565,6 @@ void ClientCommand( int clientNum )
 		Cmd_safezonelist_f(ent);
 	else if (Q_stricmp(cmd, "selfdestruct") == 0)
 		Cmd_selfdestruct_f(ent);
-	else if (Q_stricmp(cmd, "selfdestructcountdown") == 0)
-		Cmd_selfdestructcountdown_f(ent);
 	else if (Q_stricmp(cmd, "shipdamage") == 0)
 		Cmd_shipdamage_f(ent);
 	else if (Q_stricmp(cmd, "shiphealth") == 0)
