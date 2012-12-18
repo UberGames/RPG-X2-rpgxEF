@@ -1133,7 +1133,7 @@ static void target_turbolift_endMove ( gentity_t *ent )
 	}
 
 	// check for shader remaps
-	if(rpg_calcLiftTravelDuration.integer) {
+	if(rpg_calcLiftTravelDuration.integer || level.overrideCalcLiftTravelDuration) {
 		if((ent->truename && otherLift->truename) || (ent->falsename && otherLift->falsename)) {
 			f = level.time * 0.001;
 			AddRemap(ent->targetShaderName, ent->targetShaderName, f);
@@ -1403,7 +1403,7 @@ static void target_turbolift_startMove ( gentity_t *ent )
 	}
 
 	// check for shader remaps
-	if(rpg_calcLiftTravelDuration.integer) {
+	if(rpg_calcLiftTravelDuration.integer || level.overrideCalcLiftTravelDuration) {
 		if(time2 < 0 && ent->truename && otherLift->truename) {
 			f = level.time * 0.001;
 			AddRemap(ent->targetShaderName, ent->truename, f);
@@ -1540,7 +1540,7 @@ static void target_turbolift_use( gentity_t *self, gentity_t *other, gentity_t *
 		return;
 	}
 
-	trap_SendServerCommand( activator-g_entities, "lift" );
+	trap_SendServerCommand( activator-g_entities, va("lift %d", self->health) );
 }
 
 extern void BG_LanguageFilename(char *baseName,char *baseExtension,char *finalName);
@@ -1578,6 +1578,7 @@ For the angles, the entity's angle must be aimed at the main set of doors to the
 "targetShaderName" - lights off shader
 "falsename" - lights up
 "truename" - lights down
+"override" - if set to 1 overrides rpg_calcLiftTravelDuration
 
 -----LUA-----
 Retrofit:
@@ -1675,6 +1676,11 @@ void SP_target_turbolift ( gentity_t *self )
 	self->count = 0; //target/targetted lift
 	G_SpawnFloat( "wait", "3000", &self->wait );
 	G_SpawnInt( "waitEnd", "1000", &self->sound1to2 );
+
+	G_SpawnInt("override", "0", &i);
+	if(i) {
+		level.overrideCalcLiftTravelDuration = i;
+	}
 
 	if(!self->tmpEntity)
 		trap_SetBrushModel( self, self->model );
@@ -1852,15 +1858,8 @@ shader remapping:
 You can remap multiple shaders by separating them with \n.
 Example: "greenshader"	"textures/alert/green1\ntextures/alert/green2"
 */
-typedef struct {
-	char	*greenShaders[10];
-	char	*redShaders[10];
-	char	*yellowShaders[10];
-	char	*blueShaders[10];
-	int		numShaders;
-} target_alert_Shaders_s;
 
-static target_alert_Shaders_s alertShaders;
+target_alert_Shaders_s alertShaders;
 
 void target_alert_remapShaders(int target_condition) {
 	float f = 0;

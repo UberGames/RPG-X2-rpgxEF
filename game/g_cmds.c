@@ -53,13 +53,14 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		} else {
 			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 		}
+		// TODO ajust me some things here might not be needed anymore
 		Com_sprintf (entry, sizeof(entry),
 			" %i %i %i %i %i %i %i %i %i %i %i", level.sortedClients[i],
 			cl->ps.persistant[PERS_SCORE], ping, (level.time - cl->pers.enterTime)/60000,
 			scoreFlags, g_entities[level.sortedClients[i]].s.powerups,
-			GetWorstEnemyForClient(level.sortedClients[i]),
-			GetMaxDeathsForClient(level.sortedClients[i]),
-			GetFavoriteWeaponForClient(level.sortedClients[i]),
+			0,
+			0,
+			0,
 			cl->ps.persistant[PERS_KILLED],
 			((g_entities[cl->ps.clientNum].r.svFlags&SVF_ELIMINATED)!=0) );
 		j = strlen(entry);
@@ -721,7 +722,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	if ( !Q_stricmp( s, "spectator" ) || !Q_stricmp( s, "s" ) ) {
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_FREE;
-		client->noclip = 1;
+		client->noclip = (qboolean)1;
 	} else if ( g_gametype.integer >= GT_TEAM ) {
 		// if running a team game, assign player to one of the teams
 		specState = SPECTATOR_NOT;
@@ -4087,14 +4088,14 @@ static void Cmd_BeamToPlayer_f( gentity_t	*ent ) {
 	int			startPoint;
 	int			totalCount;
 	int			offsetRA[8][2] = {	{  1,  0 }, //offsets for each beam test location
-									{  1, -1 },
-									{  0, -1 },
-									{ -1, -1 },
-									{ -1,  0 },
-									{ -1,  1 }, 
-									{  0,  1 }, 
-									{  1,  1 } 
-								 };
+	{  1, -1 },
+	{  0, -1 },
+	{ -1, -1 },
+	{ -1,  0 },
+	{ -1,  1 }, 
+	{  0,  1 }, 
+	{  1,  1 } 
+	};
 	int			viewAngleHeading[8] = { 180, 135, 90, 45, 0, -45, -90, -135 };
 	qboolean    everyone = qfalse;
 
@@ -5780,7 +5781,7 @@ Harry Young | 25/07/2012
 */
 static void Cmd_selfdestruct_f(gentity_t *ent) {
 	gentity_t	*destructEnt, *safezone=NULL;
-	char		arg[16], arg2[16], arg3[16], arg4[16], arg5[16], arg6[16], arg7[16], arg8[16];
+	char		arg[16], arg2[16], arg6[16], arg7[16], arg8[16];
 	double		ETAmin, ETAsec;
 	if(!ent || !ent->client)
 		return;
@@ -5788,12 +5789,9 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 	//Trapping all potential args here.
 	trap_Argv(1, arg, sizeof(arg));
 	trap_Argv(2, arg2, sizeof(arg2));
-	trap_Argv(3, arg3, sizeof(arg3));
-	trap_Argv(4, arg4, sizeof(arg4));
-	trap_Argv(5, arg5, sizeof(arg5));
-	trap_Argv(6, arg6, sizeof(arg6));
-	trap_Argv(7, arg7, sizeof(arg7));
-	trap_Argv(8, arg8, sizeof(arg8));
+	trap_Argv(3, arg6, sizeof(arg6));
+	trap_Argv(4, arg7, sizeof(arg7));
+	trap_Argv(5, arg8, sizeof(arg8));
 
 	//There is one subcommand that is clear for general use: selfdestruct remaining
 	//If we're going for this skip admincheck
@@ -5830,9 +5828,6 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		destructEnt = G_Spawn();
 		destructEnt->classname = "target_selfdestruct";
 		destructEnt->wait = atoi(arg2);
-		destructEnt->count = atoi(arg3);
-		destructEnt->n00bCount = atoi(arg4);
-		destructEnt->health = atoi(arg5);
 		destructEnt->flags = atoi(arg6);
 		destructEnt->bluename = G_NewString(arg7);
 		destructEnt->target = G_NewString(arg8);
@@ -5840,26 +5835,20 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		destructEnt->spawnflags = 1; //tells ent to free once aborted.
 
 		//we need to check a few things here to make sure the entity works properly. Else we free it.
-		if ( destructEnt->wait > 0 || destructEnt->count > 0 || destructEnt->n00bCount > 0 || destructEnt->health > 0 ){ 
-			G_CallSpawn(destructEnt); //Spawn-Function will also manage init, so we need to call that.
-		} else { //sth's wrong so lets tell them what is.
-			G_PrintfClient(ent, "^1ERROR: The following arguments are missing:");
-			if ( destructEnt->wait == 0 )
-				G_PrintfClient(ent, "^1-duration must not be 0."); 
-			if ( destructEnt->count == 0 )
-				G_PrintfClient(ent, "^1-intervall must not be 0."); 
-			if ( destructEnt->n00bCount == 0 )
-				G_PrintfClient(ent, "^1-intervall-60 must not be 0."); 
-			if ( destructEnt->health == 0 )
-				G_PrintfClient(ent, "^1-intervall-10 must not be 0."); 
+		if ( destructEnt->wait <= 0 ){ 
+			G_PrintfClient(ent, "^1ERROR: duration must not be 0. Removing entity."); 
+
 			while((safezone = G_Find(safezone, FOFS(classname), "target_safezone")) != NULL){
 				if(!destructEnt->bluename && safezone->spawnflags & 2){
-					G_PrintfClient(ent, "^1-safezone must be given for maps consisting of multiple ships/stations (like rpg_runabout). For a list of safezonesuse the safezonelist command.");
+					G_PrintfClient(ent, "^1ERROR: safezone must be given for maps consisting of multiple ships/stations (like rpg_runabout). For a list of safezonesuse the safezonelist command. Removing entity.");
+					destructEnt->wait = 0; //we'll use this next to free the ent
 					break;
 				}
 			}
-			G_PrintfClient(ent, "^1Removing entity.");
-			G_FreeEntity(destructEnt);
+			if(destructEnt->wait <= 0)
+				G_FreeEntity(destructEnt);
+			else
+				G_CallSpawn(destructEnt);
 			return;
 		}
 	} else if (!Q_stricmp(arg, "remaining")) {
@@ -5869,6 +5858,9 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 			G_PrintfClient(ent, "^1ERROR: There's no self destruct in progress, aborting call.");
 			return;
 		}
+
+		if(destructEnt->flags == 1)
+			return; //we simply don't need this while there is a visible countdown. 
 
 		//we need the remaining time in minutes and seconds from that entity. Just ask them off and have the command do the math.
 		ETAsec = floor(modf((( floor(destructEnt->damage / 1000) - floor(level.time / 1000) ) / 60), &ETAmin)*60); //break it apart, put off the minutes and return the floored secs
@@ -5885,22 +5877,18 @@ static void Cmd_selfdestruct_f(gentity_t *ent) {
 		}
 		destructEnt->use(destructEnt, NULL, NULL); // Use-Function will simply manage the abort
 	} else {
+		//maybe hook up a setup UI here later.
 		G_PrintfClient(ent,		"^1ERROR: Invalid or no command-Argument. Arguments are start, remaining and abort");
-		G_PrintfClient(ent,		"^3Usage: selfdestruct start duration intervall intervall-60 intervall-10 audio [safezone] [target]");
+		G_PrintfClient(ent,		"^3Usage: selfdestruct start duration audio [safezone] [target]");
 		G_PrintfClient(ent,		"duration: total countdown-duration in seconds. Must not be 0.");
-		G_PrintfClient(ent,		"intervall: intervall of audio warnings up to T-60 seconds in seconds. Must not be 0.");
-		G_PrintfClient(ent,		"intervall-60: intervall of audio warnings within T-60 seconds in seconds. Must not be 0.");
-		G_PrintfClient(ent,		"intervall-10: intervall of audio warnings within T-10 seconds in seconds. Must not be 0.");
 		G_PrintfClient(ent,		"audio: set this 0 if you do want a muted countdown, else set this 1.");
 		G_PrintfClient(ent,		"safezone: safezone to toggle unsafe at T-50ms. Only for maps with multiple ships (like rpg_runabout). Set NULL to skip.");
 		G_PrintfClient(ent,		"target: Optional Argument for Effects to fire once the countdown hist 0. The entity will automatically shake everyones screen and kill all clienst outside an active target_safezone.");
 		G_PrintfClient(ent,		"^2Hint: Make sure your duration and intervalls are synced up. There is a failsave for the countdown to hit it's mark however there is nothing to make sure that you don't get your warnings at unexpected times...");
-		G_PrintfClient(ent,		"^2Try this for example: selfdestruct start 131 10 10 1 1");
-		G_PrintfClient(ent,		"\nFor a fluid countdown (each sec displayed) try extremeselfdestruct");
 		G_PrintfClient(ent,		"\n^3Usage: selfdestruct remaining");
 		G_PrintfClient(ent,		"This will give out the remaining countdown-time to you only even if the count is muted. It is free to use for any client.");
 		G_PrintfClient(ent,		"\n^3Usage: selfdestruct remaining global");
-		G_PrintfClient(ent,		"This will give out the remaining countdown-time to all clients even if the count is muted.");
+		G_PrintfClient(ent,		"This will give out the remaining countdown-time to all clients even if the count is muted. Calling this is restricted to admins");
 		G_PrintfClient(ent,		"\n^3Usage: selfdestruct abort");
 		G_PrintfClient(ent,		"This will abort any self destruct running");
 		return;
@@ -6055,7 +6043,6 @@ GSIO01 | 12/05/2009
 */
 static void Cmd_admin_centerprint_f(gentity_t *ent) {
 	char *arg;
-	gentity_t	*destructEnt;
 
 	if ( trap_Argc () < 1 ) {
 		return;
@@ -6077,12 +6064,6 @@ static void Cmd_admin_centerprint_f(gentity_t *ent) {
 
 	if ( !ent || !ent->client ) {
 		return;		// not fully in game yet
-	}
-
-	destructEnt = G_Find(NULL, FOFS(classname), "target_selfdestruct");
-	if( destructEnt || destructEnt->spawnflags & 2){ //if we have a selfdestruct that occupies the Center disallow
-		trap_SendServerCommand( ent-g_entities, va("print \"ERROR: You can not centerprint while a selfdestruct occupies that slot.\n\" ") );
-		return;
 	}
 
 	arg = ConcatArgs( 1 );
@@ -7083,17 +7064,17 @@ static void Cmd_UiTransporterLoc_f(gentity_t *ent) {
 
 	if(locTarget) {
 		if(locTarget->sound1to2) {
-		#ifndef SQL
+#ifndef SQL
 			if ( !IsAdmin( ent ) ) {
 				G_PrintfClient(ent, "Destination is a restricted location.\n");
 				return;
 			}
-		#else
+#else
 			if ( !IsAdmin( ent ) || !G_Sql_UserDB_CheckRight(ent->client->uid, SQLF_BEAM) ) {
 				G_PrintfClient(ent, "Destination is a restricted location.\n");
 				return;
 			}
-		#endif
+#endif
 		}
 		trTrigger->target_ent = locTarget;
 		trTrigger->count = 0;
@@ -7365,6 +7346,123 @@ void Cmd_CamtestEnd_f(gentity_t *ent) {
 }
 // END CCAM
 
+typedef struct rShader_s {
+	char *s;
+} rShader_s;
+void addShaderToList(list_p list, char *shader) {
+	rShader_s* s = (rShader_s *)malloc(sizeof(rShader_s));
+	rShader_s* t;
+	list_iter_p i;
+
+	if(s == NULL) return;
+	if(shader[0] == 0) return;
+	if(list == NULL) return;
+
+	s->s = strdup(shader);
+	if(s->s == NULL) {
+		free(s);
+		return;
+	}
+
+	i = list_iterator(list, FRONT);
+	if(i == NULL) {
+		free(s->s);
+		free(s);
+		return;
+	}
+
+	for(t = (rShader_s *)list_next(i); t != NULL; t = (rShader_s *)list_next(i)) {
+		if(!strcmp(shader, t->s)) {
+			return;
+		}
+	}
+
+	list_add(list, s, sizeof(rShader_s));
+}
+
+extern target_alert_Shaders_s alertShaders;
+void Cmd_GeneratePrecacheFile(gentity_t *ent) {
+	int i;
+	char info[MAX_INFO_STRING];
+	char file[MAX_QPATH];
+	list_p shaders;
+	list_iter_p iter;
+	qboolean first = qtrue;
+	fileHandle_t f;
+	rShader_s* s;
+
+	trap_GetServerinfo(info, MAX_INFO_STRING);
+	Com_sprintf(file, MAX_QPATH, "maps/%s.precache", Info_ValueForKey(info, "mapname"));
+	trap_FS_FOpenFile(file, &f, FS_APPEND);
+	if(!f) {
+		G_Printf(S_COLOR_RED "[Error] - Could not create/open 'maps/%s.precache'\n", file);
+		return;
+	}
+
+	shaders = create_list();
+	if(!shaders) {
+		G_Printf(S_COLOR_RED "[Error] - Could not create shader list.\n");
+		trap_FS_FCloseFile(f);
+		return;
+	}
+
+	G_Printf("Generating precache file '%s' ...\n", file);
+
+	for(i = 0; i < alertShaders.numShaders; i++) {
+		addShaderToList(shaders, alertShaders.blueShaders[i]);
+		addShaderToList(shaders, alertShaders.greenShaders[i]);
+		addShaderToList(shaders, alertShaders.redShaders[i]);
+		addShaderToList(shaders, alertShaders.yellowShaders[i]);
+	}
+
+	for(i = 0; i < MAX_GENTITIES; i++) {
+		if(!g_entities[i].inuse) continue;
+
+		if(g_entities[i].classname != NULL && !strcmp(g_entities[i].classname, "target_turbolift")) {
+			if(g_entities[i].falsename != NULL && g_entities[i].falsename[0] != 0) {
+				addShaderToList(shaders, g_entities[i].falsename);
+			}
+			if(g_entities[i].truename != NULL && g_entities[i].truename[0] != 0) {
+				addShaderToList(shaders, g_entities[i].truename);
+			}
+			continue;
+		}
+
+		if(g_entities[i].targetShaderNewName != NULL && g_entities[i].targetShaderNewName[0] != 0) {
+			addShaderToList(shaders, g_entities[i].targetShaderNewName);
+		}
+	}
+
+	iter = list_iterator(shaders, FRONT);
+	if(iter == NULL) {
+		trap_FS_FCloseFile(f);
+		destroy_list(shaders);
+		return;
+	}
+
+	for(s = (rShader_s *)list_next(iter); s != NULL; s = (rShader_s *)list_next(iter)) {
+		G_Printf("\t%s\n", s->s);
+		if(first) {
+			trap_FS_Write("\"", 1, f);
+			trap_FS_Write(s->s, strlen(s->s), f);
+			trap_FS_Write("\"", 1, f);
+			first = qfalse;
+		} else {
+			trap_FS_Write("\n\"", 2, f);
+			trap_FS_Write(s->s, strlen(s->s), f);
+			trap_FS_Write("\"", 1, f);
+		}
+	}
+	trap_FS_Write("\n\"END\"", 6, f);
+
+	G_Printf("Done.\n");
+
+	if(shaders != NULL) {
+		destroy_list(shaders);
+	}
+	trap_FS_FCloseFile(f);
+}
+
 /*
 =================
 G_Client_Command
@@ -7625,6 +7723,9 @@ void G_Client_Command( int clientNum )
 	else if (Q_stricmp(cmd, "camtestend") == 0)
 		Cmd_CamtestEnd_f(ent);
 	// END CCAM
+	else if (Q_stricmp (cmd, "generatePrecacheFile") == 0) {
+		Cmd_GeneratePrecacheFile(ent);
+	}
 	else if (Q_strncmp (cmd, "\n", 1) == 0 || Q_strncmp (cmd, " ", 1) == 0 || Q_strncmp (cmd, "\0", 1) == 0) // sorry
 		(void)(0);
 	else

@@ -697,6 +697,9 @@ typedef struct {
 	list_p selfdestructSafeZones;
 	list_p locations;
 	list_p timedMessages;
+
+	// override rpg_calcLiftTravelDuration
+	int overrideCalcLiftTravelDuration;
 } level_locals_t;
 
 
@@ -1249,14 +1252,6 @@ void QDECL G_LogExit( const char *string );
  * Clear client log.
  */
 void QDECL G_ClearClientLog(int client);
-
-void CalculateAwards(gentity_t *ent, char *msg);
-qboolean CalculateTeamMVPByRank(gentity_t *ent);
-int GetMaxDeathsForClient(int nClient);
-int GetMaxKillsForClient(int nClient);
-int GetFavoriteTargetForClient(int nClient);
-int GetWorstEnemyForClient(int nClient);
-int GetFavoriteWeaponForClient(int nClient);
 
 /*----------------------------------------------------------------------------------------*/
 
@@ -2106,5 +2101,14 @@ typedef struct timedMessage_s timedMessage_t;
 struct timedMessage_s {
 	char* message;
 } timedMessage_s;
+
+/* alert shaders */
+typedef struct {
+	char	*greenShaders[10];
+	char	*redShaders[10];
+	char	*yellowShaders[10];
+	char	*blueShaders[10];
+	int		numShaders;
+} target_alert_Shaders_s;
 
 #endif //_G_LOCAL_H_

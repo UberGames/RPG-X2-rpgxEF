@@ -459,7 +459,7 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &rpg_forceFieldColor,			"rpg_forceFieldColor", 			"0", 						CVAR_ARCHIVE, 											0, qfalse },
 	{ &rpg_allowRemodulation,		"rpg_allowRemodulation", 		"1", 						CVAR_ARCHIVE, 											0, qfalse },
 	{ &rpg_forceFieldFreq, 			"rpg_forceFieldFreq", 			"0", 						CVAR_ARCHIVE, 											0, qfalse },
-	{ &rpg_calcLiftTravelDuration,  "rpg_calcLiftTravelDuration",	"0", 						CVAR_ARCHIVE, 											0, qfalse },
+	{ &rpg_calcLiftTravelDuration,  "rpg_calcLiftTravelDuration",	"1", 						CVAR_ARCHIVE, 											0, qfalse },
 	{ &rpg_liftDurationModifier,	"rpg_liftDurationModifier" ,	"0.5", 						CVAR_ARCHIVE, 											0, qfalse },
 	{ &rpg_altTricorderDelay,		"rpg_altTricorderDelay", 		"1000", 					CVAR_ARCHIVE, 											0, qfalse },
 	{ &rpg_borgMoveThroughFields,	"rpg_borgMoveThroughFields",	"0", 						CVAR_ARCHIVE, 											0, qfalse },
@@ -605,25 +605,36 @@ void QDECL G_Error( const char *fmt, ... ) {
 }
 
 stringID_table_t WeaponTable[] = {
-
 	{ ENUM2STRING(WP_2) },
 	{ ENUM2STRING(WP_3) },
 	{ ENUM2STRING(WP_4) },				
-
 	{ ENUM2STRING(WP_5) },				
 	{ ENUM2STRING(WP_6) },	
 	{ ENUM2STRING(WP_7) },
-
 	{ ENUM2STRING(WP_8) },
 	{ ENUM2STRING(WP_9) },		
 	{ ENUM2STRING(WP_10) },			
-
 	{ ENUM2STRING(WP_11) },				
 	{ ENUM2STRING(WP_12) },		
 	{ ENUM2STRING(WP_13) },		
-	
 	{ ENUM2STRING(WP_14) },				
 	{ ENUM2STRING(WP_15) },
+
+	{ "WP_TRICORDER",			WP_2  },
+	{ "WP_PADD",				WP_3  },
+	{ "WP_COFFEE",				WP_4  },
+	{ "WP_PHASER",				WP_5  },
+	{ "WP_COMPRESSION_RIFLE",	WP_6  },
+	{ "WP_TR116",				WP_7  },
+	{ "WP_GRENADE_LAUNCHER",	WP_8  },
+	{ "WP_QUANTUM_BURST",		WP_9  },
+	{ "WP_DISRUPTOR",			WP_10 },
+	{ "WP_MEDKIT",				WP_11 },
+	{ "WP_VOYAGER_HYPO",		WP_12 },
+	{ "WP_DERMAL_REGEN",		WP_13 },
+	{ "WP_TOOLKIT",				WP_14 },
+	{ "WP_HYPERSPANNER",		WP_15 },
+	
 	{ NULL, -1 }
 };
 
@@ -963,16 +974,15 @@ static void G_LoadTimedMessages(void) {
 			}
 
 			msg->message = strdup(token);
-			G_Printf("------------------------------------------------>'%s'\n", token);
 			list_add(level.timedMessages, msg, sizeof(timedMessage_s));
 		} else {
+			if(token[0] == '}') {
+				break;
+			}
+
 			G_Printf("G_LoadTimedMessages -  invalid token '%s'\n", token);
 			SkipRestOfLine(&textPtr);
 			continue;
-		}
-
-		if(token[0] == '}') {
-			break;
 		}
 	}
 
@@ -1733,6 +1743,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_Printf ("------- Game Initialization -------\n");
 	G_Printf ("gamename: %s\n", GAMEVERSION);
 	G_Printf ("gamedate: %s\n", __DATE__);
+
+	level.overrideCalcLiftTravelDuration = 0;
 
 	init_tonextint(qtrue);
 	srand( randomSeed );
